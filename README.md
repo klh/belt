@@ -1,5 +1,7 @@
 # belt
 
+![version](https://img.shields.io/badge/version-1.0.0-8a857e)
+
 **The local LLM fleet for your agent fleet.** A swarm of MLX specialists on
 localhost — code, extract, reason, rerank — behind a deterministic keyword
 router, with a benchmark rig that logs every measurement to `benchmarks.jsonl`.
@@ -30,14 +32,23 @@ on demand.
 ## Install
 
 Requires macOS on Apple Silicon, [Bun](https://bun.sh), and ~64 GB of unified
-memory headroom for the resident tier (M5 Max 128 GB measured).
+memory headroom for the resident tier (M5 Max 128 GB measured). Small machines
+take the minimal tier instead — see below.
 
 ```bash
 git clone https://github.com/klh/belt && cd belt
-./install.sh                      # deploy bin/ to ~/.claude/local-llm/
+./install.sh                      # deploy bin/ to ~/.claude/local-llm/ (full tier)
+./install.sh --tier minimal       # small machines: resident fleet ≤4GB (:8902 extract + :8913 rerank)
 ./install.sh --with-models        # + deps (uv/mlx-lm/rapid-mlx) + model weights (~40-60 GB)
 ./install.sh --with-launchd       # + KeepAlive agents (com.belt.swarm, com.belt.kev, per-port rapid servers)
 ```
+
+**Tiers.** `BELT_TIER` (or `--tier minimal|full` at install time) scopes the
+resident fleet — `full` (default) keeps every resident specialist, `minimal`
+keeps only models ≤4 GB (extract :8902, rerank :8913): the fleet a 16 GB
+machine holds. A filter over `bin/registry.ts`, not new infrastructure —
+on-demand models, the router, and the dashboard are unchanged. On machines
+under 32 GB the installer prints a recommendation to use `--tier minimal`.
 
 The installer is idempotent. Deploys the fleet code to `~/.claude/local-llm/`
 — that path is the stable runtime location shared with
@@ -95,11 +106,16 @@ current routing prefs.
 bun bin/dashboard.ts            # http://127.0.0.1:7791
 ```
 
+![belt dashboard — fleet status board on :7791](assets/dashboard.png)
+
 Data derives from `bin/registry.ts` plus the same liveness probes as
-`swarm.ts`/`coordinator.ts` (GET /api/status for the raw JSON). On the LAN the
-server advertises itself via dns-sd as `http://belt.local:7791`. For always-on,
-`./install.sh --with-launchd` loads it as the `com.belt.dashboard` KeepAlive
-agent (logs: `~/.claude-insights/belt-dashboard.log`).
+`swarm.ts`/`coordinator.ts` (GET /api/status for the raw JSON). `GET /llms.txt`
+serves a plain-text description of the fleet for LLM agents. On the LAN the
+server advertises itself via dns-sd as `http://belt.local:7791`;
+optionally, `klh-local` (klh/local) fronts that with Caddy at
+`http://belt.local` — belt works fine without it, dashboard direct on :7791.
+For always-on, `./install.sh --with-launchd` loads it as the
+`com.belt.dashboard` KeepAlive agent (logs: `~/.claude-insights/belt-dashboard.log`).
 
 ## Routing
 
@@ -129,4 +145,4 @@ belt is source-available under the **Business Source License 1.1** (see [LICENSE
 - **Production / commercial use requires a commercial license** — running it in a product or service, in paid client work, or as part of business operations. Contact the Licensor (see LICENSE) for terms.
 - **No conversion** — unlike standard BSL 1.1, the Change Date / Change License parameters are **N/A**: the Licensed Work never converts to an open license; all rights remain with the Licensor indefinitely.
 
-A Threads thing — [threads.dk](https://www.threads.dk).
+A Threads thing — [threads.dk](http://www.threads.dk).
