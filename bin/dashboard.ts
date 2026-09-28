@@ -14,7 +14,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { SPECIALISTS, DOWNLOAD_MODELS } from "./registry.ts";
 
-const HOME = process.env.HOME!;
+const HOME = process.env.HOME;
 const LOG_DIR = `${HOME}/.claude-insights`;
 const PREFS = `${HOME}/.claude/local-llm/prefs.json`;
 const ROUTING_LOG = `${LOG_DIR}/swarm-routing.log`;
@@ -22,108 +22,105 @@ const PORT = Number(process.env.BELT_PORT ?? 7791);
 
 // ─── liveness — same probes as swarm.ts / coordinator.ts ───
 const isUp = async (port: number): Promise<boolean> => {
-  try {
-    // Any HTTP response = listening. The router (:4000) answers 404 on
-    // /v1/models by design — it only implements Anthropic /v1/messages.
-    await fetch(`http://localhost:${port}/v1/models`, {
-      signal: AbortSignal.timeout(1000),
-    });
-    return true;
-  } catch {
-    return false;
-  }
+	try {
+		// Any HTTP response = listening. The router (:4000) answers 404 on
+		// /v1/models by design — it only implements Anthropic /v1/messages.
+		await fetch(`http://localhost:${port}/v1/models`, {
+			signal: AbortSignal.timeout(1000),
+		});
+		return true;
+	} catch {
+		return false;
+	}
 };
 
 const getModel = async (port: number): Promise<string> => {
-  try {
-    const r = await fetch(`http://localhost:${port}/v1/models`, {
-      signal: AbortSignal.timeout(1000),
-    });
-    const j = (await r.json()) as any;
-    return j.data?.[0]?.id ?? "?";
-  } catch {
-    return "down";
-  }
+	try {
+		const r = await fetch(`http://localhost:${port}/v1/models`, {
+			signal: AbortSignal.timeout(1000),
+		});
+		const j = (await r.json()) as { data?: { id?: string }[] };
+		return j.data?.[0]?.id ?? "?";
+	} catch {
+		return "down";
+	}
 };
 
 // mlx_lm /v1/models lists the whole HF cache (first id ≠ served model) —
 // verify the actually-loaded model from the process args instead.
 const psModel = (port: number): string | null => {
-  const pid = Bun.spawnSync(["lsof", "-ti", `:${port}`])
-    .stdout.toString()
-    .trim()
-    .split("\n")[0];
-  if (!pid) return null;
-  const cmd = Bun.spawnSync([
-    "ps",
-    "-o",
-    "command",
-    "-p",
-    pid,
-  ]).stdout.toString();
-  return cmd.match(/--model\s+(\S+)/)?.[1] ?? null;
+	const pid = Bun.spawnSync(["lsof", "-ti", `:${port}`])
+		.stdout.toString()
+		.trim()
+		.split("\n")[0];
+	if (!pid) return null;
+	const cmd = Bun.spawnSync([
+		"ps",
+		"-o",
+		"command",
+		"-p",
+		pid,
+	]).stdout.toString();
+	return cmd.match(/--model\s+(\S+)/)?.[1] ?? null;
 };
 
-const short = (m: string | null): string =>
-  (m ?? "").replace("mlx-community/", "");
-
 // ─── status snapshot ───
-async function status(): Promise<Record<string, any>> {
-  const router = { up: await isUp(4000), port: 4000 };
+async function status() {
+	const router = { up: await isUp(4000), port: 4000 };
 
-  // Probe every registry port in parallel; remember which models are live so
-  // "available to load" = DOWNLOAD_MODELS minus whatever is currently served.
-  const served = new Set<string>();
-  const specialists = await Promise.all(
-    SPECIALISTS.map(async (s): Promise<Record<string, any>> => {
-      const up = await isUp(s.port);
-      let model_served: string | null = null;
-      if (up) {
-        model_served =
-          s.engine === "rapid"
-            ? await getModel(s.port)
-            : (psModel(s.port) ?? null);
-        if (model_served && model_served !== "?") served.add(model_served);
-      }
-      return {
-        port: s.port,
-        label: s.label,
-        role: s.role,
-        model: s.model,
-        tier: s.tier,
-        engine: s.engine ?? "mlx_lm",
-        ram_gb: s.ram_gb,
-        up,
-        model_served,
-      };
-    }),
-  );
+	// Probe every registry port in parallel; remember which models are live so
+	// "available to load" = DOWNLOAD_MODELS minus whatever is currently served.
+	const served = new Set<string>();
+	const specialists = await Promise.all(
+		SPECIALISTS.map(async (s) => {
+			const up = await isUp(s.port);
+			let model_served: string | null = null;
+			if (up) {
+				model_served =
+					s.engine === "rapid"
+						? await getModel(s.port)
+						: (psModel(s.port) ?? null);
+				if (model_served && model_served !== "?") served.add(model_served);
+			}
+			return {
+				port: s.port,
+				label: s.label,
+				role: s.role,
+				model: s.model,
+				tier: s.tier,
+				engine: s.engine ?? "mlx_lm",
+				ram_gb: s.ram_gb,
+				up,
+				model_served,
+			};
+		}),
+	);
 
-  const available = DOWNLOAD_MODELS.filter((m) => !served.has(m));
-  const ram = {
-    resident_gb: specialists
-      .filter((s) => s.up)
-      .reduce((a, s) => a + s.ram_gb, 0),
-    total_note: "128GB unified memory",
-  };
+	const available = DOWNLOAD_MODELS.filter((m) => !served.has(m));
+	const ram = {
+		resident_gb: specialists
+			.filter((s) => s.up)
+			.reduce((a, s) => a + s.ram_gb, 0),
+		total_note: "128GB unified memory",
+	};
 
-  const prefs = existsSync(PREFS)
-    ? JSON.parse(readFileSync(PREFS, "utf8"))
-    : {};
-  const raw = existsSync(ROUTING_LOG)
-    ? readFileSync(ROUTING_LOG, "utf8").trim()
-    : "";
-  const routing_tail = raw ? raw.split("\n").slice(-12) : [];
+	const prefs = existsSync(PREFS)
+		? JSON.parse(readFileSync(PREFS, "utf8"))
+		: {};
+	const raw = existsSync(ROUTING_LOG)
+		? readFileSync(ROUTING_LOG, "utf8").trim()
+		: "";
+	const routing_tail = raw ? raw.split("\n").slice(-12) : [];
 
-  return {
-    router,
-    specialists,
-    ram,
-    prefs,
-    routing_tail,
-    available,
-    ts: new Date().toISOString(),
-  };
+	return {
+		router,
+		specialists,
+		ram,
+		prefs,
+		routing_tail,
+		available,
+		ts: new Date().toISOString(),
+	};
 }
 
 // ─── page — embedded, no frameworks, no external assets (works offline) ───
@@ -314,6 +311,10 @@ models, routing-log tail, current prefs.
 
 ## Notes
 
+- Agent backend: belt provides local model endpoints for agent clients.
+  Use the specialists' OpenAI-compatible API or the router's Anthropic API
+  according to the client's supported protocol. suspenders provides the
+  agent control plane (sessions, claims, work graph, and fleet board).
 - BELT_TIER=minimal scopes the resident fleet to models with ram_gb <= 4
   (:8902 + :8913) — the fleet a 16 GB machine holds. A filter, not a variant.
 - Specialists speak OpenAI-compatible /v1/chat/completions (rapid-mlx /
@@ -324,30 +325,30 @@ models, routing-log tail, current prefs.
 
 // ─── server ───
 const json = (x: unknown): Response =>
-  new Response(JSON.stringify(x, null, 2), {
-    headers: { "content-type": "application/json" },
-  });
+	new Response(JSON.stringify(x, null, 2), {
+		headers: { "content-type": "application/json" },
+	});
 
 Bun.serve({
-  port: PORT,
-  hostname: "0.0.0.0",
-  async fetch(req): Promise<Response> {
-    const path = new URL(req.url).pathname;
-    if (path === "/api/status") return json(await status());
-    if (path === "/")
-      return new Response(PAGE, {
-        headers: { "content-type": "text/html; charset=utf-8" },
-      });
-    if (path === "/llms.txt")
-      return new Response(LLMS, {
-        headers: { "content-type": "text/plain; charset=utf-8" },
-      });
-    if (path === "/threads-mark.js")
-      return new Response(Bun.file(`${import.meta.dir}/threads-mark.js`), {
-        headers: { "content-type": "text/javascript; charset=utf-8" },
-      });
-    return new Response("not found\n", { status: 404 });
-  },
+	port: PORT,
+	hostname: "0.0.0.0",
+	async fetch(req): Promise<Response> {
+		const path = new URL(req.url).pathname;
+		if (path === "/api/status") return json(await status());
+		if (path === "/")
+			return new Response(PAGE, {
+				headers: { "content-type": "text/html; charset=utf-8" },
+			});
+		if (path === "/llms.txt")
+			return new Response(LLMS, {
+				headers: { "content-type": "text/plain; charset=utf-8" },
+			});
+		if (path === "/threads-mark.js")
+			return new Response(Bun.file(`${import.meta.dir}/threads-mark.js`), {
+				headers: { "content-type": "text/javascript; charset=utf-8" },
+			});
+		return new Response("not found\n", { status: 404 });
+	},
 });
 
 // ─── LAN advertisement: Bonjour "belt" + the belt.local A record ───
@@ -359,27 +360,27 @@ Bun.serve({
 // but never completes registration. "Name conflicts" from a lingering
 // previous registration is expected and harmless (output goes to the log).
 try {
-  Bun.spawnSync(["/usr/bin/pkill", "-f", "dns-sd -R belt"]);
+	Bun.spawnSync(["/usr/bin/pkill", "-f", "dns-sd -R belt"]);
 } catch {}
 try {
-  Bun.spawnSync(["/usr/bin/pkill", "-f", "dns-sd -P belt "]);
+	Bun.spawnSync(["/usr/bin/pkill", "-f", "dns-sd -P belt "]);
 } catch {}
 let lanIp = "";
 try {
-  lanIp = Bun.spawnSync(["/usr/sbin/ipconfig", "getifaddr", "en0"])
-    .stdout.toString()
-    .trim();
+	lanIp = Bun.spawnSync(["/usr/sbin/ipconfig", "getifaddr", "en0"])
+		.stdout.toString()
+		.trim();
 } catch {}
 const mdnsCmd = lanIp
-  ? `/usr/bin/dns-sd -P belt _http._tcp local ${PORT} belt.local ${lanIp} >> ${LOG_DIR}/belt-mdns.log 2>&1`
-  : `/usr/bin/dns-sd -R belt _http._tcp local ${PORT} >> ${LOG_DIR}/belt-mdns.log 2>&1`;
+	? `/usr/bin/dns-sd -P belt _http._tcp local ${PORT} belt.local ${lanIp} >> ${LOG_DIR}/belt-mdns.log 2>&1`
+	: `/usr/bin/dns-sd -R belt _http._tcp local ${PORT} >> ${LOG_DIR}/belt-mdns.log 2>&1`;
 const mdns = Bun.spawn(["/bin/sh", "-c", mdnsCmd], {
-  stdin: "ignore",
-  stdout: "ignore",
-  stderr: "ignore",
+	stdin: "ignore",
+	stdout: "ignore",
+	stderr: "ignore",
 });
 mdns.unref();
 
 console.log(
-  `belt dashboard → http://127.0.0.1:${PORT} · LAN: http://belt.local:${PORT}`,
+	`belt dashboard → http://127.0.0.1:${PORT} · LAN: http://belt.local:${PORT}`,
 );
