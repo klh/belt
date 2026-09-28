@@ -12,7 +12,7 @@
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { SPECIALISTS as FLEET, DOWNLOAD_MODELS } from "../bin/registry.ts";
+import { residentSet, DOWNLOAD_MODELS } from "../bin/registry.ts";
 
 const DRY = process.argv.includes("--dry-run");
 const SKIP_DL = process.argv.includes("--skip-download");
@@ -145,7 +145,8 @@ async function stepLaunchd(): Promise<void> {
   console.log("\n5) launchd plists (KeepAlive) → ~/Library/LaunchAgents");
   const logDir = `${HOME}/.claude-insights`;
   if (!DRY) await Bun.$`mkdir -p ${logDir}`.quiet().catch(() => {});
-  for (const f of FLEET.filter((x) => x.engine === "rapid" && x.tier === "resident")) {
+  // BELT_TIER=minimal installs KeepAlive plists for the small fleet only
+  for (const f of residentSet().filter((x) => x.engine === "rapid")) {
     const label = `com.belt.llm-${f.port}`;
     const plistPath = join(HOME, "Library", "LaunchAgents", `${label}.plist`);
     const args = [
@@ -249,7 +250,9 @@ async function stepCoordination(): Promise<void> {
       ]);
     }
     // install.sh resolves its own dir — safe from any cwd
-    if ((await sh(["/bin/bash", join(src, "install.sh"), "--with-launchd"])) !== 0) {
+    if (
+      (await sh(["/bin/bash", join(src, "install.sh"), "--with-launchd"])) !== 0
+    ) {
       console.error("  ✗ suspenders install.sh --with-launchd failed");
       process.exitCode = 1;
       return;
