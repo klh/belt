@@ -53,7 +53,7 @@ under 32 GB the installer prints a recommendation to use `--tier minimal`.
 The installer is idempotent. Deploys the fleet code to `~/.claude/local-llm/`
 — that path is the stable runtime location shared with
 [suspenders](https://github.com/klh/suspenders) and
-[speedy-claude](https://github.com/klh/speedy). Then:
+[speedy](https://github.com/klh/speedy). Then:
 
 ```bash
 bun ~/.claude/local-llm/coordinator.ts status    # every port, up/down, model, RAM
