@@ -53,7 +53,7 @@ under 32 GB the installer prints a recommendation to use `--tier minimal`.
 The installer is idempotent. Deploys the fleet code to `~/.claude/local-llm/`
 — that path is the stable runtime location shared with
 [suspenders](https://github.com/klh/suspenders) and
-[speedy-claude](https://github.com/klh/speedy-claude). Then:
+[speedy-claude](https://github.com/klh/speedy). Then:
 
 ```bash
 bun ~/.claude/local-llm/coordinator.ts status    # every port, up/down, model, RAM
@@ -67,7 +67,7 @@ bun ~/.claude/local-llm/set-cloud.ts off         # router: local-only mode
 | --------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
 | [klh/suspenders](https://github.com/klh/suspenders)       | control plane — SQLite sessions/claims/work graph, fleet board  | any OpenAI-compatible endpoint (default `:8901`)       |
 | **klh/belt**                                              | local LLM fleet — MLX specialists, router, benchmark rig        | suspenders (optional, for warm weights + board advice) |
-| [klh/speedy-claude](https://github.com/klh/speedy-claude) | speed + safety config layer — skills, hooks, personas, settings | installs both                                          |
+| [klh/speedy](https://github.com/klh/speedy) | speed + safety config layer — skills, hooks, personas, settings | installs both                                          |
 
 suspenders' advice worker (`advise.ts`) reads `SUSPENDERS_LLM_URL`
 (default `http://127.0.0.1:8901`) — belt's code specialist answers board
