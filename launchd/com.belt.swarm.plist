@@ -6,7 +6,7 @@
     <string>com.belt.swarm</string>
     <key>ProgramArguments</key>
     <array>
-        <string>__HOME__/.local/bin/bun</string>
+        <string>/opt/homebrew/bin/bun</string>
         <string>__HOME__/.claude/local-llm/swarm.ts</string><string>start</string>
     </array>
     <key>KeepAlive</key>
@@ -19,6 +19,8 @@
     <string>__HOME__/.claude-insights/mlx-swarm.log</string>
     <key>EnvironmentVariables</key>
     <dict>
+        <key>BELT_TIER</key>
+        <string>__TIER__</string>
         <key>PATH</key>
         <string>__HOME__/.local/bin:__HOME__/.local/share/uv/tools/mlx-lm/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
     </dict>
