@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # belt installer — deploys the local-LLM fleet scripts to ~/.claude/local-llm
-# (the stable runtime path shared with suspenders + speedy-claude) and
+# (the stable runtime path shared with suspenders + speedy) and
 # optionally: --with-models runs setup/llm-stack.ts (deps, model downloads,
 # metal check, per-port plists), --with-launchd loads the macOS KeepAlive
 # agents and supersedes the legacy labels.
