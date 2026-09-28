@@ -1,6 +1,6 @@
 # belt
 
-![version](https://img.shields.io/badge/version-1.0.0-8a857e)
+![version](https://img.shields.io/badge/version-1.0.1-8a857e)
 
 **The local LLM fleet for your agent fleet.** A swarm of MLX specialists on
 localhost — code, extract, reason, rerank — behind a deterministic keyword
