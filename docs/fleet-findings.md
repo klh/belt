@@ -1,6 +1,6 @@
 # Local LLM fleet — findings from the speed campaign (Sep 2026)
 
-An optional layer on top of speedy-claude: a local MLX specialist swarm behind an
+An optional layer on top of speedy: a local MLX specialist swarm behind an
 Anthropic-compatible router, so most agent traffic never leaves the machine.
 This doc records what we measured, what we swapped, and the gotchas that cost us
 time — so a new Mac can skip straight to the good config.

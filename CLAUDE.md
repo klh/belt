@@ -3,7 +3,7 @@
 Local LLM fleet: MLX specialists (bin/registry.ts = single source of truth),
 deterministic router :4000, dashboard :7791, bench rig. Install deploys to
 ~/.claude/local-llm/. Companions: suspenders (control plane), klh/local
-(Caddy .local services), speedy-claude (config layer).
+(Caddy .local services), speedy (config layer).
 
 ## qlty Quality Doctrine
 
