@@ -81,6 +81,7 @@ fi
 echo
 echo "done. next:"
 echo "  bun $PREFIX/coordinator.ts status   # every port: up/down, model, RAM"
+echo "  bun $PREFIX/dashboard.ts            # fleet dashboard on :7791 (belt.local:7791 on the LAN; launchd: com.belt.dashboard)"
 echo "  bun $PREFIX/swarm.ts start          # start the fleet (or let launchd keep it alive)"
 echo "  bun $PREFIX/set-cloud.ts off        # pin the router local-only"
 echo "docs: docs/routing.md (routing) · docs/add-a-model.md (add a model) · bench/RESULTS.md"

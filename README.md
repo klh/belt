@@ -84,6 +84,23 @@ bun bench-suite.ts --port 8901 --model mlx-community/Qwen3-Coder-30B-A3B-Instruc
 - [`docs/add-a-model.md`](docs/add-a-model.md) — **how to add a new model**:
   registry → download → serve → bench → adopt/reject, with the rejection log
 
+### Dashboard
+
+Live status board for the fleet: which specialists are up, which model each
+port is actually serving, resident RAM against the 128 GB unified budget,
+which registry models are available to load, the routing-log tail, and the
+current routing prefs.
+
+```bash
+bun bin/dashboard.ts            # http://127.0.0.1:7791
+```
+
+Data derives from `bin/registry.ts` plus the same liveness probes as
+`swarm.ts`/`coordinator.ts` (GET /api/status for the raw JSON). On the LAN the
+server advertises itself via dns-sd as `http://belt.local:7791`. For always-on,
+`./install.sh --with-launchd` loads it as the `com.belt.dashboard` KeepAlive
+agent (logs: `~/.claude-insights/belt-dashboard.log`).
+
 ## Routing
 
 Deterministic, keyword-based, 0 ms — no LLM overhead for routing decisions.
