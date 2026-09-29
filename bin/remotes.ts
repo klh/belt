@@ -348,6 +348,7 @@ export interface RouteLogEntry {
 	role: string;
 	duration_ms: number;
 	ok: boolean;
+	model?: string; // served model id — metrics.ts tallies per (machine, port, model)
 	woke?: boolean; // the route fired WoL and the machine came up
 }
 
@@ -584,6 +585,7 @@ async function main() {
 						role,
 						duration_ms: 0,
 						ok: false,
+						model: ep.model,
 					};
 					try {
 						const woke = await wakeIfNeeded(m, ep);
