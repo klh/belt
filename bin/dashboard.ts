@@ -26,6 +26,7 @@ import {
 	type CheckRow,
 	type RouteLogEntry,
 } from "./remotes.ts";
+import { metricsFor, metricsSnapshot } from "./metrics.ts";
 
 const HOME = process.env.HOME;
 const LOG_DIR = `${HOME}/.claude-insights`;
@@ -99,6 +100,8 @@ async function status() {
 		protocol: ROUTER.protocol,
 		good_at: ROUTER.good_at,
 		model_served: null as string | null,
+		// machine-level tallies (every local port the router has routed to)
+		...metricsFor(LOCAL_NAME),
 	};
 
 	// Probe every registry port in parallel; remember which models are live so
@@ -127,6 +130,7 @@ async function status() {
 				ram_gb: s.ram_gb,
 				up,
 				model_served,
+				...metricsFor(LOCAL_NAME, s.port, model_served ?? s.model),
 			};
 		}),
 	);
@@ -179,7 +183,11 @@ async function buildRemotes(): Promise<RemotesSnapshot> {
 	}
 	const prefs = readPrefs();
 	return {
-		rows: rows.map((r) => ({ ...r, fastest_for: byRow.get(r) ?? [] })),
+		rows: rows.map((r) => ({
+			...r,
+			fastest_for: byRow.get(r) ?? [],
+			...metricsFor(r.machine, r.port, r.model),
+		})),
 		discovered: discover(),
 		cloud_fallback: prefs.allow_cloud === true,
 		mode: typeof prefs.cost_speed === "string" ? prefs.cost_speed : "balanced",
@@ -230,13 +238,24 @@ header .right { margin-left:auto; display:flex; align-items:center; gap:8px; fon
 h2 { font-size:10px; font-weight:400; text-transform:uppercase; letter-spacing:.14em; color:var(--mut); margin:20px 0 2px; }
 table { width:100%; border-collapse:collapse; }
 th { text-align:left; font-weight:400; font-size:10px; text-transform:uppercase; letter-spacing:.14em; color:var(--mut); padding:8px 8px 6px 0; border-bottom:1px solid var(--hair); }
-td { padding:9px 8px 9px 0; border-bottom:1px solid var(--hair); font-size:12.5px; }
-td.r, th.r { text-align:right; padding-right:0; }
-td .u { color:var(--mut); }
-td.model, td.brk { word-break:break-word; }
-.ga { max-width:26ch; font-size:11px; line-height:1.4; word-break:break-word; }
-td .mut, .mut { color:var(--mut); }
+.mut { color:var(--mut); }
+.u { color:var(--mut); }
 .ok { color:var(--ok); }
+/* unified fleet table — one <details> per row; a shared grid keeps the
+   collapsed columns aligned, expanded panels wrap instead of widening */
+.fhead, .frow summary { display:grid; grid-template-columns:minmax(80px,1fr) minmax(105px,1.2fr) 122px minmax(130px,2fr) minmax(120px,1.1fr); gap:8px; align-items:baseline; padding:8px 8px 8px 0; }
+.fhead { font-size:10px; text-transform:uppercase; letter-spacing:.14em; color:var(--mut); border-bottom:1px solid var(--hair); padding-bottom:6px; }
+.frow { border-bottom:1px solid var(--hair); }
+.frow summary { cursor:pointer; list-style:none; }
+.frow summary::-webkit-details-marker { display:none; }
+.frow summary::before { content:"▸"; color:var(--mut); margin-right:6px; }
+.frow[open] summary::before { content:"▾"; }
+.frow .cmodel { word-break:break-word; }
+.frow .cgood { font-size:11px; color:var(--mut); line-height:1.4; word-break:break-word; max-width:26ch; }
+.frow .cstate { word-break:break-word; }
+.load { display:inline-block; border:1px solid var(--hair); border-radius:2px; padding:0 5px; font-size:10px; color:var(--mut); font-style:normal; font-variant-numeric:tabular-nums; margin-left:4px; }
+.panel { padding:2px 0 12px; display:grid; gap:6px; max-width:100%; }
+.panel p { margin:0; font-size:11.5px; max-width:100%; overflow-wrap:anywhere; }
 .scroll { overflow-x:auto; }
 .bar { height:3px; background:var(--track); border-radius:2px; overflow:hidden; }
 .bar i { display:block; height:100%; width:0; background:#6f6a63; }
@@ -304,16 +323,14 @@ threads-mark { vertical-align:middle; margin:0 3px 0 0; }
 <header><span class="mark">belt</span><span class="sub">local LLM fleet</span>
   <span class="right"><i class="dot blink" id="live"></i><span id="clockbox">—</span></span></header>
 <h2>Fleet</h2>
-<div class="scroll"><table id="fleet"></table></div>
+<div class="scroll">
+<div class="fhead"><span>location</span><span>endpoint</span><span>protocol</span><span>model</span><span>state</span></div>
+<div id="fleet"></div>
+</div>
+<div id="fleetmeta" class="mut">—</div>
 <div class="rhead"><span id="remotesnote" class="mut">loading…</span><button id="remotesbtn" type="button">refresh</button></div>
 <div id="remotesdisc"></div>
 <div id="remoteslog"></div>
-<h2>Memory</h2>
-<div class="memrow"><span class="mut">resident</span><span class="n" id="memnum">—</span></div>
-<div class="bar"><i id="memfill"></i></div>
-<div id="models"></div>
-<h2>Available</h2>
-<div id="avail"></div>
 <h2>Routing log</h2>
 <div id="log">—</div>
 <div id="prefsline"></div>
@@ -324,6 +341,12 @@ threads-mark { vertical-align:middle; margin:0 3px 0 0; }
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function short(m){return String(m||'').replace('mlx-community/','');}
 var statusData=null,remoteRows=[];
+var openRows={};
+fleet.addEventListener('toggle',function(e){
+  var d=e.target; if(!d||d.tagName!=='DETAILS')return;
+  var k=d.getAttribute('data-key');
+  if(d.open)openRows[k]=1; else delete openRows[k];
+},true);
 var LOCAL_NAME=${JSON.stringify(LOCAL_NAME)};
 function renderFleet(){
   if(!statusData)return;
@@ -332,38 +355,59 @@ function renderFleet(){
   statusData.routing_tail.slice().reverse().forEach(function(l){
     try{var e=JSON.parse(l); if(e.port!=null&&!(e.port in last))last[e.port]=e.ts;}catch(_){}
   });
-  var html='<tr><th>location</th><th>endpoint</th><th>protocol</th><th>roles</th><th>model</th><th>good at</th><th>engine</th><th class="r">ram</th><th>state</th><th class="r">last used / latency</th></tr>';
+  var html='<div class="fhead"><span>location</span><span>endpoint</span><span>protocol</span><span>model</span><span>state</span></div>';
   var R=statusData.router;
   [Object.assign({engine:'bun',ram_gb:null},R)]
     .concat(statusData.specialists)
     .forEach(function(x){
       var st=x.up?'<span class="ok">loaded</span>':'<span class="mut">offline</span>';
-      var ram=x.ram_gb==null?'<span class="mut">—</span>':'<span>'+x.ram_gb+'</span> <span class="u">GB</span>';
-      var used=last[x.port]?age(last[x.port],now):'<span class="mut">—</span>';
-      html+='<tr><td>'+esc(LOCAL_NAME)+' <span class="u">(local)</span></td>'
-        +'<td>:'+x.port+'</td>'
-        +'<td><span class="badge '+esc(x.protocol||'')+'">'+esc(x.protocol||'—')+'</span></td>'
-        +'<td class="mut brk">'+esc(x.role||'—')+'</td>'
-        +'<td class="mut model" title="'+esc(x.model_served||x.model||'')+'">'+esc(short(x.model_served||x.model)||'—')+'</td>'
-        +'<td class="mut ga">'+esc(x.good_at||'—')+'</td>'
-        +'<td class="mut">'+esc(x.engine||'—')+'</td>'
-        +'<td class="r">'+ram+'</td>'
-        +'<td>'+st+'</td>'
-        +'<td class="r">'+used+'</td></tr>';
+      var load=(x.load_5m||0)>0?'<em class="load">'+x.load_5m+'/5m</em>':'';
+      var modelFull=x.model_served||x.model||'';
+      var mem=x.up&&x.ram_gb!=null
+        ?'<div class="mrow"><span>'+esc(short(modelFull))+'</span><span class="n">'+x.ram_gb+' GB</span></div>'
+          +'<div class="bar"><i style="width:'+(x.ram_gb/128*100)+'%"></i></div>'
+        :'';
+      var bits=['engine '+esc(x.engine||'—')];
+      if(x.tier)bits.push('tier '+esc(x.tier));
+      if(x.ram_gb!=null)bits.push(x.ram_gb+' GB ram');
+      bits.push('last used '+(x.last_used?age(x.last_used,now):'—'));
+      bits.push((x.calls||0)+' calls');
+      bits.push('avg '+(x.avg_ms!=null?x.avg_ms+'ms':'—'));
+      bits.push((x.errors||0)+' errors');
+      if(x.last_error)bits.push('<span class="mut">last error: '+esc(x.last_error)+'</span>');
+      var k='L'+x.port;
+      html+='<details class="frow" data-key="'+k+'"'+(openRows[k]?' open':'')+'><summary>'
+        +'<span>'+esc(LOCAL_NAME)+' <span class="u">(local)</span></span>'
+        +'<span>:'+x.port+'</span>'
+        +'<span><span class="badge '+esc(x.protocol||'')+'">'+esc(x.protocol||'—')+'</span></span>'
+        +'<span class="cmodel" title="'+esc(modelFull)+'">'+esc(short(modelFull)||'—')+'</span>'
+        +'<span>'+st+load+'</span>'
+        +'</summary><div class="panel">'
+        +'<p><span class="mut">good at:</span> '+esc(x.good_at||'—')+'</p>'
+        +mem
+        +'<p class="mut">'+bits.join(' · ')+'</p>'
+        +'</div></details>';
     });
   (remoteRows||[]).forEach(function(x){
     var st=x.ok?'<span class="ok">up</span>':'<span class="mut">down</span>';
     var fast=(x.fastest_for||[]).map(function(r){return '<span class="fast">fastest '+esc(r)+'</span>';}).join(' ');
-    var lat=x.ok?x.ms+'ms':'<span class="mut">—</span>';
-    html+='<tr><td>'+esc(x.machine)+' <span class="u">(remote)</span></td>'
-      +'<td>'+esc(x.host)+':'+x.port+'</td>'
-      +'<td><span class="badge '+esc(x.protocol)+'">'+esc(x.protocol)+'</span></td>'
-      +'<td class="mut brk">'+esc((x.roles||[]).join(', ')||'—')+'</td>'
-      +'<td class="mut model" title="'+esc(x.model||'')+'">'+esc(x.model||'—')+'</td>'
-      +'<td class="mut ga">'+esc((x.roles||[]).join(', ')||'—')+'</td>'
-      +'<td class="mut">—</td><td class="r mut">—</td>'
-      +'<td>'+st+' '+fast+'</td>'
-      +'<td class="r">'+lat+'</td></tr>';
+    var load=(x.load_5m||0)>0?'<em class="load">'+x.load_5m+'/5m</em>':'';
+    var bits=['last used '+(x.last_used?age(x.last_used,now):'—'),
+      (x.calls||0)+' calls',
+      'avg '+(x.avg_ms!=null?x.avg_ms+'ms':'—'),
+      (x.errors||0)+' errors'];
+    if(x.last_error)bits.push('<span class="mut">last error: '+esc(x.last_error)+'</span>');
+    var k='R'+x.machine+':'+x.port+':'+(x.model||'');
+    html+='<details class="frow" data-key="'+esc(k)+'"'+(openRows[k]?' open':'')+'><summary>'
+      +'<span>'+esc(x.machine)+' <span class="u">(remote)</span></span>'
+      +'<span>'+esc(x.host)+':'+x.port+'</span>'
+      +'<span><span class="badge '+esc(x.protocol)+'">'+esc(x.protocol)+'</span></span>'
+      +'<span class="cmodel" title="'+esc(x.model||'')+'">'+esc(x.model||'—')+'</span>'
+      +'<span>'+st+' '+fast+load+'</span>'
+      +'</summary><div class="panel">'
+      +'<p><span class="mut">good at (roles):</span> '+esc((x.roles||[]).join(', ')||'—')+'</p>'
+      +'<p class="mut">'+bits.join(' · ')+'</p>'
+      +'</div></details>';
   });
   fleet.innerHTML=html;
 }
@@ -389,17 +433,10 @@ function tick(){
     clockbox.textContent=hhmmss(s.ts);
     live.className='dot blink';
     statusData=s; renderFleet();
-    var pct=s.ram.resident_gb/128*100;
-    memfill.style.width=Math.min(100,pct)+'%';
-    memfill.className=pct>80?'hot':'';
-    memnum.textContent=s.ram.resident_gb.toFixed(1)+' / 128 GB unified memory';
-    models.innerHTML=s.specialists.filter(function(x){return x.up;}).map(function(x){
-      return '<div class="mrow"><span>'+esc(short(x.model_served||x.model))+'</span><span class="n">'+x.ram_gb+' GB</span></div>'
-        +'<div class="bar"><i style="width:'+(x.ram_gb/128*100)+'%"></i></div>';
-    }).join('');
-    avail.innerHTML=s.available.length
+    var chips=s.available.length
       ?s.available.map(function(m){return '<span class="chip">'+esc(short(m))+'</span>';}).join('')
-      :'<p class="empty">All registry models resident.</p>';
+      :'all registry models loaded';
+    fleetmeta.innerHTML='resident '+s.ram.resident_gb.toFixed(1)+' / 128 GB unified memory · available: '+chips;
     log.textContent=s.routing_tail.length?s.routing_tail.map(fmt).join('\\n'):'No requests logged yet.';
     prefsline.textContent='mode '+(s.prefs.cost_speed||'balanced')
       +' · cloud '+(s.prefs.allow_cloud?'on':'off')
@@ -420,12 +457,15 @@ function tickRemotes(){
     remotesdisc.innerHTML=disc.length
       ?disc.map(function(d){return '<span class="chip">'+esc(d.name)+'.local <span class="u">discovered · not configured</span></span>';}).join('')
       :'';
-    var routes=s.routes||[];
-    remoteslog.textContent=routes.length
-      ?routes.map(function(e){
-        return e.ts.slice(11,19)+'  '+e.role+'  →  '+e.machine+' ('+e.endpoint+', '+e.protocol+')  '+e.duration_ms+'ms'+(e.ok?'':'  FAILED')+(e.woke?'  woke':'');
-      }).join('\\n')
-      :'No remote routes yet — bun bin/remotes.ts route <role> <prompt>.';
+    fetch('/api/metrics').then(function(r){return r.json();}).then(function(m){
+      var lines=(m.recent||[]).map(function(e){
+        return e.ts.slice(11,19)+'  '+e.role+'  →  '+e.machine+':'+e.port
+          +(e.model?'  '+short(e.model):'')+'  '+e.duration_ms+'ms'+(e.ok?'':'  FAILED');
+      });
+      remoteslog.textContent=lines.length
+        ?lines.join('\\n')
+        :'No routes tallied yet — bun bin/remotes.ts route <role> <prompt>.';
+    }).catch(function(){});
     remotesnote.textContent=(remoteRows.length
       ?'LAN-local, routed for SPEED — not cost'
       :'no remote machines — add ~/.claude/local-llm/remotes.json (remotes.example.json shows the shape)')
@@ -460,12 +500,20 @@ requests leave the machine unless cloud fallback is enabled.
 
 GET /api/status on this port returns JSON: per-port liveness, the model each
 port is actually serving, resident RAM, available (downloaded, not loaded)
-models, routing-log tail, current prefs.
+models, routing-log tail, current prefs — plus per-endpoint call tallies
+(calls, errors, avg_ms, last_used, load_5m) folded into every row.
 
 GET /api/remotes on this port returns JSON: every static multi-machine
 endpoint (~/.claude/local-llm/remotes.json) with live health + probe latency,
-the fastest endpoint per routing role, DNS-SD discovered _klh-llm._tcp
-advertisements, recent remote routes, and the cloud-vs-local posture.
+the fastest endpoint per routing role, per-endpoint call tallies as above,
+DNS-SD discovered _klh-llm._tcp advertisements, recent remote routes, and
+the cloud-vs-local posture.
+
+GET /api/metrics returns the tallies alone: per (machine, port, model)
+{calls, errors, avg_ms, last_used, load_5m, last_error} plus the 12 most
+recent routes across locals and remotes. Source of truth:
+~/.claude/local-llm/metrics.db (bun:sqlite), fed incrementally from the two
+JSONL route logs belt already writes.
 
 ## Notes
 
@@ -494,6 +542,11 @@ Bun.serve({
 		const path = new URL(req.url).pathname;
 		if (path === "/api/status") return json(await status());
 		if (path === "/api/remotes") return json(await remotesSnapshot());
+		if (path === "/api/metrics")
+			return json({
+				...metricsSnapshot(),
+				ts: new Date().toISOString(),
+			});
 		if (path === "/")
 			return new Response(PAGE, {
 				headers: { "content-type": "text/html; charset=utf-8" },
