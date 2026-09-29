@@ -231,7 +231,7 @@ export function tailRoutes(n: number): RouteLogEntry[] {
 	}
 }
 
-/** Immich SERVER smart-search: POST /api/search/smart with {"q": prompt} and
+/** Immich SERVER smart-search: POST /api/search/smart with {"query": prompt} and
  *  x-api-key auth. Throws with a clear message when IMMICH_API_KEY is unset. */
 async function immichSmartSearch(
 	ip: string,
@@ -246,7 +246,7 @@ async function immichSmartSearch(
 	const r = await fetch(`http://${ip}:${port}/api/search/smart`, {
 		method: "POST",
 		headers: { "content-type": "application/json", "x-api-key": key },
-		body: JSON.stringify({ q: prompt }),
+		body: JSON.stringify({ query: prompt }),
 		signal: AbortSignal.timeout(30_000),
 	});
 	if (!r.ok)
