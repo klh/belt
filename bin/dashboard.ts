@@ -242,17 +242,30 @@ th { text-align:left; font-weight:400; font-size:10px; text-transform:uppercase;
 .u { color:var(--mut); }
 .ok { color:var(--ok); }
 /* unified fleet table — one <details> per row; a shared grid keeps the
-   collapsed columns aligned, expanded panels wrap instead of widening */
-.fhead, .frow summary { display:grid; grid-template-columns:minmax(80px,1fr) minmax(105px,1.2fr) 122px minmax(130px,2fr) minmax(120px,1.1fr); gap:8px; align-items:baseline; padding:8px 8px 8px 0; }
+   collapsed columns aligned (location | endpoint | state | protocol |
+   model), expanded panels wrap instead of widening. The disclosure marker
+   is position:absolute so it never becomes a grid item (a ::before in a
+   grid container occupies a track and would push the state cell to a
+   second line). */
+.fhead, .frow summary { display:grid; grid-template-columns:minmax(80px,1fr) minmax(105px,1.2fr) minmax(150px,1.3fr) 122px minmax(130px,2fr); gap:10px; align-items:baseline; padding:8px 8px 8px 18px; }
+/* wide-only cells (engine/ram/latency/good-at) — hidden on narrow, and the
+   media query below swaps in a NINE-track template so cell count always
+   matches the grid (a mismatch is what spilled state onto a second line) */
+.fhead > .w, .frow summary > .w { display:none; }
+@media (min-width:1280px) {
+  .fhead, .frow summary { grid-template-columns:minmax(90px,.9fr) minmax(120px,1.1fr) minmax(140px,1.2fr) 110px minmax(130px,1.6fr) 88px 70px 88px minmax(160px,1.6fr); }
+  .fhead > .w, .frow summary > .w { display:block; }
+}
 .fhead { font-size:10px; text-transform:uppercase; letter-spacing:.14em; color:var(--mut); border-bottom:1px solid var(--hair); padding-bottom:6px; }
 .frow { border-bottom:1px solid var(--hair); }
-.frow summary { cursor:pointer; list-style:none; }
+.frow summary { cursor:pointer; list-style:none; position:relative; }
 .frow summary::-webkit-details-marker { display:none; }
-.frow summary::before { content:"▸"; color:var(--mut); margin-right:6px; }
+.frow summary::before { content:"▸"; position:absolute; left:2px; top:9px; color:var(--mut); font-size:10px; }
 .frow[open] summary::before { content:"▾"; }
 .frow .cmodel { word-break:break-word; }
 .frow .cgood { font-size:11px; color:var(--mut); line-height:1.4; word-break:break-word; max-width:26ch; }
 .frow .cstate { word-break:break-word; }
+.fhead > span, .frow summary > span { min-width:0; overflow-wrap:anywhere; }
 .load { display:inline-block; border:1px solid var(--hair); border-radius:2px; padding:0 5px; font-size:10px; color:var(--mut); font-style:normal; font-variant-numeric:tabular-nums; margin-left:4px; }
 .panel { padding:2px 0 12px; display:grid; gap:6px; max-width:100%; }
 .panel p { margin:0; font-size:11.5px; max-width:100%; overflow-wrap:anywhere; }
@@ -269,7 +282,7 @@ th { text-align:left; font-weight:400; font-size:10px; text-transform:uppercase;
 .rhead button { margin-left:auto; }
 button { border:1px solid var(--hair); border-radius:2px; background:transparent; color:var(--mut); font:inherit; font-size:11px; padding:2px 10px; cursor:pointer; letter-spacing:.04em; }
 button:hover { color:var(--text); border-color:var(--rust); }
-.badge { display:inline-block; border:1px solid var(--hair); border-radius:2px; padding:0 6px; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--mut); }
+.badge { display:inline-block; border:1px solid var(--hair); border-radius:2px; padding:0 6px; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--mut); margin-right:2px; }
 .badge.immich { color:var(--rust); border-color:rgba(224,90,43,.5); }
 .fast { color:var(--ok); }
 #remoteslog { font-size:11px; line-height:1.75; color:var(--mut); white-space:pre-wrap; word-break:break-word; margin:4px 0 0; }
@@ -324,7 +337,7 @@ threads-mark { vertical-align:middle; margin:0 3px 0 0; }
   <span class="right"><i class="dot blink" id="live"></i><span id="clockbox">—</span></span></header>
 <h2>Fleet</h2>
 <div class="scroll">
-<div class="fhead"><span>location</span><span>endpoint</span><span>protocol</span><span>model</span><span>state</span></div>
+<div class="fhead"><span>location</span><span>endpoint</span><span>state</span><span>protocol</span><span>model</span><span class="w">engine</span><span class="w">ram</span><span class="w">latency</span><span class="w">good at</span></div>
 <div id="fleet"></div>
 </div>
 <div id="fleetmeta" class="mut">—</div>
@@ -355,7 +368,8 @@ function renderFleet(){
   statusData.routing_tail.slice().reverse().forEach(function(l){
     try{var e=JSON.parse(l); if(e.port!=null&&!(e.port in last))last[e.port]=e.ts;}catch(_){}
   });
-  var html='<div class="fhead"><span>location</span><span>endpoint</span><span>protocol</span><span>model</span><span>state</span></div>';
+  // single source header: the static .fhead div above #fleet — never emit one here
+  var html='';
   var R=statusData.router;
   [Object.assign({engine:'bun',ram_gb:null},R)]
     .concat(statusData.specialists)
@@ -379,9 +393,13 @@ function renderFleet(){
       html+='<details class="frow" data-key="'+k+'"'+(openRows[k]?' open':'')+'><summary>'
         +'<span>'+esc(LOCAL_NAME)+' <span class="u">(local)</span></span>'
         +'<span>:'+x.port+'</span>'
+        +'<span class="cstate">'+st+load+'</span>'
         +'<span><span class="badge '+esc(x.protocol||'')+'">'+esc(x.protocol||'—')+'</span></span>'
         +'<span class="cmodel" title="'+esc(modelFull)+'">'+esc(short(modelFull)||'—')+'</span>'
-        +'<span>'+st+load+'</span>'
+        +'<span class="w">'+esc(x.engine||'—')+'</span>'
+        +'<span class="w">'+(x.ram_gb!=null?x.ram_gb+' GB':'—')+'</span>'
+        +'<span class="w">'+(x.avg_ms!=null?x.avg_ms+'ms':'—')+'</span>'
+        +'<span class="w cgood">'+esc(x.good_at||'—')+'</span>'
         +'</summary><div class="panel">'
         +'<p><span class="mut">good at:</span> '+esc(x.good_at||'—')+'</p>'
         +mem
@@ -401,9 +419,13 @@ function renderFleet(){
     html+='<details class="frow" data-key="'+esc(k)+'"'+(openRows[k]?' open':'')+'><summary>'
       +'<span>'+esc(x.machine)+' <span class="u">(remote)</span></span>'
       +'<span>'+esc(x.host)+':'+x.port+'</span>'
+      +'<span class="cstate">'+st+' '+fast+load+'</span>'
       +'<span><span class="badge '+esc(x.protocol)+'">'+esc(x.protocol)+'</span></span>'
       +'<span class="cmodel" title="'+esc(x.model||'')+'">'+esc(x.model||'—')+'</span>'
-      +'<span>'+st+' '+fast+load+'</span>'
+      +'<span class="w">—</span>'
+      +'<span class="w">—</span>'
+      +'<span class="w">'+(x.ok?x.ms+'ms':'—')+'</span>'
+      +'<span class="w cgood">'+esc((x.roles||[]).join(', ')||'—')+'</span>'
       +'</summary><div class="panel">'
       +'<p><span class="mut">good at (roles):</span> '+esc((x.roles||[]).join(', ')||'—')+'</p>'
       +'<p class="mut">'+bits.join(' · ')+'</p>'
