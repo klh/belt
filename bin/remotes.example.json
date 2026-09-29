@@ -14,6 +14,22 @@
 					"model": "qwen2.5:0.5b"
 				}
 			]
+		},
+		{
+			"name": "cloud-provider",
+			"host": "api.example.com",
+			"cloud": true,
+			"endpoints": [
+				{
+					"port": 443,
+					"protocol": "openai",
+					"tls": true,
+					"base": "https://api.example.com/v4",
+					"api_key_env": "EXAMPLE_API_KEY",
+					"roles": ["general", "fast"],
+					"model": "example-flash"
+				}
+			]
 		}
 	]
 }

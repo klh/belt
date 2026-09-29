@@ -11,7 +11,29 @@ export interface Specialist {
 	tier: "resident" | "ondemand";
 	engine?: "mlx_lm" | "rapid"; // default mlx_lm; rapid = rapid-mlx (MTP, prefix cache, batching)
 	flags?: string[]; // extra server args for the chosen engine
+	// terse capability tags, comma-separated — written so an LLM picking an
+	// agent-LLM from a fleet manifest chooses the right specialist
+	good_at: string;
 }
+
+// Wire protocol per row: specialists speak OpenAI-compatible /v1 (rapid-mlx /
+// mlx_lm servers); only the :4000 router speaks Anthropic. Exposed so the
+// dashboard and LLM-facing manifests can state the protocol per entry.
+export const SPECIALIST_PROTOCOL = "openai";
+export const ROUTER_PROTOCOL = "anthropic-shim";
+
+// The :4000 router is not a Specialist (no model of its own — it fronts the
+// fleet and, when allowed, the cloud), but LLM-facing manifests list it
+// alongside them.
+export const ROUTER = {
+	port: 4000,
+	label: "router",
+	role: "router",
+	protocol: ROUTER_PROTOCOL,
+	model_served: null,
+	good_at:
+		"anthropic-protocol clients, deterministic role routing, fleet-wide access, cloud fallback",
+} as const;
 
 export type SPECIALIST_PORTS =
 	| 8901
@@ -38,6 +60,8 @@ export const SPECIALISTS: Specialist[] = [
 		flags: ["--enable-prefix-cache", "--response-cache-entries", "128"],
 		// 2026-09-23 A/B: --kv-cache-dtype int8 = 87.3 vs 117.7 tok/s median (-26%)
 		// at short contexts — dequant overhead dominates; bf16 KV stays.
+		good_at:
+			"code generation, multi-file edits, repo-scale refactors, long context",
 	},
 	{
 		port: 8902,
@@ -48,6 +72,8 @@ export const SPECIALISTS: Specialist[] = [
 		tier: "resident",
 		engine: "rapid",
 		flags: ["--enable-prefix-cache", "--response-cache-entries", "128"],
+		good_at:
+			"structured extraction, json shaping, summarization, fast cheap drafting",
 	},
 	{
 		// 2026-09-23 swap: Qwen3.5-35B-A3B (MoE, 3B active, 4bit ≈20GB) replaces
@@ -66,6 +92,8 @@ export const SPECIALISTS: Specialist[] = [
 			"--response-cache-entries",
 			"128",
 		],
+		good_at:
+			"multi-step reasoning, planning, hard analysis, determinate answers",
 	},
 	// 8904/8905 (embed/rerank) retired 2026-09-23: mlx_lm 0.31.x server dropped
 	// /v1/embeddings + /v1/rerank routes. Embeddings live on :8907 (context-rag
@@ -84,6 +112,7 @@ export const SPECIALISTS: Specialist[] = [
 			"--response-cache-entries",
 			"128",
 		],
+		good_at: "danish, general chat, translation, light on-demand reasoning",
 	},
 	{
 		// 2026-09-24 adoption: found running stray on the brew 0.14.3 binary,
@@ -97,6 +126,7 @@ export const SPECIALISTS: Specialist[] = [
 		tier: "resident",
 		engine: "rapid",
 		flags: ["--enable-prefix-cache"],
+		good_at: "document reranking, relevance ordering, query-passage scoring",
 	},
 ];
 
