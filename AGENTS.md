@@ -27,6 +27,16 @@ are and WHAT the mission is; this file carries HOW. Read it before any edit.
 4. Commit on your branch (subject = the item title), push the branch. NO tags.
 5. Finish: `bun ~/.claude/hooks/suspenders/bin/work.ts done <id> --sha <branch-head>`.
 
+## LLM routing
+
+Owner directive 2026-09-29: ASK BELT what LLMs are available before
+dispatching LLM work — `bun bin/remotes.ts check` (liveness) or
+`bun bin/remotes.ts discover` (DNS-SD). Cloud is fastest for most items and
+stays the default; use the remote/local machines (NAS ollama, the local
+swarm) to refine a prompt or plan, for long-running background tasks, or as
+fallback when cloud is down. The optimization target is SPEED, not cost.
+Details: docs/multi-machine.md.
+
 Final line of output: `DONE <sha>` | `SPLIT <id>` | `BLOCKED` (after 3
 honest attempts, tree restored).
 
