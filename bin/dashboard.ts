@@ -27,6 +27,7 @@ import {
 	type RouteLogEntry,
 } from "./remotes.ts";
 import { metricsFor, metricsSnapshot } from "./metrics.ts";
+import { handleRoute } from "./route-policy.ts";
 
 const HOME = process.env.HOME;
 const LOG_DIR = `${HOME}/.claude-insights`;
@@ -533,9 +534,21 @@ the cloud-vs-local posture.
 
 GET /api/metrics returns the tallies alone: per (machine, port, model)
 {calls, errors, avg_ms, last_used, load_5m, last_error} plus the 12 most
-recent routes across locals and remotes. Source of truth:
+recent routes across locals and remotes, and the /api/route audit trail
+(decision, token label, target, why). Source of truth:
 ~/.claude/local-llm/metrics.db (bun:sqlite), fed incrementally from the two
 JSONL route logs belt already writes.
+
+POST /api/route — the policy endpoint (bearer token required; tokens in
+~/.claude/local-llm/belt-tokens.json). Body {role?, model?, messages?,
+max_tokens?, temperature?, execute?}. Advisory (no execute): picks the
+fastest healthy target for the role from local specialists + remotes.json,
+scored by belt's own metrics (avg_ms, load_5m, errors), and answers
+{target, why, latency_estimate_ms}. With messages (or execute:true) it
+proxies the call — locals direct, remotes/cloud via the LiteLLM gateway
+with WoL-ensure for silent LAN machines — and adds {reply, ms}. Errors are
+machine-readable {error, why}: 401 (no token) / 403 (unknown token) / 503
+(target down, wake failed or gateway error).
 
 ## Notes
 
@@ -552,8 +565,9 @@ JSONL route logs belt already writes.
 `;
 
 // ─── server ───
-const json = (x: unknown): Response =>
+const json = (x: unknown, status = 200): Response =>
 	new Response(JSON.stringify(x, null, 2), {
+		status,
 		headers: { "content-type": "application/json" },
 	});
 
@@ -564,6 +578,16 @@ Bun.serve({
 		const path = new URL(req.url).pathname;
 		if (path === "/api/status") return json(await status());
 		if (path === "/api/remotes") return json(await remotesSnapshot());
+		if (path === "/api/route")
+			return req.method === "POST"
+				? handleRoute(req)
+				: json(
+						{
+							error: "method not allowed",
+							why: "POST /api/route with a bearer token",
+						},
+						405,
+					);
 		if (path === "/api/metrics")
 			return json({
 				...metricsSnapshot(),
