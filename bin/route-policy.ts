@@ -375,10 +375,41 @@ async function executeRemote(
 	const ms = Date.now() - t0;
 	if (!r.ok) throw new Error(`HTTP ${r.status} from gateway for ${alias}`);
 	const j = (await r.json()) as {
-		choices?: { message?: { content?: string } }[];
+		choices?: {
+			message?: { content?: string };
+			finish_reason?: string;
+		}[];
 	};
+	// thinking models spend max_tokens ON reasoning (glm-5.3 burned 497/500
+	// in one probe → empty content, finish "length") — one retry at 4× budget
+	let out = j.choices?.[0];
+	if (out && !out.message?.content && out.finish_reason === "length") {
+		const r2 = await fetch(`${GATEWAY_URL}/v1/chat/completions`, {
+			method: "POST",
+			headers: {
+				"content-type": "application/json",
+				authorization: `Bearer ${key}`,
+			},
+			body: JSON.stringify({
+				model: alias,
+				messages: body.messages ?? [],
+				max_tokens: (body.max_tokens ?? 500) * 4,
+				temperature: body.temperature,
+			}),
+			signal: AbortSignal.timeout(180_000),
+		});
+		if (r2.ok) {
+			const j2 = (await r2.json()) as {
+				choices?: { message?: { content?: string } }[];
+			};
+			out = j2.choices?.[0];
+		}
+	}
 	logRemoteRoute(c, role, ms, true);
-	return { reply: j.choices?.[0]?.message?.content ?? "(empty response)", ms };
+	return {
+		reply: out?.message?.content || "(empty response)",
+		ms: Date.now() - t0,
+	};
 }
 
 // ─── the endpoint ───
