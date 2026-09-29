@@ -2,6 +2,8 @@
 
 ![version](https://img.shields.io/badge/version-1.0.1-8a857e)
 
+> **Platform: Apple-silicon macOS.** belt runs MLX, which has no CUDA/ROCm path — the swarm needs an M-series Mac. Other machines and fleets can still consume it over the network: the endpoints are plain HTTP on :8901+.
+
 **The local LLM fleet for your agent fleet.** A swarm of MLX specialists on
 localhost — code, extract, reason, rerank — behind a deterministic keyword
 router, with a benchmark rig that logs every measurement to `benchmarks.jsonl`.
@@ -63,11 +65,11 @@ bun ~/.claude/local-llm/set-cloud.ts off         # router: local-only mode
 
 ## The trio
 
-| Repo                                                      | Layer                                                           | Depends on                                             |
-| --------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
-| [klh/suspenders](https://github.com/klh/suspenders)       | control plane — SQLite sessions/claims/work graph, fleet board  | any OpenAI-compatible endpoint (default `:8901`)       |
-| **klh/belt**                                              | local LLM fleet — MLX specialists, router, benchmark rig        | suspenders (optional, for warm weights + board advice) |
-| [klh/speedy](https://github.com/klh/speedy) | speed + safety config layer — skills, hooks, personas, settings | installs both                                          |
+| Repo                                                | Layer                                                           | Depends on                                             |
+| --------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------ |
+| [klh/suspenders](https://github.com/klh/suspenders) | control plane — SQLite sessions/claims/work graph, fleet board  | any OpenAI-compatible endpoint (default `:8901`)       |
+| **klh/belt**                                        | local LLM fleet — MLX specialists, router, benchmark rig        | suspenders (optional, for warm weights + board advice) |
+| [klh/speedy](https://github.com/klh/speedy)         | speed + safety config layer — skills, hooks, personas, settings | installs both                                          |
 
 suspenders' advice worker (`advise.ts`) reads `SUSPENDERS_LLM_URL`
 (default `http://127.0.0.1:8901`) — belt's code specialist answers board
