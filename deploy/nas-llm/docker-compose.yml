@@ -1,0 +1,26 @@
+# nas-llm — the belt remote-provider proof on the Synology (Container
+# Manager project). ollama with a small model for long-running CPU tasks;
+# the announcer advertises _klh-llm._tcp over host networking so belt's
+# dynamic discovery finds it. DNS name nas.threads.dk resolves first; the
+# static ip_fallback covers resolver hiccups; WoL covers hibernation.
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: nas-llm
+    ports:
+      - "11434:11434"
+    volumes:
+      - /volume1/docker/nas-llm:/root/.ollama
+    restart: unless-stopped
+
+  announcer:
+    image: python:3.12-alpine
+    container_name: nas-llm-announce
+    network_mode: host
+    restart: unless-stopped
+    entrypoint:
+      - /bin/sh
+      - -c
+      - pip install --no-cache-dir zeroconf >/dev/null 2>&1 && python /announce.py
+    volumes:
+      - ./announce.py:/announce.py:ro
