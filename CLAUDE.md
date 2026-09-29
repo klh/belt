@@ -5,6 +5,15 @@ deterministic router :4000, dashboard :7791, bench rig. Install deploys to
 ~/.claude/local-llm/. Companions: suspenders (control plane), klh/local
 (Caddy .local services), speedy (config layer).
 
+## LLM Routing Doctrine
+
+Owner directive 2026-09-29: agents ASK BELT what LLMs are available before
+dispatching LLM work — `bun bin/remotes.ts check` / `discover`. Cloud is
+fastest for most items and stays the default; use remote/local machines
+(NAS ollama, the local swarm) to refine a prompt or plan, for long-running
+background tasks, or as fallback when cloud is down. The optimization target
+is SPEED, not cost. Config model + verbs: docs/multi-machine.md.
+
 ## qlty Quality Doctrine
 
 qlty is THE quality tool; `.qlty/` must exist or the governor's on-write
