@@ -13,7 +13,12 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { hostname } from "node:os";
-import { SPECIALISTS, DOWNLOAD_MODELS } from "./registry.ts";
+import {
+	DOWNLOAD_MODELS,
+	ROUTER,
+	SPECIALIST_PROTOCOL,
+	SPECIALISTS,
+} from "./registry.ts";
 import {
 	checkAll,
 	discover,
@@ -86,7 +91,15 @@ const psModel = (port: number): string | null => {
 
 // ─── status snapshot ───
 async function status() {
-	const router = { up: await isUp(4000), port: 4000 };
+	const router = {
+		up: await isUp(ROUTER.port),
+		port: ROUTER.port,
+		label: ROUTER.label,
+		role: ROUTER.role,
+		protocol: ROUTER.protocol,
+		good_at: ROUTER.good_at,
+		model_served: null as string | null,
+	};
 
 	// Probe every registry port in parallel; remember which models are live so
 	// "available to load" = DOWNLOAD_MODELS minus whatever is currently served.
@@ -107,6 +120,8 @@ async function status() {
 				label: s.label,
 				role: s.role,
 				model: s.model,
+				protocol: SPECIALIST_PROTOCOL,
+				good_at: s.good_at,
 				tier: s.tier,
 				engine: s.engine ?? "mlx_lm",
 				ram_gb: s.ram_gb,
@@ -218,7 +233,8 @@ th { text-align:left; font-weight:400; font-size:10px; text-transform:uppercase;
 td { padding:9px 8px 9px 0; border-bottom:1px solid var(--hair); font-size:12.5px; }
 td.r, th.r { text-align:right; padding-right:0; }
 td .u { color:var(--mut); }
-td.model { word-break:break-word; }
+td.model, td.brk { word-break:break-word; }
+.ga { max-width:26ch; font-size:11px; line-height:1.4; word-break:break-word; }
 td .mut, .mut { color:var(--mut); }
 .ok { color:var(--ok); }
 .scroll { overflow-x:auto; }
@@ -316,8 +332,9 @@ function renderFleet(){
   statusData.routing_tail.slice().reverse().forEach(function(l){
     try{var e=JSON.parse(l); if(e.port!=null&&!(e.port in last))last[e.port]=e.ts;}catch(_){}
   });
-  var html='<tr><th>location</th><th>endpoint</th><th>protocol</th><th>roles</th><th>model</th><th>engine</th><th class="r">ram</th><th>state</th><th class="r">last used / latency</th></tr>';
-  [{port:4000,model:'router — anthropic shim',role:'router',engine:'bun',ram_gb:null,model_served:null,up:statusData.router.up}]
+  var html='<tr><th>location</th><th>endpoint</th><th>protocol</th><th>roles</th><th>model</th><th>good at</th><th>engine</th><th class="r">ram</th><th>state</th><th class="r">last used / latency</th></tr>';
+  var R=statusData.router;
+  [Object.assign({engine:'bun',ram_gb:null},R)]
     .concat(statusData.specialists)
     .forEach(function(x){
       var st=x.up?'<span class="ok">loaded</span>':'<span class="mut">offline</span>';
@@ -325,7 +342,10 @@ function renderFleet(){
       var used=last[x.port]?age(last[x.port],now):'<span class="mut">—</span>';
       html+='<tr><td>'+esc(LOCAL_NAME)+' <span class="u">(local)</span></td>'
         +'<td>:'+x.port+'</td>'
-        +'<td class="mut">—</td><td class="mut">—</td><td class="mut">—</td>'
+        +'<td><span class="badge '+esc(x.protocol||'')+'">'+esc(x.protocol||'—')+'</span></td>'
+        +'<td class="mut brk">'+esc(x.role||'—')+'</td>'
+        +'<td class="mut model" title="'+esc(x.model_served||x.model||'')+'">'+esc(short(x.model_served||x.model)||'—')+'</td>'
+        +'<td class="mut ga">'+esc(x.good_at||'—')+'</td>'
         +'<td class="mut">'+esc(x.engine||'—')+'</td>'
         +'<td class="r">'+ram+'</td>'
         +'<td>'+st+'</td>'
@@ -338,8 +358,9 @@ function renderFleet(){
     html+='<tr><td>'+esc(x.machine)+' <span class="u">(remote)</span></td>'
       +'<td>'+esc(x.host)+':'+x.port+'</td>'
       +'<td><span class="badge '+esc(x.protocol)+'">'+esc(x.protocol)+'</span></td>'
-      +'<td class="mut">'+esc((x.roles||[]).join(', ')||'—')+'</td>'
-      +'<td class="mut">'+esc(x.model||'—')+'</td>'
+      +'<td class="mut brk">'+esc((x.roles||[]).join(', ')||'—')+'</td>'
+      +'<td class="mut model" title="'+esc(x.model||'')+'">'+esc(x.model||'—')+'</td>'
+      +'<td class="mut ga">'+esc((x.roles||[]).join(', ')||'—')+'</td>'
       +'<td class="mut">—</td><td class="r mut">—</td>'
       +'<td>'+st+' '+fast+'</td>'
       +'<td class="r">'+lat+'</td></tr>';

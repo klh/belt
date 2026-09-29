@@ -44,6 +44,12 @@ export interface RemoteEndpoint {
 	protocol: "openai" | "llama" | "immich";
 	roles: string[]; // routing roles this endpoint serves (code/extract/...)
 	model?: string; // openai-protocol model id, if the provider needs one
+	// ── cloud endpoints — base URL + bearer key instead of LAN ip:port ──
+	tls?: boolean; // informational: the endpoint speaks https
+	base?: string; // full base URL (probe: ${base}/models, route:
+	// ${base}/chat/completions) — set when the URL is not http://<ip>:<port>/v1
+	api_key?: string; // inline bearer key — RUNTIME-ONLY, never committed
+	api_key_env?: string; // env var holding the bearer key instead
 }
 
 export interface RemoteMachine {
@@ -52,6 +58,7 @@ export interface RemoteMachine {
 	ip_fallback?: string; // used only when DNS resolution fails
 	mac?: string; // WoL target — the NAS hibernates; ARP answers, TCP silent
 	wol_broadcast?: string; // "ip:port" — where the magic packet goes (subnet :9)
+	cloud?: boolean; // lives outside the LAN — no WoL, no ip_fallback
 	endpoints: RemoteEndpoint[];
 }
 
@@ -163,6 +170,15 @@ export function resolveHost(machine: RemoteMachine): string | null {
 		stateFor(machine.name).resolved_ip = ip;
 		return ip;
 	}
+	// pure-cloud machine (every endpoint carries a base URL): the base host IS
+	// the address — skip the LAN ip_fallback logic entirely for it
+	const base = machine.endpoints.find((e) => e.base)?.base;
+	const hasLan = machine.endpoints.some((e) => !e.base);
+	if (base && !hasLan) {
+		const host = new URL(base).host;
+		stateFor(machine.name).resolved_ip = host;
+		return host;
+	}
 	if (machine.ip_fallback) {
 		stateFor(machine.name).resolved_ip = machine.ip_fallback;
 		return machine.ip_fallback;
@@ -170,14 +186,46 @@ export function resolveHost(machine: RemoteMachine): string | null {
 	return null;
 }
 
+/** Bearer key for an endpoint: inline api_key wins, else api_key_env from
+ *  the runtime file/env — undefined when neither is set. NEVER log it. */
+export function endpointKey(ep: RemoteEndpoint): string | undefined {
+	if (ep.api_key) return ep.api_key;
+	if (ep.api_key_env) {
+		const fromEnv = process.env[ep.api_key_env];
+		if (fromEnv) return fromEnv;
+	}
+	return undefined;
+}
+
+/** Probe-failure reason where the boolean probe shape can't carry one —
+ *  currently only the no-key cloud case; LAN failures are transport deaths. */
+const probeReason = (ep: RemoteEndpoint): string | undefined =>
+	ep.base && !endpointKey(ep)
+		? `missing api key (api_key or ${ep.api_key_env ?? "api_key_env"})`
+		: undefined;
+
 /** Protocol-aware health probe: openai → GET /v1/models; llama → GET
  *  /health; immich → GET /ping (Immich ML v3.1 answers "pong"; /predict
- *  requires multipart and is broken upstream). Any HTTP answer = alive; only
- *  transport failure = dead. */
+ *  requires multipart and is broken upstream). Cloud endpoints (base) →
+ *  GET ${base}/models with bearer auth; a missing key = not alive. Any HTTP
+ *  answer = alive; only transport failure = dead. */
 export async function probeEndpoint(
 	machine: RemoteMachine,
 	ep: RemoteEndpoint,
 ): Promise<boolean> {
+	if (ep.base) {
+		const key = endpointKey(ep);
+		if (!key) return false;
+		try {
+			const r = await fetch(`${ep.base}/models`, {
+				headers: { authorization: `Bearer ${key}` },
+				signal: AbortSignal.timeout(4000),
+			});
+			return r.status < 600;
+		} catch {
+			return false;
+		}
+	}
 	const ip = resolveHost(machine);
 	if (!ip) return false;
 	const path =
@@ -242,6 +290,7 @@ export interface CheckRow {
 	ok: boolean;
 	ms: number;
 	ip?: string;
+	reason?: string; // probe-failure reason (e.g. missing cloud api key)
 	last_seen: number | null;
 }
 
@@ -251,7 +300,8 @@ export async function checkAll(): Promise<CheckRow[]> {
 		for (const ep of m.endpoints) {
 			const t0 = Date.now();
 			const ok = await probeEndpoint(m, ep);
-			noteLiveness(m.name, ep.port, ok);
+			const reason = ok ? undefined : probeReason(ep);
+			noteLiveness(m.name, ep.port, ok, reason);
 			const st = stateFor(m.name);
 			rows.push({
 				machine: m.name,
@@ -426,29 +476,64 @@ async function wakeIfNeeded(
 	return true;
 }
 
+/** POST one OpenAI-style chat completion, return the first choice's text.
+ *  `headers` must already carry auth when the endpoint needs it — the key
+ *  itself is never logged or printed; errors name the host only. */
+async function chatCompletion(
+	url: string,
+	headers: Record<string, string>,
+	model: string,
+	prompt: string,
+): Promise<string> {
+	const r = await fetch(url, {
+		method: "POST",
+		headers,
+		body: JSON.stringify({
+			model,
+			messages: [{ role: "user", content: prompt }],
+		}),
+		signal: AbortSignal.timeout(600_000),
+	});
+	if (!r.ok) throw new Error(`HTTP ${r.status} from ${new URL(url).host}`);
+	const j = (await r.json()) as {
+		choices?: { message?: { content?: string } }[];
+	};
+	return j.choices?.[0]?.message?.content ?? "(empty response)";
+}
+
 export async function routeTask(
 	machine: RemoteMachine,
 	ep: RemoteEndpoint,
 	prompt: string,
 ): Promise<string> {
 	if (ep.protocol === "immich") return routeImmich(machine, ep, prompt);
+	const headers: Record<string, string> = {
+		"content-type": "application/json",
+	};
+	const key = endpointKey(ep);
+	if (key) headers.authorization = `Bearer ${key}`;
+	if (ep.base) {
+		// cloud: POST ${base}/chat/completions over https with bearer auth;
+		// a missing key throws before any fetch leaves the machine
+		if (!key)
+			throw new Error(
+				`${machine.name}:${ep.port} needs an api key (api_key or ${ep.api_key_env ?? "api_key_env"})`,
+			);
+		return chatCompletion(
+			`${ep.base}/chat/completions`,
+			headers,
+			ep.model ?? "default",
+			prompt,
+		);
+	}
 	const ip = resolveHost(machine);
 	if (!ip) throw new Error(`cannot resolve ${machine.host}`);
-	const r = await fetch(`http://${ip}:${ep.port}/v1/chat/completions`, {
-		method: "POST",
-		headers: { "content-type": "application/json" },
-		body: JSON.stringify({
-			model: ep.model ?? "default",
-			messages: [{ role: "user", content: prompt }],
-		}),
-		signal: AbortSignal.timeout(600_000),
-	});
-	if (!r.ok)
-		throw new Error(`HTTP ${r.status} from ${machine.host}:${ep.port}`);
-	const j = (await r.json()) as {
-		choices?: { message?: { content?: string } }[];
-	};
-	return j.choices?.[0]?.message?.content ?? "(empty response)";
+	return chatCompletion(
+		`http://${ip}:${ep.port}/v1/chat/completions`,
+		headers,
+		ep.model ?? "default",
+		prompt,
+	);
 }
 
 async function main() {
