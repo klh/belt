@@ -442,11 +442,10 @@ const WAKE_TIMEOUT_MS = 90_000;
 
 /** Pre-route reachability: probe the endpoint; on a silent one with mac +
  *  wol_broadcast configured, print the agent-facing ACCEPT ack, fire the
- *  magic packet, poll every 4 s up to 90 s. Returns whether the machine woke
- *  under WoL (false when it was already up). Throws when a configured machine
- *  never woke. A machine without WoL config just falls through — the route
- *  attempt itself reports the transport error. */
-async function wakeIfNeeded(
+ *  magic packet and poll. Returns whether the machine woke under WoL
+ *  (false when it was already up). Throws when a configured machine never
+ *  woke. Shared by the remotes CLI and the /api/route execute path. */
+export async function wakeIfNeeded(
 	machine: RemoteMachine,
 	ep: RemoteEndpoint,
 ): Promise<boolean> {

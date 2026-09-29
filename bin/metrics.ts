@@ -38,6 +38,16 @@ export interface MetricsSnapshot {
 		duration_ms: number;
 		ok: boolean;
 	}[];
+	audit: {
+		ts: string;
+		token_label: string;
+		action: string;
+		machine: string;
+		port: number | null;
+		model: string;
+		decision: string;
+		why: string;
+	}[];
 }
 
 const KEEP_DAYS = 30;
@@ -66,8 +76,52 @@ function openDb(): Database {
 			path TEXT PRIMARY KEY,
 			pos INTEGER NOT NULL DEFAULT 0
 		);
+		CREATE TABLE IF NOT EXISTS audit (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			ts TEXT NOT NULL,
+			token_label TEXT NOT NULL DEFAULT '',
+			action TEXT NOT NULL DEFAULT '',
+			machine TEXT NOT NULL DEFAULT '',
+			port INTEGER,
+			model TEXT NOT NULL DEFAULT '',
+			decision TEXT NOT NULL DEFAULT '',
+			why TEXT NOT NULL DEFAULT '',
+			belt_url TEXT NOT NULL DEFAULT '',
+			gateway_url TEXT NOT NULL DEFAULT ''
+		);
 	`);
 	return db;
+}
+
+/** Audit trail — every /api/route decision (allowed AND denied) lands here;
+ *  a product feature, not debugging residue. */
+export function auditRoute(e: {
+	ts: string;
+	token_label: string;
+	action: string;
+	machine?: string;
+	port?: number | null;
+	model?: string;
+	decision: string;
+	why: string;
+	belt_url: string;
+	gateway_url: string;
+}): void {
+	openDb().run(
+		"INSERT INTO audit (ts, token_label, action, machine, port, model, decision, why, belt_url, gateway_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		[
+			e.ts,
+			e.token_label,
+			e.action,
+			e.machine ?? "",
+			e.port ?? null,
+			e.model ?? "",
+			e.decision,
+			e.why,
+			e.belt_url,
+			e.gateway_url,
+		],
+	);
 }
 
 // ─── ingestion ───
@@ -170,6 +224,7 @@ export function tallyMetrics(): void {
 	const d = openDb();
 	const cutoff = new Date(Date.now() - KEEP_DAYS * 86_400_000).toISOString();
 	d.run("DELETE FROM routes WHERE ts < ?", [cutoff]);
+	d.run("DELETE FROM audit WHERE ts < ?", [cutoff]);
 	d.run(
 		"DELETE FROM routes WHERE id NOT IN (SELECT id FROM routes ORDER BY id DESC LIMIT ?)",
 		[KEEP_ROWS],
@@ -225,6 +280,10 @@ const recentQ = `
 	SELECT ts, machine, port, model, role, duration_ms, ok
 	FROM routes ORDER BY id DESC LIMIT 12`;
 
+const auditQ = `
+	SELECT ts, token_label, action, machine, port, model, decision, why
+	FROM audit ORDER BY id DESC LIMIT 12`;
+
 function buildSnapshot(): MetricsSnapshot {
 	const d = openDb();
 	const endpoints: Record<string, EndpointMetrics> = {};
@@ -277,7 +336,17 @@ function buildSnapshot(): MetricsSnapshot {
 			ok: number;
 		}[]
 	).map((r) => ({ ...r, ok: !!r.ok }));
-	return { endpoints, recent };
+	const audit = d.query(auditQ).all() as {
+		ts: string;
+		token_label: string;
+		action: string;
+		machine: string;
+		port: number | null;
+		model: string;
+		decision: string;
+		why: string;
+	}[];
+	return { endpoints, recent, audit };
 }
 
 let cache: { snap: MetricsSnapshot; at: number } | null = null;
