@@ -12,6 +12,7 @@
 //   curl 127.0.0.1:7791/api/status    — raw snapshot
 
 import { existsSync, readFileSync } from "node:fs";
+import { hostname } from "node:os";
 import { SPECIALISTS, DOWNLOAD_MODELS } from "./registry.ts";
 import {
 	checkAll,
@@ -26,6 +27,8 @@ const LOG_DIR = `${HOME}/.claude-insights`;
 const PREFS = `${HOME}/.claude/local-llm/prefs.json`;
 const ROUTING_LOG = `${LOG_DIR}/swarm-routing.log`;
 const PORT = Number(process.env.BELT_PORT ?? 7791);
+// local rows of the unified fleet table are labelled with this machine's name
+const LOCAL_NAME = hostname().replace(/\.local\.?$/, "");
 
 const readPrefs = (): Record<string, unknown> => {
 	try {
@@ -286,6 +289,9 @@ threads-mark { vertical-align:middle; margin:0 3px 0 0; }
   <span class="right"><i class="dot blink" id="live"></i><span id="clockbox">—</span></span></header>
 <h2>Fleet</h2>
 <div class="scroll"><table id="fleet"></table></div>
+<div class="rhead"><span id="remotesnote" class="mut">loading…</span><button id="remotesbtn" type="button">refresh</button></div>
+<div id="remotesdisc"></div>
+<div id="remoteslog"></div>
 <h2>Memory</h2>
 <div class="memrow"><span class="mut">resident</span><span class="n" id="memnum">—</span></div>
 <div class="bar"><i id="memfill"></i></div>
@@ -294,11 +300,6 @@ threads-mark { vertical-align:middle; margin:0 3px 0 0; }
 <div id="avail"></div>
 <h2>Routing log</h2>
 <div id="log">—</div>
-<h2>Remotes — multi-machine</h2>
-<div class="rhead"><span id="remotesnote" class="mut">loading…</span><button id="remotesbtn" type="button">refresh</button></div>
-<div class="scroll"><table id="remotes"></table></div>
-<div id="remotesdisc"></div>
-<div id="remoteslog"></div>
 <div id="prefsline"></div>
 <footer><span>a <threads-mark size="20" transparent></threads-mark> Threads thing</span>
   <span class="right">belt.local:7791 · refresh 3s</span></footer>
@@ -306,6 +307,30 @@ threads-mark { vertical-align:middle; margin:0 3px 0 0; }
 <script>
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function short(m){return String(m||'').replace('mlx-community/','');}
+var statusData=null,remoteRows=[];
+var LOCAL_NAME=${JSON.stringify(LOCAL_NAME)};
+function renderFleet(){
+  if(!statusData)return;
+  var now=Date.parse(statusData.ts);
+  var last={};
+  statusData.routing_tail.slice().reverse().forEach(function(l){
+    try{var e=JSON.parse(l); if(e.port!=null&&!(e.port in last))last[e.port]=e.ts;}catch(_){}
+  });
+  var html='<tr><th>location</th><th>endpoint</th><th>protocol</th><th>roles</th><th>model</th><th>engine</th><th class="r">ram</th><th>state</th><th class="r">last used / latency</th></tr>';
+  [{port:4000,model:'router — anthropic shim',role:'router',engine:'bun',ram_gb:null,model_served:null,up:statusData.router.up}]
+    .concat(statusData.specialists)
+    .forEach(function(x){
+      var st=x.up?'<span class="ok">loaded</span>':'<span class="mut">offline</span>';
+      var ram=x.ram_gb==null?'<span class="mut">—</span>':'<span>'+x.ram_gb+'</span> <span class="u">GB</span>';
+      var used=last[x.port]?age(last[x.port],now):'<span class="mut">—</span>';
+      html+='<tr><td>'+esc(LOCAL_NAME)+' <span class="u">(local)</span></td>'
+        +'<td>:'+x.port+'</td>'
+        +'<td class="mut">—</td><td class="mut">—</td><td class="mut">—</td>'
+        +'<td class="mut">'+esc(x.engine||'—')+'</td>'
+        +'<td class="r">'+ram+'</td>'
+        +'<td>'+st+'</td>'
+        +'<td class="r">'+used+'</td></tr>';
+    });
 function age(iso,now){
   if(!iso)return '—';
   var t=Math.max(0,(now-Date.parse(iso))/1000);
@@ -322,26 +347,26 @@ function fmt(line){
     return e.ts.slice(11,19)+'  '+e.category+'  '+short(e.model)+'  :'+e.port+'  '+e.duration_ms+'ms  '+e.tier+(e.escalated?'  cloud':'');
   }catch(_){return line;}
 }
+  (remoteRows||[]).forEach(function(x){
+    var st=x.ok?'<span class="ok">up</span>':'<span class="mut">down</span>';
+    var fast=(x.fastest_for||[]).map(function(r){return '<span class="fast">fastest '+esc(r)+'</span>';}).join(' ');
+    var lat=x.ok?x.ms+'ms':'<span class="mut">—</span>';
+    html+='<tr><td>'+esc(x.machine)+' <span class="u">(remote)</span></td>'
+      +'<td>'+esc(x.host)+':'+x.port+'</td>'
+      +'<td><span class="badge '+esc(x.protocol)+'">'+esc(x.protocol)+'</span></td>'
+      +'<td class="mut">'+esc((x.roles||[]).join(', ')||'—')+'</td>'
+      +'<td class="mut">'+esc(x.model||'—')+'</td>'
+      +'<td class="mut">—</td><td class="r mut">—</td>'
+      +'<td>'+st+' '+fast+'</td>'
+      +'<td class="r">'+lat+'</td></tr>';
+  });
+  fleet.innerHTML=html;
+}
 function tick(){
   fetch('/api/status').then(function(r){return r.json();}).then(function(s){
-    var now=Date.parse(s.ts);
     clockbox.textContent=hhmmss(s.ts);
     live.className='dot blink';
-    var last={};
-    s.routing_tail.slice().reverse().forEach(function(l){
-      try{var e=JSON.parse(l); if(e.port!=null&&!(e.port in last))last[e.port]=e.ts;}catch(_){}
-    });
-    var rows=[{port:4000,model:'router — anthropic shim',role:'router',engine:'bun',ram_gb:null,model_served:null,up:s.router.up}]
-      .concat(s.specialists);
-    fleet.innerHTML='<tr><th>port</th><th>model</th><th>role</th><th>engine</th>'
-      +'<th class="r">ram</th><th>state</th><th class="r">last used</th></tr>'
-      +rows.map(function(x){
-        var st=x.up?'<span class="ok">loaded</span>':'<span class="mut">offline</span>';
-        var ram=x.ram_gb==null?'<span class="mut">—</span>':'<span>'+x.ram_gb+'</span> <span class="u">GB</span>';
-        return '<tr><td>:'+x.port+'</td><td class="model">'+esc(short(x.model_served||x.model))
-          +'</td><td class="mut">'+esc(x.role||'')+'</td><td class="mut">'+esc(x.engine||'—')
-          +'</td><td class="r">'+ram+'</td><td>'+st+'</td><td class="r mut">'+age(last[x.port],now)+'</td></tr>';
-      }).join('');
+    statusData=s; renderFleet();
     var pct=s.ram.resident_gb/128*100;
     memfill.style.width=Math.min(100,pct)+'%';
     memfill.className=pct>80?'hot':'';
@@ -367,22 +392,8 @@ tick();setInterval(tick,3000);
 <script>
 function tickRemotes(){
   fetch('/api/remotes').then(function(r){return r.json();}).then(function(s){
-    var rows=s.rows||[];
-    remotes.innerHTML=rows.length
-      ?'<tr><th>machine</th><th>endpoint</th><th>protocol</th><th>roles</th><th>model</th><th>state</th><th class="r">latency</th></tr>'
-       +rows.map(function(x){
-        var st=x.ok?'<span class="ok">up</span>':'<span class="mut">down</span>';
-        var fast=(x.fastest_for||[]).map(function(r){return '<span class="fast">fastest '+esc(r)+'</span>';}).join(' ');
-        var lat=x.ok?x.ms+'ms':'<span class="mut">—</span>';
-        return '<tr><td>'+esc(x.machine)+'</td>'
-          +'<td>'+esc(x.host)+':'+x.port+'</td>'
-          +'<td><span class="badge '+esc(x.protocol)+'">'+esc(x.protocol)+'</span></td>'
-          +'<td class="mut">'+esc((x.roles||[]).join(', ')||'—')+'</td>'
-          +'<td class="mut">'+esc(x.model||'—')+'</td>'
-          +'<td>'+st+' '+fast+'</td>'
-          +'<td class="r">'+lat+'</td></tr>';
-      }).join('')
-      :'<p class="empty">No remote machines — add ~/.claude/local-llm/remotes.json (remotes.example.json shows the shape).</p>';
+    remoteRows=s.rows||[];
+    renderFleet();
     var disc=s.discovered||[];
     remotesdisc.innerHTML=disc.length
       ?disc.map(function(d){return '<span class="chip">'+esc(d.name)+'.local <span class="u">discovered · not configured</span></span>';}).join('')
@@ -390,11 +401,13 @@ function tickRemotes(){
     var routes=s.routes||[];
     remoteslog.textContent=routes.length
       ?routes.map(function(e){
-        return e.ts.slice(11,19)+'  '+e.role+'  →  '+e.machine+' ('+e.endpoint+', '+e.protocol+')  '+e.duration_ms+'ms'+(e.ok?'':'  FAILED');
+        return e.ts.slice(11,19)+'  '+e.role+'  →  '+e.machine+' ('+e.endpoint+', '+e.protocol+')  '+e.duration_ms+'ms'+(e.ok?'':'  FAILED')+(e.woke?'  woke':'');
       }).join('\\n')
       :'No remote routes yet — bun bin/remotes.ts route <role> <prompt>.';
-    remotesnote.textContent='LAN-local, routed for SPEED — not cost · cloud fallback '
-      +(s.cloud_fallback?'on':'off')+' · '+s.mode+' mode · auto-refresh 30s';
+    remotesnote.textContent=(remoteRows.length
+      ?'LAN-local, routed for SPEED — not cost'
+      :'no remote machines — add ~/.claude/local-llm/remotes.json (remotes.example.json shows the shape)')
+      +' · cloud fallback '+(s.cloud_fallback?'on':'off')+' · '+s.mode+' mode · auto-refresh 30s';
   }).catch(function(){remotesnote.textContent='remotes: unreachable';});
 }
 tickRemotes();setInterval(tickRemotes,30000);

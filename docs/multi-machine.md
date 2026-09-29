@@ -28,6 +28,7 @@ Machine + endpoint shape (see the example file for a full entry):
 | `host`                 | DNS name — resolved **first** on every health check              |
 | `ip_fallback`          | static IP, used **only** when DNS resolution fails               |
 | `mac`                  | WoL target — hibernating machines answer ARP, not TCP            |
+| `wol_broadcast`        | `"ip:port"` the magic packet goes to (subnet :9)                 |
 | `endpoints[].port`     | TCP port (`11434` for ollama)                                    |
 | `endpoints[].protocol` | `openai` \| `llama` \| `immich` — picks the probe and call shape |
 | `endpoints[].roles`    | routing roles this endpoint serves (`route <role>` matches here) |
@@ -38,15 +39,24 @@ Machine + endpoint shape (see the example file for a full entry):
 - **DNS first, IP fallback.** Every health check resolves `host` through the
   system resolver (`dscacheutil` — mDNS `foo.local` names work too);
   `ip_fallback` fires only when resolution fails. The resolved IP is cached
-  in per-process state alongside last-ok / last-error.
+  in per-process state.
 - **Protocol-aware probes.** `openai` → `GET /v1/models`, `llama` →
   `GET /health`, `immich` → `GET /ping` — Immich ML v3.1 answers `pong`
   there, while `/predict` needs multipart and is broken upstream — 4 s
   timeout. Any HTTP answer = alive; only a transport failure = dead. A
   sleeping machine fails honestly (✗) instead of hanging.
-- **Hibernation + WoL.** The NAS hibernates: ARP answers, TCP goes silent.
-  `mac` records the wake target for that moment. A magic-packet sender is not
-  wired into `remotes.ts` yet — wake the machine first, then `check`.
+- **Liveness state cache.** Every probe and route attempt persists
+  `<machine>:<port> → {last_ok, last_error}` to
+  `~/.claude/local-llm/remotes-state.json` (runtime dir, never committed);
+  `check --json` rows carry `last_seen` (epoch ms, `null` = never seen up).
+- **Hibernation + WoL-accept routing.** The NAS hibernates: ARP answers, TCP
+  goes silent. `route` probes first; if the endpoint is silent and the
+  machine config carries `mac` + `wol_broadcast`, it prints
+  `ACCEPT <machine>:<port> — asleep, WoL sent; waiting for wake (up to 90s)`
+  to stdout immediately, sends the magic packet, polls the probe every 4 s up
+  to 90 s, then routes and reports as usual — route-log entries where the
+  wake fired carry `"woke": true`. Never wakes →
+  `route failed: <machine> did not wake within 90s`, exit 1.
 
 ## CLI
 
@@ -62,10 +72,23 @@ bun bin/remotes.ts route <role> "<prompt>"  # one task to the first endpoint ser
   until probed.
 - `route` — the report-back proof: send one task to a remote provider, print
   the answer when done. Posts `/v1/chat/completions` with the endpoint's
-  model (or `default`); 600 s timeout, sized for slow NAS CPUs.
-- `--json` flags for machine-readable output (raw JSON arrays, the belt
-  dashboard is the consumer) are being added by a parallel lane — in flight
-  as this doc lands.
+  model (or `default`); 600 s timeout, sized for slow NAS CPUs. Probes
+  first; a silent endpoint with WoL config gets the ACCEPT ack + wake-poll
+  (see above).
+- `--json` flags — machine-readable output (raw JSON arrays, the belt
+  dashboard is the consumer). `check --json` rows carry `last_seen`
+  (epoch ms or `null`) from the liveness state cache.
+
+The belt dashboard (`bin/dashboard.ts`) shows one unified **Fleet** table —
+local specialists and remote endpoints together, a `location` column
+rendering `<machine-name> (local)` / `<machine-name> (remote)`. Remote-only
+columns (protocol, roles, model) render `—` on local rows; state + latency
+are shared; the fastest-per-role green marking stays on remote rows. The
+remotes note line, discovered chips, and the remote-route log sit under the
+unified table.
+
+Future work: Remote endpoints with request queues in front of them (when
+load makes it matter) — deferred.
 
 ## The first machine: a Synology NAS
 

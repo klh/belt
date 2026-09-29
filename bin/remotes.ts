@@ -17,8 +17,19 @@
 //   --json = raw machine-readable JSON array (the belt dashboard consumes it);
 //   default output stays human-readable.
 //   route  = the multi-machine proof: send one task to a remote provider
-//            and report the result back when done.
-import { appendFileSync, existsSync, readFileSync } from "node:fs";
+//            and report the result back when done. Probes first; a silent
+//            endpoint with mac + wol_broadcast gets a Wake-on-LAN magic
+//            packet, an ACCEPT ack on stdout, and up to 90 s of wake-polling
+//            before the task is routed.
+// Liveness persists to ~/.claude/local-llm/remotes-state.json (runtime dir,
+// NEVER committed): <machine>:<port> → {last_ok, last_error}.
+import dgram from "node:dgram";
+import {
+	appendFileSync,
+	existsSync,
+	readFileSync,
+	writeFileSync,
+} from "node:fs";
 
 const RUNTIME = `${process.env.HOME}/.claude/local-llm`;
 const STATIC_PATH = `${RUNTIME}/remotes.json`;
@@ -40,12 +51,11 @@ export interface RemoteMachine {
 	host: string; // DNS name — resolved FIRST on every health check
 	ip_fallback?: string; // used only when DNS resolution fails
 	mac?: string; // WoL target — the NAS hibernates; ARP answers, TCP silent
+	wol_broadcast?: string; // "ip:port" — where the magic packet goes (subnet :9)
 	endpoints: RemoteEndpoint[];
 }
 
 export interface RemoteState {
-	last_ok?: number;
-	last_error?: string;
 	resolved_ip?: string;
 }
 
@@ -56,6 +66,61 @@ const stateFor = (name: string): RemoteState => {
 	if (!states.has(name)) states.set(name, {});
 	return states.get(name) as RemoteState;
 };
+
+// ─── liveness state cache — <machine>:<port> → {last_ok, last_error},
+// persisted to the runtime dir (never committed); updated on every checkAll
+// probe and every route attempt; check --json reports last_seen ───
+interface LivenessEntry {
+	last_ok?: number;
+	last_error?: string;
+}
+
+const STATE_PATH = `${RUNTIME}/remotes-state.json`;
+
+const stateCache: Record<string, LivenessEntry> = (() => {
+	try {
+		return existsSync(STATE_PATH)
+			? (JSON.parse(readFileSync(STATE_PATH, "utf8")) as Record<
+					string,
+					LivenessEntry
+				>)
+			: {};
+	} catch {
+		return {};
+	}
+})();
+
+const livenessFor = (machine: string, port: number): LivenessEntry => {
+	const key = `${machine}:${port}`;
+	if (!stateCache[key]) stateCache[key] = {};
+	return stateCache[key];
+};
+
+const persistState = (): void => {
+	try {
+		writeFileSync(STATE_PATH, `${JSON.stringify(stateCache, null, "\t")}\n`);
+	} catch {
+		// best-effort — a failed state write must never fail the probe/route
+	}
+};
+
+/** Record one probe/route outcome for <machine>:<port> and persist it. */
+export function noteLiveness(
+	machine: string,
+	port: number,
+	ok: boolean,
+	error?: string,
+): void {
+	const e = livenessFor(machine, port);
+	if (ok) e.last_ok = Date.now();
+	else e.last_error = error ?? new Date().toISOString();
+	persistState();
+}
+
+/** Last successful probe/route for <machine>:<port>, epoch ms (null = never). */
+export function lastSeen(machine: string, port: number): number | null {
+	return stateCache[`${machine}:${port}`]?.last_ok ?? null;
+}
 
 export function loadStatic(): RemoteMachine[] {
 	if (!existsSync(STATIC_PATH)) return [];
@@ -131,6 +196,38 @@ export async function probeEndpoint(
 	}
 }
 
+/** Synology hibernation: NIC answers ARP but TCP is silent until a magic
+ *  packet. Ported verbatim from suspenders hooks/lib/remotes.ts (spike w86,
+ *  bfde191 — proven on the real NAS). Broadcast + 255.255.255.255 retry. */
+export async function sendWoL(mac: string, target: string): Promise<boolean> {
+	const clean = mac.replace(/[:-]/g, "").toLowerCase();
+	if (clean.length !== 12) return false;
+	const payload = Buffer.concat([
+		Buffer.alloc(6, 0xff),
+		Buffer.from(clean.repeat(16), "hex"),
+	]);
+	const [ip, portStr] = target.split(":");
+	const port = Number(portStr || "9");
+	return new Promise((resolve) => {
+		const sock = dgram.createSocket("udp4");
+		sock.bind(() => {
+			sock.setBroadcast(true);
+			sock.send(payload, port, ip, (err) => {
+				// broadcast to the subnet can miss on some APs — retry all-ones
+				const retry = (err2: Error | null) => {
+					sock.close();
+					resolve(!err2);
+				};
+				if (err) sock.send(payload, port, "255.255.255.255", retry);
+				else {
+					sock.close();
+					resolve(true);
+				}
+			});
+		});
+	});
+}
+
 /** One health pass over every static machine's endpoints. DNS first, IP
  *  fallback; updates cached liveness state and returns a report carrying
  *  per-endpoint metadata + probe latency (ms) — the shape behind both the
@@ -145,6 +242,7 @@ export interface CheckRow {
 	ok: boolean;
 	ms: number;
 	ip?: string;
+	last_seen: number | null;
 }
 
 export async function checkAll(): Promise<CheckRow[]> {
@@ -153,9 +251,8 @@ export async function checkAll(): Promise<CheckRow[]> {
 		for (const ep of m.endpoints) {
 			const t0 = Date.now();
 			const ok = await probeEndpoint(m, ep);
+			noteLiveness(m.name, ep.port, ok);
 			const st = stateFor(m.name);
-			if (ok) st.last_ok = Date.now();
-			else st.last_error = new Date().toISOString();
 			rows.push({
 				machine: m.name,
 				host: m.host,
@@ -166,6 +263,7 @@ export async function checkAll(): Promise<CheckRow[]> {
 				ok,
 				ms: Date.now() - t0,
 				ip: st.resolved_ip,
+				last_seen: lastSeen(m.name, ep.port),
 			});
 		}
 	}
@@ -200,6 +298,7 @@ export interface RouteLogEntry {
 	role: string;
 	duration_ms: number;
 	ok: boolean;
+	woke?: boolean; // the route fired WoL and the machine came up
 }
 
 const ROUTE_LOG = `${RUNTIME}/remotes-routes.log`;
@@ -287,9 +386,46 @@ async function routeImmich(
 	return `${count} assets match '${prompt}' — first: ${names}`;
 }
 
-/** Send one task to a remote endpoint: openai-protocol gets chat completions,
- *  immich-protocol gets an Immich smart-search. Resolves with the answer
- *  when done — the report-back. Long timeout for slow NAS CPUs. */
+const WAKE_POLL_MS = 4_000;
+const WAKE_TIMEOUT_MS = 90_000;
+
+/** Pre-route reachability: probe the endpoint; on a silent one with mac +
+ *  wol_broadcast configured, print the agent-facing ACCEPT ack, fire the
+ *  magic packet, poll every 4 s up to 90 s. Returns whether the machine woke
+ *  under WoL (false when it was already up). Throws when a configured machine
+ *  never woke. A machine without WoL config just falls through — the route
+ *  attempt itself reports the transport error. */
+async function wakeIfNeeded(
+	machine: RemoteMachine,
+	ep: RemoteEndpoint,
+): Promise<boolean> {
+	if (await probeEndpoint(machine, ep)) {
+		noteLiveness(machine.name, ep.port, true);
+		return false;
+	}
+	if (!machine.mac || !machine.wol_broadcast) return false;
+	console.log(
+		`ACCEPT ${machine.name}:${ep.port} — asleep, WoL sent; waiting for wake (up to ${WAKE_TIMEOUT_MS / 1000}s)`,
+	);
+	let woke = false;
+	if (await sendWoL(machine.mac, machine.wol_broadcast)) {
+		const deadline = Date.now() + WAKE_TIMEOUT_MS;
+		while (Date.now() < deadline) {
+			await new Promise((r) => setTimeout(r, WAKE_POLL_MS));
+			if (await probeEndpoint(machine, ep)) {
+				woke = true;
+				break;
+			}
+		}
+	}
+	if (!woke)
+		throw new Error(
+			`${machine.name} did not wake within ${WAKE_TIMEOUT_MS / 1000}s`,
+		);
+	noteLiveness(machine.name, ep.port, true);
+	return true;
+}
+
 export async function routeTask(
 	machine: RemoteMachine,
 	ep: RemoteEndpoint,
@@ -365,14 +501,23 @@ async function main() {
 						ok: false,
 					};
 					try {
+						const woke = await wakeIfNeeded(m, ep);
 						const answer = await routeTask(m, ep, prompt);
 						entry.ok = true;
+						if (woke) entry.woke = true;
 						entry.duration_ms = Date.now() - t0;
 						logRoute(entry);
+						noteLiveness(m.name, ep.port, true);
 						console.log(answer);
 					} catch (err) {
 						entry.duration_ms = Date.now() - t0;
 						logRoute(entry);
+						noteLiveness(
+							m.name,
+							ep.port,
+							false,
+							err instanceof Error ? err.message : String(err),
+						);
 						console.error(
 							`route failed: ${err instanceof Error ? err.message : String(err)}`,
 						);
