@@ -13,12 +13,29 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { SPECIALISTS, DOWNLOAD_MODELS } from "./registry.ts";
+import {
+	checkAll,
+	discover,
+	tailRoutes,
+	type CheckRow,
+	type RouteLogEntry,
+} from "./remotes.ts";
 
 const HOME = process.env.HOME;
 const LOG_DIR = `${HOME}/.claude-insights`;
 const PREFS = `${HOME}/.claude/local-llm/prefs.json`;
 const ROUTING_LOG = `${LOG_DIR}/swarm-routing.log`;
 const PORT = Number(process.env.BELT_PORT ?? 7791);
+
+const readPrefs = (): Record<string, unknown> => {
+	try {
+		return existsSync(PREFS)
+			? (JSON.parse(readFileSync(PREFS, "utf8")) as Record<string, unknown>)
+			: {};
+	} catch {
+		return {};
+	}
+};
 
 // ─── liveness — same probes as swarm.ts / coordinator.ts ───
 const isUp = async (port: number): Promise<boolean> => {
@@ -104,9 +121,7 @@ async function status() {
 		total_note: "128GB unified memory",
 	};
 
-	const prefs = existsSync(PREFS)
-		? JSON.parse(readFileSync(PREFS, "utf8"))
-		: {};
+	const prefs = readPrefs();
 	const raw = existsSync(ROUTING_LOG)
 		? readFileSync(ROUTING_LOG, "utf8").trim()
 		: "";
@@ -122,6 +137,60 @@ async function status() {
 		ts: new Date().toISOString(),
 	};
 }
+
+// ─── remotes / multi-machine — static remotes.json + DNS-SD ads ───
+interface RemotesSnapshot {
+	rows: (CheckRow & { fastest_for: string[] })[];
+	discovered: { name: string; host: string; port: number }[];
+	cloud_fallback: boolean;
+	mode: string;
+	routes: RouteLogEntry[];
+	ts: string;
+}
+
+const REMOTES_TTL_MS = 20_000;
+
+async function buildRemotes(): Promise<RemotesSnapshot> {
+	const rows = await checkAll();
+	const byRow = new Map<CheckRow, string[]>();
+	for (const role of new Set(rows.flatMap((r) => r.roles))) {
+		const live = rows.filter((r) => r.ok && r.roles.includes(role));
+		if (!live.length) continue;
+		const best = live.reduce((a, b) => (b.ms < a.ms ? b : a));
+		byRow.set(best, [...(byRow.get(best) ?? []), role]);
+	}
+	const prefs = readPrefs();
+	return {
+		rows: rows.map((r) => ({ ...r, fastest_for: byRow.get(r) ?? [] })),
+		discovered: discover(),
+		cloud_fallback: prefs.allow_cloud === true,
+		mode: typeof prefs.cost_speed === "string" ? prefs.cost_speed : "balanced",
+		routes: tailRoutes(8),
+		ts: new Date().toISOString(),
+	};
+}
+
+let remotesCache: RemotesSnapshot | null = null;
+let remotesPending: Promise<RemotesSnapshot> | null = null;
+
+/** Cached remotes snapshot — probes can be slow (dead host: 4s timeout each),
+ *  so /api/remotes serves fresh-enough state instead of blocking every call. */
+const remotesSnapshot = (): Promise<RemotesSnapshot> => {
+	const fresh =
+		remotesCache && Date.now() - Date.parse(remotesCache.ts) < REMOTES_TTL_MS;
+	if (fresh && remotesCache) return Promise.resolve(remotesCache);
+	if (!remotesPending) {
+		remotesPending = buildRemotes()
+			.then((snap) => {
+				remotesCache = snap;
+				return snap;
+			})
+			.finally(() => {
+				remotesPending = null;
+			});
+	}
+	return remotesPending;
+};
 
 // ─── page — embedded, no frameworks, no external assets (works offline) ───
 const PAGE = `<!doctype html>
@@ -158,6 +227,14 @@ td .mut, .mut { color:var(--mut); }
 .mrow { display:grid; grid-template-columns:1fr 64px; gap:10px; align-items:baseline; max-width:560px; margin:8px 0 4px; font-size:11px; }
 .mrow .n { text-align:right; color:var(--mut); font-variant-numeric:tabular-nums; }
 .chip { display:inline-block; border:1px solid var(--hair); border-radius:2px; padding:2px 8px; font-size:11px; color:var(--mut); margin:6px 6px 0 0; background:transparent; }
+.rhead { display:flex; align-items:center; margin:6px 0 0; }
+.rhead button { margin-left:auto; }
+button { border:1px solid var(--hair); border-radius:2px; background:transparent; color:var(--mut); font:inherit; font-size:11px; padding:2px 10px; cursor:pointer; letter-spacing:.04em; }
+button:hover { color:var(--text); border-color:var(--rust); }
+.badge { display:inline-block; border:1px solid var(--hair); border-radius:2px; padding:0 6px; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--mut); }
+.badge.immich { color:var(--rust); border-color:rgba(224,90,43,.5); }
+.fast { color:var(--ok); }
+#remoteslog { font-size:11px; line-height:1.75; color:var(--mut); white-space:pre-wrap; word-break:break-word; margin:4px 0 0; }
 #log { font-size:11px; line-height:1.75; color:var(--mut); white-space:pre-wrap; word-break:break-word; margin:4px 0 0; }
 #prefsline { margin-top:12px; font-size:11px; color:var(--mut); }
 footer { border-top:1px solid var(--hair); margin-top:22px; padding-top:12px; display:flex; align-items:center; font-size:11px; color:var(--mut); }
@@ -217,6 +294,11 @@ threads-mark { vertical-align:middle; margin:0 3px 0 0; }
 <div id="avail"></div>
 <h2>Routing log</h2>
 <div id="log">—</div>
+<h2>Remotes — multi-machine</h2>
+<div class="rhead"><span id="remotesnote" class="mut">loading…</span><button id="remotesbtn" type="button">refresh</button></div>
+<div class="scroll"><table id="remotes"></table></div>
+<div id="remotesdisc"></div>
+<div id="remoteslog"></div>
 <div id="prefsline"></div>
 <footer><span>a <threads-mark size="20" transparent></threads-mark> Threads thing</span>
   <span class="right">belt.local:7791 · refresh 3s</span></footer>
@@ -282,6 +364,42 @@ function tick(){
 }
 tick();setInterval(tick,3000);
 </script>
+<script>
+function tickRemotes(){
+  fetch('/api/remotes').then(function(r){return r.json();}).then(function(s){
+    var rows=s.rows||[];
+    remotes.innerHTML=rows.length
+      ?'<tr><th>machine</th><th>endpoint</th><th>protocol</th><th>roles</th><th>model</th><th>state</th><th class="r">latency</th></tr>'
+       +rows.map(function(x){
+        var st=x.ok?'<span class="ok">up</span>':'<span class="mut">down</span>';
+        var fast=(x.fastest_for||[]).map(function(r){return '<span class="fast">fastest '+esc(r)+'</span>';}).join(' ');
+        var lat=x.ok?x.ms+'ms':'<span class="mut">—</span>';
+        return '<tr><td>'+esc(x.machine)+'</td>'
+          +'<td>'+esc(x.host)+':'+x.port+'</td>'
+          +'<td><span class="badge '+esc(x.protocol)+'">'+esc(x.protocol)+'</span></td>'
+          +'<td class="mut">'+esc((x.roles||[]).join(', ')||'—')+'</td>'
+          +'<td class="mut">'+esc(x.model||'—')+'</td>'
+          +'<td>'+st+' '+fast+'</td>'
+          +'<td class="r">'+lat+'</td></tr>';
+      }).join('')
+      :'<p class="empty">No remote machines — add ~/.claude/local-llm/remotes.json (remotes.example.json shows the shape).</p>';
+    var disc=s.discovered||[];
+    remotesdisc.innerHTML=disc.length
+      ?disc.map(function(d){return '<span class="chip">'+esc(d.name)+'.local <span class="u">discovered · not configured</span></span>';}).join('')
+      :'';
+    var routes=s.routes||[];
+    remoteslog.textContent=routes.length
+      ?routes.map(function(e){
+        return e.ts.slice(11,19)+'  '+e.role+'  →  '+e.machine+' ('+e.endpoint+', '+e.protocol+')  '+e.duration_ms+'ms'+(e.ok?'':'  FAILED');
+      }).join('\\n')
+      :'No remote routes yet — bun bin/remotes.ts route <role> <prompt>.';
+    remotesnote.textContent='LAN-local, routed for SPEED — not cost · cloud fallback '
+      +(s.cloud_fallback?'on':'off')+' · '+s.mode+' mode · auto-refresh 30s';
+  }).catch(function(){remotesnote.textContent='remotes: unreachable';});
+}
+tickRemotes();setInterval(tickRemotes,30000);
+remotesbtn.onclick=function(){remotesbtn.disabled=true;tickRemotes();setTimeout(function(){remotesbtn.disabled=false;},600);};
+</script>
 </body></html>`;
 
 // ─── llms.txt — static description for LLM crawlers/agents ───
@@ -309,6 +427,11 @@ GET /api/status on this port returns JSON: per-port liveness, the model each
 port is actually serving, resident RAM, available (downloaded, not loaded)
 models, routing-log tail, current prefs.
 
+GET /api/remotes on this port returns JSON: every static multi-machine
+endpoint (~/.claude/local-llm/remotes.json) with live health + probe latency,
+the fastest endpoint per routing role, DNS-SD discovered _klh-llm._tcp
+advertisements, recent remote routes, and the cloud-vs-local posture.
+
 ## Notes
 
 - Agent backend: belt provides local model endpoints for agent clients.
@@ -335,6 +458,7 @@ Bun.serve({
 	async fetch(req): Promise<Response> {
 		const path = new URL(req.url).pathname;
 		if (path === "/api/status") return json(await status());
+		if (path === "/api/remotes") return json(await remotesSnapshot());
 		if (path === "/")
 			return new Response(PAGE, {
 				headers: { "content-type": "text/html; charset=utf-8" },
