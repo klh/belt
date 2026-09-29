@@ -331,6 +331,21 @@ function renderFleet(){
         +'<td>'+st+'</td>'
         +'<td class="r">'+used+'</td></tr>';
     });
+  (remoteRows||[]).forEach(function(x){
+    var st=x.ok?'<span class="ok">up</span>':'<span class="mut">down</span>';
+    var fast=(x.fastest_for||[]).map(function(r){return '<span class="fast">fastest '+esc(r)+'</span>';}).join(' ');
+    var lat=x.ok?x.ms+'ms':'<span class="mut">—</span>';
+    html+='<tr><td>'+esc(x.machine)+' <span class="u">(remote)</span></td>'
+      +'<td>'+esc(x.host)+':'+x.port+'</td>'
+      +'<td><span class="badge '+esc(x.protocol)+'">'+esc(x.protocol)+'</span></td>'
+      +'<td class="mut">'+esc((x.roles||[]).join(', ')||'—')+'</td>'
+      +'<td class="mut">'+esc(x.model||'—')+'</td>'
+      +'<td class="mut">—</td><td class="r mut">—</td>'
+      +'<td>'+st+' '+fast+'</td>'
+      +'<td class="r">'+lat+'</td></tr>';
+  });
+  fleet.innerHTML=html;
+}
 function age(iso,now){
   if(!iso)return '—';
   var t=Math.max(0,(now-Date.parse(iso))/1000);
@@ -347,21 +362,7 @@ function fmt(line){
     return e.ts.slice(11,19)+'  '+e.category+'  '+short(e.model)+'  :'+e.port+'  '+e.duration_ms+'ms  '+e.tier+(e.escalated?'  cloud':'');
   }catch(_){return line;}
 }
-  (remoteRows||[]).forEach(function(x){
-    var st=x.ok?'<span class="ok">up</span>':'<span class="mut">down</span>';
-    var fast=(x.fastest_for||[]).map(function(r){return '<span class="fast">fastest '+esc(r)+'</span>';}).join(' ');
-    var lat=x.ok?x.ms+'ms':'<span class="mut">—</span>';
-    html+='<tr><td>'+esc(x.machine)+' <span class="u">(remote)</span></td>'
-      +'<td>'+esc(x.host)+':'+x.port+'</td>'
-      +'<td><span class="badge '+esc(x.protocol)+'">'+esc(x.protocol)+'</span></td>'
-      +'<td class="mut">'+esc((x.roles||[]).join(', ')||'—')+'</td>'
-      +'<td class="mut">'+esc(x.model||'—')+'</td>'
-      +'<td class="mut">—</td><td class="r mut">—</td>'
-      +'<td>'+st+' '+fast+'</td>'
-      +'<td class="r">'+lat+'</td></tr>';
-  });
-  fleet.innerHTML=html;
-}
+
 function tick(){
   fetch('/api/status').then(function(r){return r.json();}).then(function(s){
     clockbox.textContent=hhmmss(s.ts);
@@ -408,7 +409,7 @@ function tickRemotes(){
       ?'LAN-local, routed for SPEED — not cost'
       :'no remote machines — add ~/.claude/local-llm/remotes.json (remotes.example.json shows the shape)')
       +' · cloud fallback '+(s.cloud_fallback?'on':'off')+' · '+s.mode+' mode · auto-refresh 30s';
-  }).catch(function(){remotesnote.textContent='remotes: unreachable';});
+  }).catch(function(e){remotesnote.textContent='remotes: unreachable — '+String(e && (e.message||e));});
 }
 tickRemotes();setInterval(tickRemotes,30000);
 remotesbtn.onclick=function(){remotesbtn.disabled=true;tickRemotes();setTimeout(function(){remotesbtn.disabled=false;},600);};
