@@ -117,3 +117,14 @@ echo "  bun $PREFIX/dashboard.ts            # fleet dashboard on :7791 (belt.loc
 echo "  bun $PREFIX/swarm.ts start          # start the fleet (or let launchd keep it alive)"
 echo "  bun $PREFIX/set-cloud.ts off        # pin the router local-only"
 echo "docs: docs/routing.md (routing) · docs/add-a-model.md (add a model) · bench/RESULTS.md"
+
+# ─── release notify: the distributed changelog (2026-09-30) ───
+# every deploy announces the live version on the coord bus; every session
+# sees it at next poll or SessionStart. Fresh machines (no coord) skip.
+COORD="$HOME/.claude/hooks/suspenders/bin/coord.ts"
+if [ -f "$COORD" ]; then
+  REL_VER=$(git -C "$(cd "$(dirname "$0")" && pwd)" describe --tags --abbrev=0 2>/dev/null || echo unknown)
+  REL_NOTE=$(git -C "$(cd "$(dirname "$0")" && pwd)" tag -l --format='%(contents:subject)' "$REL_VER" 2>/dev/null | head -1)
+  bun "$COORD" emit RELEASE --scope belt --version "$REL_VER" \
+    --note "${REL_NOTE:-deployed}" --as installer >/dev/null 2>&1 || true
+fi
