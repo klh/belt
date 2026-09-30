@@ -93,7 +93,7 @@ export const SPECIALISTS: Specialist[] = [
 			"128",
 		],
 		good_at:
-			"multi-step reasoning, planning, hard analysis, determinate answers",
+			"multi-step reasoning, planning, hard analysis, determinate answers, knowledge distillation",
 	},
 	// 8904/8905 (embed/rerank) retired 2026-09-23: mlx_lm 0.31.x server dropped
 	// /v1/embeddings + /v1/rerank routes. Embeddings live on :8907 (context-rag

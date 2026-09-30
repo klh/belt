@@ -96,6 +96,80 @@ function checkAuth(
 	return { ok: true, label };
 }
 
+// ─── hint grammar (W96, owner FINAL 2026-09-30) ───
+// hint := VERB LOCATION? MODEL? TAGS* — deterministic, zero LLM:
+//   VERB     prefer (soft: full fits rank first, degrade by policy)
+//            must   (hard: no healthy full fit → machine-readable error,
+//                    NEVER a silent substitute)
+//   LOCATION local | cloud | host:<server>
+//   MODEL    model:<id-or-glob>  ('*' wildcard, case-insensitive)
+//   TAGS     a small tag cloud — each tag is a regexp matched against the
+//            candidate's capability text (roles + good_at + model); ANY tag
+//            matching = the tag group fits; all present groups AND together.
+// No hint = default policy (healthy → proven avg_ms → load).
+export interface RouteHint {
+	verb: "prefer" | "must";
+	// local/cloud box or a set host — absent = every machine qualifies
+	location?: { kind: "local" | "cloud" } | { host: string };
+	model?: string; // glob: '*' wildcard
+	tags: string[]; // regexp sources, OR-semantics
+}
+
+const HINT_TOKENS_MAX = 12;
+const HINT_TOKEN_MAX = 64;
+
+/** Parse 'must cloud', 'prefer local distill reasoning',
+ *  'prefer host:nas model:qwen*' — malformed input is a 400-grade rejection
+ *  with the reason, never a guess. */
+export function parseHint(
+	raw: string,
+): { ok: true; hint: RouteHint } | { ok: false; why: string } {
+	const tokens = raw.trim().split(/\s+/).filter(Boolean);
+	if (!tokens.length || tokens.length > HINT_TOKENS_MAX)
+		return {
+			ok: false,
+			why: `hint: 1–${HINT_TOKENS_MAX} whitespace-separated tokens, e.g. 'prefer local reasoning'`,
+		};
+	const [verb, ...rest] = tokens;
+	if (verb !== "prefer" && verb !== "must")
+		return {
+			ok: false,
+			why: `hint must start with 'prefer' or 'must', got '${verb.slice(0, 24)}'`,
+		};
+	const hint: RouteHint = { verb, tags: [] };
+	return finishHint(hint, rest);
+}
+
+/** Token loop, split out to keep each mutation small. */
+function finishHint(hint: RouteHint, rest: string[]) {
+	for (const tok of rest) {
+		if (tok.length > HINT_TOKEN_MAX)
+			return {
+				ok: false,
+				why: `hint token over ${HINT_TOKEN_MAX} chars: '${tok.slice(0, 24)}…'`,
+			} as const;
+		if (tok === "local" || tok === "cloud") {
+			if (hint.location)
+				return { ok: false, why: `hint: duplicate location ('${tok}')` };
+			hint.location = { kind: tok };
+		} else if (tok.startsWith("host:")) {
+			if (hint.location)
+				return { ok: false, why: `hint: duplicate location ('${tok}')` };
+			const host = tok.slice("host:".length);
+			if (!host) return { ok: false, why: "hint: host: needs a server name" };
+			hint.location = { host };
+		} else if (tok.startsWith("model:")) {
+			if (hint.model) return { ok: false, why: "hint: duplicate model:" };
+			const model = tok.slice("model:".length);
+			if (!model) return { ok: false, why: "hint: model: needs an id or glob" };
+			hint.model = model;
+		} else {
+			hint.tags.push(tok);
+		}
+	}
+	return { ok: true as const, hint };
+}
+
 // ─── candidates ───
 interface Candidate {
 	machine: string;
@@ -104,6 +178,8 @@ interface Candidate {
 	protocol: string;
 	kind: "local" | "remote" | "cloud";
 	roles: string[];
+	// capability text the hint tag cloud regexps against (roles + good_at + model)
+	tags: string;
 	healthy: boolean;
 	// measured avg latency from metrics.db; null = unproven (never called)
 	estimate_ms: number | null;
@@ -123,6 +199,7 @@ function audit(
 	decision: string,
 	why: string,
 	target?: { machine?: string; port?: number; model?: string },
+	hint?: string,
 ): void {
 	auditRoute({
 		ts: new Date().toISOString(),
@@ -133,6 +210,7 @@ function audit(
 		model: target?.model,
 		decision,
 		why,
+		hint,
 		belt_url: BELT_PUBLIC_URL,
 		gateway_url: GATEWAY_URL,
 	});
@@ -160,6 +238,7 @@ async function localCandidates(): Promise<Candidate[]> {
 				protocol: "openai",
 				kind: "local" as const,
 				roles: [s.role],
+				tags: `${s.role} ${s.good_at} ${s.model}`,
 				healthy: await localProbe(s.port),
 				estimate_ms: met.calls > 0 ? met.avg_ms : null,
 				calls: met.calls,
@@ -191,6 +270,7 @@ async function remoteCandidates(): Promise<Candidate[]> {
 				protocol: ep.protocol,
 				kind: (m.cloud ? "cloud" : "remote") as "remote" | "cloud",
 				roles: ep.roles,
+				tags: `${ep.roles.join(" ")} ${ep.model ?? ""}`,
 				healthy,
 				estimate_ms: met.calls > 0 ? met.avg_ms : null,
 				calls: met.calls,
@@ -204,6 +284,59 @@ async function remoteCandidates(): Promise<Candidate[]> {
 		}),
 	);
 }
+
+const RE_META = new Set("\\.*+?^$()[]{}|/".split(""));
+
+/** Escape every regexp metachar in s. */
+const escapeRe = (s: string): string =>
+	s
+		.split("")
+		.map((ch) => (RE_META.has(ch) ? `\\${ch}` : ch))
+		.join("");
+
+/** Glob → regexp matched anywhere in the model id, case-insensitive —
+ *  ids carry namespace prefixes (mlx-community/Qwen3.5-…), so qwen*
+ *  means 'any qwen anywhere in the id'; only '*' is special. */
+const globToRe = (glob: string): RegExp => {
+	const esc = glob
+		.split("")
+		.map((ch) => (ch === "*" ? ".*" : escapeRe(ch)))
+		.join("");
+	return new RegExp(esc, "i");
+};
+
+/** Tag cloud entry → regexp; a non-compiling tag degrades to a literal
+ *  substring test — deterministic, never throws. */
+const tagRe = (tag: string): RegExp => {
+	try {
+		return new RegExp(tag, "i");
+	} catch {
+		return new RegExp(escapeRe(tag), "i");
+	}
+};
+
+/** How many of the hint's present groups does the candidate satisfy?
+ *  location + model + tag cloud (any one tag); absent groups never count. */
+export function hintFit(
+	c: { kind: string; machine: string; model: string; tags: string },
+	h: RouteHint,
+): number {
+	let tier = 0;
+	if (h.location) {
+		const ok =
+			"kind" in h.location
+				? c.kind === h.location.kind
+				: c.machine.toLowerCase() === h.location.host.toLowerCase();
+		if (ok) tier++;
+	}
+	if (h.model && globToRe(h.model).test(c.model)) tier++;
+	if (h.tags.length && h.tags.some((t) => tagRe(t).test(c.tags))) tier++;
+	return tier;
+}
+
+/** Full-fit threshold — the count of groups the hint actually carries. */
+export const hintTotal = (h: RouteHint): number =>
+	(h.location ? 1 : 0) + (h.model ? 1 : 0) + (h.tags.length ? 1 : 0);
 
 /** Role/model filter: exact model wins; else role membership, with the
  *  model id itself accepted as a role-ish selector. */
@@ -257,6 +390,9 @@ function decideWhy(
 interface RouteBody {
 	role?: string;
 	model?: string;
+	// W96: 'must cloud' | 'prefer local distill reasoning' | … — supersedes
+	// role/model when present
+	hint?: string;
 	messages?: { role: string; content: string }[];
 	max_tokens?: number;
 	temperature?: number;
@@ -446,6 +582,9 @@ async function routeDecide(req: Request, label: string): Promise<Response> {
 	}
 	const role = typeof body.role === "string" ? body.role : undefined;
 	const model = typeof body.model === "string" ? body.model : undefined;
+	// W96: hint supersedes role/model — one selector at a time
+	if (typeof body.hint === "string" && body.hint.trim())
+		return routeByHint(body, label);
 	if (!role && !model) {
 		audit(label, "route", "denied", "neither role nor model in body");
 		return respond(400, {
@@ -465,15 +604,69 @@ async function routeDecide(req: Request, label: string): Promise<Response> {
 	return pickAndRun(body, matching, label, role);
 }
 
+/** `must` semantics: healthy AND every present group fits — else empty. */
+function mustFits(all: Candidate[], hint: RouteHint): Candidate[] {
+	const total = hintTotal(hint);
+	return all.filter((c) => c.healthy && hintFit(c, hint) === total);
+}
+
+/** `prefer` semantics: tier by fit, belt's own policy breaks ties — soft. */
+function preferOrdered(all: Candidate[], hint: RouteHint): Candidate[] {
+	return all
+		.map((c) => ({ c, tier: hintFit(c, hint) }))
+		.sort((a, b) => b.tier - a.tier || compareCandidates(a.c, b.c))
+		.map((x) => x.c);
+}
+
+/** W96 hint path — hint supersedes role/model. must = hard (no healthy
+ *  full fit → machine-readable 503, never a silent substitute);
+ *  prefer = soft (best fit first, degrade by policy — audit "degraded"). */
+async function routeByHint(body: RouteBody, label: string): Promise<Response> {
+	const raw = (body.hint ?? "").trim();
+	const parsed = parseHint(raw);
+	if (!parsed.ok) {
+		audit(label, "route", "denied", `bad hint: ${parsed.why}`, undefined, raw);
+		return respond(400, { error: "bad request", why: parsed.why });
+	}
+	const hint = parsed.hint;
+	const all = [...(await localCandidates()), ...(await remoteCandidates())];
+	if (hint.verb === "must") {
+		const fits = mustFits(all, hint);
+		if (!fits.length) {
+			const why = `must '${raw}': no healthy full fit among ${all.length} candidates — must never substitutes`;
+			audit(label, "route", "errored", why, undefined, raw);
+			return respond(503, { error: "no healthy fit", why });
+		}
+		return pickAndRun(body, fits.sort(compareCandidates), label, undefined, {
+			raw,
+			degraded: false,
+		});
+	}
+	const matching = preferOrdered(all, hint);
+	const degraded = (hintFit(matching[0], hint) ?? 0) < hintTotal(hint);
+	return pickAndRun(body, matching, label, undefined, { raw, degraded });
+}
+
+/** Hint context threaded to the audit trail: the raw hint + whether prefer
+ *  fell below a full fit. */
+interface HintCtx {
+	raw: string;
+	degraded: boolean;
+}
+
 /** Policy decision → advisory reply, or hand off to the execute branch. */
 function pickAndRun(
 	body: RouteBody,
 	matching: Candidate[],
 	label: string,
 	role?: string,
+	hintCtx?: HintCtx,
 ): Promise<Response> {
 	const best = matching[0];
-	const why = decideWhy(best, matching[1], role);
+	const base = decideWhy(best, matching[1], role);
+	const why = hintCtx
+		? `hint '${hintCtx.raw}': ${base}${hintCtx.degraded ? " — degraded: no candidate fully satisfies the hint" : ""}`
+		: base;
 	const target = {
 		machine: best.machine,
 		port: best.port,
@@ -481,16 +674,23 @@ function pickAndRun(
 		protocol: best.protocol,
 		kind: best.kind,
 	};
-	audit(label, "route", "policy", why, {
-		machine: best.machine,
-		port: best.port,
-		model: best.model,
-	});
+	audit(
+		label,
+		"route",
+		hintCtx?.degraded ? "degraded" : "policy",
+		why,
+		{
+			machine: best.machine,
+			port: best.port,
+			model: best.model,
+		},
+		hintCtx?.raw,
+	);
 	const estimate =
 		best.estimate_ms ?? (best.probe_ms ? Math.round(best.probe_ms * 3) : null);
 	if (body.execute !== true && !Array.isArray(body.messages))
 		return respond(200, { target, why, latency_estimate_ms: estimate });
-	return runExecute(body, best, label, role, why, target, estimate);
+	return runExecute(body, best, label, role, why, target, estimate, hintCtx);
 }
 
 /** Execute branch of the policy path — 400 without messages, honest 503 via
@@ -503,6 +703,7 @@ async function runExecute(
 	why: string,
 	target: Record<string, unknown>,
 	estimate: number | null,
+	hintCtx?: HintCtx,
 ): Promise<Response> {
 	if (!Array.isArray(body.messages) || body.messages.length === 0) {
 		audit(label, "route", "denied", "execute without messages", {
@@ -517,11 +718,18 @@ async function runExecute(
 	}
 	try {
 		const { reply, ms } = await executeOn(best, body, role ?? "route");
-		audit(label, "route", "executed", why, {
-			machine: best.machine,
-			port: best.port,
-			model: best.model,
-		});
+		audit(
+			label,
+			"route",
+			hintCtx?.degraded ? "degraded" : "executed",
+			why,
+			{
+				machine: best.machine,
+				port: best.port,
+				model: best.model,
+			},
+			hintCtx?.raw,
+		);
 		return respond(200, {
 			target,
 			why,
@@ -534,7 +742,7 @@ async function runExecute(
 	}
 }
 
-/** The honest 503: audit + routing-log + machine-readable error. */
+/** The honest 503: audit + routing-log + machine-readable {error, why}. */
 function failRoute(
 	best: Candidate,
 	label: string,
