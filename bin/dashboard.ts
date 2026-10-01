@@ -27,7 +27,14 @@ import {
 	type RouteLogEntry,
 } from "./remotes.ts";
 import { metricsFor, metricsSnapshot } from "./metrics.ts";
-import { handleRoute } from "./route-policy.ts";
+import { bearerToken, handleRoute } from "./route-policy.ts";
+import {
+	citizenshipGate,
+	etagJson,
+	problem,
+	rateLimiter,
+	type RouteMethods,
+} from "./http-citizenship.ts";
 
 const HOME = process.env.HOME;
 const LOG_DIR = `${HOME}/.claude-insights`;
@@ -160,6 +167,30 @@ async function status() {
 		ts: new Date().toISOString(),
 	};
 }
+
+// W155.3: /api/status re-validates via strong ETag, so the snapshot must be
+// byte-stable across a poll — memoize for 1s (remotesSnapshot's pattern at
+// a shorter TTL; the page polls every 3s, so staleness ≤1s changes nothing).
+const STATUS_TTL_MS = 1_000;
+let statusCache: string | null = null;
+let statusAt = 0;
+let statusPending: Promise<string> | null = null;
+const statusBody = (): Promise<string> => {
+	if (statusCache !== null && Date.now() - statusAt < STATUS_TTL_MS)
+		return Promise.resolve(statusCache);
+	if (!statusPending) {
+		statusPending = status()
+			.then((s) => {
+				statusCache = JSON.stringify(s, null, 2);
+				statusAt = Date.now();
+				return statusCache;
+			})
+			.finally(() => {
+				statusPending = null;
+			});
+	}
+	return statusPending;
+};
 
 // ─── remotes / multi-machine — static remotes.json + DNS-SD ads ───
 interface RemotesSnapshot {
@@ -550,6 +581,14 @@ with WoL-ensure for silent LAN machines — and adds {reply, ms}. Errors are
 machine-readable {error, why}: 401 (no token) / 403 (unknown token) / 503
 (target down, wake failed or gateway error).
 
+## Protocol conventions
+
+belt's own endpoints code to the fleet HTTP citizenship standard (suspenders
+docs/design/http-citizenship.md): OPTIONS → 204 + Allow, 405 + Allow on
+known paths (problem+json errors), strong ETag + 304 on GET /api/status,
+and the RateLimit trio on authenticated POST /api/route (BELT_ROUTE_RPM,
+default 120 rpm per token).
+
 ## Notes
 
 - Agent backend: belt provides local model endpoints for agent clients.
@@ -571,23 +610,60 @@ const json = (x: unknown, status = 200): Response =>
 		headers: { "content-type": "application/json" },
 	});
 
+// W155.3 http-citizenship: methods each known path serves — the single
+// source the gate introspects (HEAD rides GET paths; Bun strips its body).
+const ROUTES: RouteMethods = {
+	"/": ["GET", "HEAD"],
+	"/api/status": ["GET", "HEAD"],
+	"/api/remotes": ["GET", "HEAD"],
+	"/api/metrics": ["GET", "HEAD"],
+	"/api/route": ["POST"],
+	"/llms.txt": ["GET", "HEAD"],
+	"/threads-mark.js": ["GET", "HEAD"],
+};
+
+// Fixed 60s window per bearer token on the authenticated route API
+// (BELT_ROUTE_RPM overrides; default 120).
+const ROUTE_RPM = Number(process.env.BELT_ROUTE_RPM ?? 120);
+const routeLimit = rateLimiter(ROUTE_RPM);
+
+/** /api/route with the citizenship trio: keyed requests get the rate-limit
+ *  headers on every reply and a 429 problem+json once the window is spent;
+ *  tokenless calls stay with handleRoute's own 401 (not authenticated). */
+const serveRoute = async (req: Request): Promise<Response> => {
+	const token = bearerToken(req);
+	if (!token) return handleRoute(req);
+	const verdict = routeLimit(token);
+	if (!verdict.ok)
+		return problem(
+			429,
+			"Too Many Requests",
+			"belt.rate_limited",
+			`route rpm window (${ROUTE_RPM}) spent — retry after ~${verdict.retryAfter ?? 1}s`,
+			new URL(req.url).pathname,
+			"rpm budget exhausted for this token window",
+			{
+				...verdict.headers,
+				"retry-after": String(verdict.retryAfter ?? 1),
+			},
+		);
+	const res = await handleRoute(req);
+	for (const [k, v] of Object.entries(verdict.headers)) res.headers.set(k, v);
+	return res;
+};
+
 Bun.serve({
 	port: PORT,
 	hostname: "0.0.0.0",
 	async fetch(req): Promise<Response> {
 		const path = new URL(req.url).pathname;
-		if (path === "/api/status") return json(await status());
+		// W155.3 citizenship: OPTIONS → 204+Allow; off-method on a known path
+		// → 405+Allow. Runs before auth — introspection needs no credentials.
+		const preflight = citizenshipGate(req, ROUTES);
+		if (preflight) return preflight;
+		if (path === "/api/status") return etagJson(req, await statusBody());
 		if (path === "/api/remotes") return json(await remotesSnapshot());
-		if (path === "/api/route")
-			return req.method === "POST"
-				? handleRoute(req)
-				: json(
-						{
-							error: "method not allowed",
-							why: "POST /api/route with a bearer token",
-						},
-						405,
-					);
+		if (path === "/api/route") return serveRoute(req);
 		if (path === "/api/metrics")
 			return json({
 				...metricsSnapshot(),
@@ -617,27 +693,31 @@ Bun.serve({
 // sh intermediary that stays its parent — as a direct Bun child it lives
 // but never completes registration. "Name conflicts" from a lingering
 // previous registration is expected and harmless (output goes to the log).
-try {
-	Bun.spawnSync(["/usr/bin/pkill", "-f", "dns-sd -R belt"]);
-} catch {}
-try {
-	Bun.spawnSync(["/usr/bin/pkill", "-f", "dns-sd -P belt "]);
-} catch {}
-let lanIp = "";
-try {
-	lanIp = Bun.spawnSync(["/usr/sbin/ipconfig", "getifaddr", "en0"])
-		.stdout.toString()
-		.trim();
-} catch {}
-const mdnsCmd = lanIp
-	? `/usr/bin/dns-sd -P belt _http._tcp local ${PORT} belt.local ${lanIp} >> ${LOG_DIR}/belt-mdns.log 2>&1`
-	: `/usr/bin/dns-sd -R belt _http._tcp local ${PORT} >> ${LOG_DIR}/belt-mdns.log 2>&1`;
-const mdns = Bun.spawn(["/bin/sh", "-c", mdnsCmd], {
-	stdin: "ignore",
-	stdout: "ignore",
-	stderr: "ignore",
-});
-mdns.unref();
+// mdns registration is skipped under BELT_MDNS=off (W155.3: scratch/test
+// boots must not pkill the live registration nor re-advertise belt.local).
+if (process.env.BELT_MDNS !== "off") {
+	try {
+		Bun.spawnSync(["/usr/bin/pkill", "-f", "dns-sd -R belt"]);
+	} catch {}
+	try {
+		Bun.spawnSync(["/usr/bin/pkill", "-f", "dns-sd -P belt "]);
+	} catch {}
+	let lanIp = "";
+	try {
+		lanIp = Bun.spawnSync(["/usr/sbin/ipconfig", "getifaddr", "en0"])
+			.stdout.toString()
+			.trim();
+	} catch {}
+	const mdnsCmd = lanIp
+		? `/usr/bin/dns-sd -P belt _http._tcp local ${PORT} belt.local ${lanIp} >> ${LOG_DIR}/belt-mdns.log 2>&1`
+		: `/usr/bin/dns-sd -R belt _http._tcp local ${PORT} >> ${LOG_DIR}/belt-mdns.log 2>&1`;
+	const mdns = Bun.spawn(["/bin/sh", "-c", mdnsCmd], {
+		stdin: "ignore",
+		stdout: "ignore",
+		stderr: "ignore",
+	});
+	mdns.unref();
+}
 
 console.log(
 	`belt dashboard → http://127.0.0.1:${PORT} · LAN: http://belt.local:${PORT}`,
