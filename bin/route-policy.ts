@@ -32,6 +32,14 @@ import {
 	type RemoteEndpoint,
 } from "./remotes.ts";
 import { metricsFor, auditRoute, LOCAL_NAME } from "./metrics.ts";
+import {
+	applyLawStack,
+	composeLawPlan,
+	executeUserPlane,
+	resolveLawStack,
+	userPlaneCandidates,
+	type UserPlaneCandidate,
+} from "./repo-laws.ts";
 // W159 stage-2 fit: cached local-model verdicts refine ambiguous hints
 import {
 	applyFitVerdict,
@@ -400,6 +408,9 @@ interface RouteBody {
 	// W96: 'must cloud' | 'prefer local distill reasoning' | … — supersedes
 	// role/model when present
 	hint?: string;
+	// W164: the caller's repo root (or cwd) — opts into repo-scoped routing
+	// laws (.llm dotfile > user plane > central repo-laws > belt default)
+	repo?: string;
 	messages?: { role: string; content: string }[];
 	max_tokens?: number;
 	temperature?: number;
@@ -467,6 +478,24 @@ async function executeOn(
 		max_tokens: body.max_tokens,
 		temperature: body.temperature,
 	};
+	// W164: user-plane candidates execute DIRECT (sovereign plane — no
+	// gateway, key by NAME from the secrets home; honest 503 on failure
+	// via failRoute).
+	if ("base" in c) {
+		const reply = await executeUserPlane(c, body);
+		const ms = Date.now() - t0;
+		logRoute({
+			ts: new Date().toISOString(),
+			machine: c.machine,
+			endpoint: c.base,
+			protocol: "openai",
+			role,
+			duration_ms: ms,
+			ok: true,
+			model: c.model || undefined,
+		});
+		return { reply, ms };
+	}
 	if (c.kind === "local") {
 		const r = await fetch(`http://127.0.0.1:${c.port}/v1/chat/completions`, {
 			method: "POST",
@@ -599,8 +628,15 @@ async function routeDecide(req: Request, label: string): Promise<Response> {
 			why: "pass role (e.g. 'reasoning') or model (e.g. 'glm-5.3')",
 		});
 	}
-	const all = [...(await localCandidates()), ...(await remoteCandidates())];
-	const matching = all
+	// W164: the law stack applies to the role/model path too — musts filter,
+	// the nearest prefer ranks (request hint absent here), else belt default.
+	const pooled = await poolFor(body, null);
+	if ("lawError" in pooled) {
+		const why = pooled.lawError.why;
+		audit(label, "route", "errored", why);
+		return respond(503, { error: "no healthy fit", why });
+	}
+	const matching = pooled
 		.filter((c) => applies(c, role, model))
 		.sort(compareCandidates);
 	if (!matching.length) {
@@ -625,6 +661,31 @@ function preferOrdered(all: Candidate[], hint: RouteHint): Candidate[] {
 		.map((x) => x.c);
 }
 
+// ─── W164: repo-scoped law stack over the candidate pool ──────────────────
+/** The W164 pool: locals + remotes + user-plane entries, filtered by the
+ *  repo's law stack (musts AND across layers, honest layer-named error),
+ *  ranked by the nearest prefer (request hint > dotfile > user > central).
+ *  No repo in the body = pool unchanged, belt's own ordering. */
+async function poolFor(
+	body: RouteBody,
+	hint: RouteHint | null,
+): Promise<Candidate[] | { lawError: { layer: string; why: string } }> {
+	const userPlane = await userPlaneCandidates();
+	const all: (Candidate | UserPlaneCandidate)[] = [
+		...(await localCandidates()),
+		...(await remoteCandidates()),
+		...userPlane,
+	];
+	if (typeof body.repo !== "string" || body.repo.trim().length === 0)
+		return all;
+	const stack = resolveLawStack(body.repo.trim());
+	const plan = composeLawPlan(stack, hint);
+	const applied = applyLawStack(all, plan, hintFit, hintTotal);
+	if (!applied.ok)
+		return { lawError: { layer: applied.layer, why: applied.why } };
+	return applied.candidates as Candidate[];
+}
+
 /** W96 hint path — hint supersedes role/model. must = hard (no healthy
  *  full fit → machine-readable 503, never a silent substitute);
  *  prefer = soft (best fit first, degrade by policy — audit "degraded"). */
@@ -636,7 +697,14 @@ async function routeByHint(body: RouteBody, label: string): Promise<Response> {
 		return respond(400, { error: "bad request", why: parsed.why });
 	}
 	const hint = parsed.hint;
-	const all = [...(await localCandidates()), ...(await remoteCandidates())];
+	// W164: repo law stack filters the pool (musts AND across layers —
+	// honest layer-named 503); the request hint keeps the W96 ranking.
+	const pooled = await poolFor(body, hint);
+	if ("lawError" in pooled) {
+		audit(label, "route", "errored", pooled.lawError.why, undefined, raw);
+		return respond(503, { error: "no healthy fit", why: pooled.lawError.why });
+	}
+	const all = pooled;
 	if (hint.verb === "must") {
 		const fits = mustFits(all, hint);
 		if (!fits.length) {
