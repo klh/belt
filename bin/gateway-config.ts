@@ -5,24 +5,24 @@
 // resolved at runtime via os.environ/Z_AI_API_KEY, never inline).
 import { readFileSync } from "node:fs";
 import { emitRouterSettings, loadGatewayPolicy } from "./router-policy.ts";
+import { buildRemoteEntries } from "./remotes-validate.ts";
 
 const HOME = process.env.HOME ?? "/Users/kk";
-const remotes = JSON.parse(
-	readFileSync(`${HOME}/.claude/local-llm/remotes.json`, "utf8"),
-) as {
-	machines: {
-		name: string;
-		cloud?: boolean;
-		endpoints: {
-			port: number;
-			protocol: string;
-			roles: string[];
-			model?: string;
-			base?: string;
-			tls?: boolean;
-		}[];
-	}[];
-};
+const REMOTES_PATH = `${HOME}/.claude/local-llm/remotes.json`;
+
+// W192: remotes.json is parsed but NEVER trusted — grammar validation and
+// entry building live in remotes-validate.ts. Unparseable config aborts the
+// regen loudly (the last good litellm.yaml stays); per-entry validation
+// failures are skipped + warned on stderr below.
+let remotesRaw: unknown;
+try {
+	remotesRaw = JSON.parse(readFileSync(REMOTES_PATH, "utf8"));
+} catch (err) {
+	console.error(
+		`gateway-config: ${REMOTES_PATH} unreadable or invalid JSON — not writing litellm.yaml (${err instanceof Error ? err.message : String(err)})`,
+	);
+	process.exit(1);
+}
 
 const LOCAL_PORTS: [number, string, string][] = [
 	// port, belt-facing alias, role note — reranker (:8913) excluded: rerank
@@ -53,28 +53,12 @@ for (const [port, alias] of LOCAL_PORTS) {
 			`      api_key: local`,
 	);
 }
-for (const m of remotes.machines) {
-	for (const ep of m.endpoints) {
-		if (ep.protocol !== "openai" || !ep.model) continue;
-		if (ep.base) {
-			entries.push(
-				`  - model_name: ${m.name}-${ep.model.replace(/[^a-zA-Z0-9.-]/g, "-")}\n` +
-					`    litellm_params:\n` +
-					`      model: openai/${ep.model}\n` +
-					`      api_base: ${ep.base}\n` +
-					`      api_key: os.environ/Z_AI_API_KEY`,
-			);
-		} else {
-			entries.push(
-				`  - model_name: ${m.name}-${ep.model.replace(/[^a-zA-Z0-9.-]/g, "-")}\n` +
-					`    litellm_params:\n` +
-					`      model: openai/${ep.model}\n` +
-					`      api_base: http://${m.host}:${ep.port}/v1` +
-					(m.cloud ? "" : "\n      api_key: dummy"),
-			);
-		}
-	}
-}
+// Remote tiers: validated + built by remotes-validate (W192) — invalid
+// machines/endpoints are skipped + warned on stderr, never interpolated.
+const remotesBuilt = buildRemoteEntries(remotesRaw);
+for (const s of remotesBuilt.skipped)
+	console.error(`gateway-config: skipped ${s.ref}: ${s.why}`);
+entries.push(...remotesBuilt.entries);
 
 // (openai-dialect draft above is superseded by fullYaml — kept variables
 // merged there; this block intentionally removed)
