@@ -32,6 +32,13 @@ import {
 	type RemoteEndpoint,
 } from "./remotes.ts";
 import { metricsFor, auditRoute, LOCAL_NAME } from "./metrics.ts";
+// W159 stage-2 fit: cached local-model verdicts refine ambiguous hints
+import {
+	applyFitVerdict,
+	lookupFitVerdict,
+	scheduleFitClassification,
+	taskSignature,
+} from "./fit-classifier.ts";
 
 // ─── config (env overridable, current values as defaults) ───
 export const GATEWAY_URL = process.env.GATEWAY_URL ?? "http://127.0.0.1:4100";
@@ -642,8 +649,31 @@ async function routeByHint(body: RouteBody, label: string): Promise<Response> {
 			degraded: false,
 		});
 	}
-	const matching = preferOrdered(all, hint);
+	let matching = preferOrdered(all, hint);
 	const degraded = (hintFit(matching[0], hint) ?? 0) < hintTotal(hint);
+	// W159 stage 2: a cached reclassifier verdict refines AMBIGUOUS fits for
+	// long-running placement; a cache miss schedules an async classify that
+	// is never awaited — the decision above stays regex-only, hot path intact.
+	const sig = taskSignature(raw);
+	const verdict = lookupFitVerdict(sig);
+	if (verdict) {
+		matching = applyFitVerdict(matching, verdict);
+		audit(
+			label,
+			"route",
+			"policy",
+			`hint '${raw}': stage-2 refinement by cached fit verdict (placement=${verdict.placement})`,
+			{
+				machine: matching[0]?.machine,
+				port: matching[0]?.port,
+				model: matching[0]?.model,
+			},
+			raw,
+		);
+	} else if (degraded) {
+		// long-running heavy work on ambiguous fits is what stage 2 learns
+		scheduleFitClassification(sig, raw, matching.slice(0, 8));
+	}
 	return pickAndRun(body, matching, label, undefined, { raw, degraded });
 }
 
