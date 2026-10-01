@@ -90,6 +90,12 @@ function openDb(): Database {
 			gateway_url TEXT NOT NULL DEFAULT ''
 		);
 	`);
+	// W96: hint column on pre-W96 databases — idempotent migration
+	const cols = db.query("PRAGMA table_info(audit)").all() as {
+		name: string;
+	}[];
+	if (!cols.some((c) => c.name === "hint"))
+		db.run("ALTER TABLE audit ADD COLUMN hint TEXT NOT NULL DEFAULT ''");
 	return db;
 }
 
@@ -104,11 +110,12 @@ export function auditRoute(e: {
 	model?: string;
 	decision: string;
 	why: string;
+	hint?: string;
 	belt_url: string;
 	gateway_url: string;
 }): void {
 	openDb().run(
-		"INSERT INTO audit (ts, token_label, action, machine, port, model, decision, why, belt_url, gateway_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		"INSERT INTO audit (ts, token_label, action, machine, port, model, decision, why, hint, belt_url, gateway_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 		[
 			e.ts,
 			e.token_label,
@@ -118,6 +125,7 @@ export function auditRoute(e: {
 			e.model ?? "",
 			e.decision,
 			e.why,
+			e.hint ?? "",
 			e.belt_url,
 			e.gateway_url,
 		],
@@ -281,7 +289,7 @@ const recentQ = `
 	FROM routes ORDER BY id DESC LIMIT 12`;
 
 const auditQ = `
-	SELECT ts, token_label, action, machine, port, model, decision, why
+	SELECT ts, token_label, action, machine, port, model, decision, why, hint
 	FROM audit ORDER BY id DESC LIMIT 12`;
 
 function buildSnapshot(): MetricsSnapshot {
@@ -345,6 +353,7 @@ function buildSnapshot(): MetricsSnapshot {
 		model: string;
 		decision: string;
 		why: string;
+		hint?: string;
 	}[];
 	return { endpoints, recent, audit };
 }
