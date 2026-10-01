@@ -1,0 +1,35 @@
+# Belt routing policy — LiteLLM-router config. The single policy file:
+# bin/router-policy.ts loads it, bin/gateway-config.ts emits the `gateway`
+# section verbatim as LiteLLM router_settings into the private litellm.yaml.
+# All native 1.103.0 router semantics (pinned-source verified, W126 audit):
+# fallbacks = ordered cross-group ladders tried after num_retries;
+# allowed_fails + cooldown_time = passive outlier ejection; num_retries =
+# per-call retries with native retry-after-honoring jittered backoff
+# (utils.py::_calculate_retry_after). One file an SRE recognizes.
+#
+# OWNER DIRECTIVES 2026-10-01 (lesson.fanout-rate-budget):
+#   - ladder: glm-5.3-flash → local(:4000 shim, anthropic/ backend) →
+#     OpenAI → Anthropic. NEVER flashx — same upstream family saturates
+#     together, and flashx is too expensive.
+#   - operators edit THIS FILE — never code. Runtime copy
+#     ~/.claude/local-llm/routing-policy.yaml beats the committed default;
+#     BELT_POLICY env beats both.
+#
+# ACTIVATION (coordinator step, BETWEEN fan-outs — a config reload drops
+# in-flight streams):
+#   bun bin/gateway-config.ts
+#   launchctl kickstart -k gui/$(id -u)/com.belt.gateway
+#
+# BUDGETS: per-key/per-group rpm/tpm + spend budgets are ALSO native
+# (virtual keys + parallel_request_limiter) but need Postgres (DATABASE_URL)
+# — documented activation step, deliberately not built in this lane. Until
+# then the proactive tier is the operator cap: keep fan-outs ≤ ~6 concurrent
+# flash lanes (lesson.fanout-rate-budget).
+version: 1
+
+gateway:
+  num_retries: 1
+  allowed_fails: 3
+  cooldown_time: 30
+  fallbacks:
+    glm-5.3-flash: [local-swarm, gpt-5.2, claude-sonnet-5]
