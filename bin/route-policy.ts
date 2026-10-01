@@ -88,13 +88,19 @@ function readTokens(): Tokens {
 	}
 }
 
+/** Raw bearer token from the Authorization header — "" when absent. Shared
+ *  with the dashboard's rate limiter (W155.3) so both parse one way. */
+export const bearerToken = (req: Request): string => {
+	const raw = req.headers.get("authorization") ?? "";
+	return raw.startsWith("Bearer ") ? raw.slice(7).trim() : "";
+};
+
 /** 401 = no/malformed credential; 403 = credential present but unknown. */
 function checkAuth(
 	req: Request,
 ): { ok: true; label: string } | { ok: false; status: 401 | 403; why: string } {
 	ensureTokenFile();
-	const raw = req.headers.get("authorization") ?? "";
-	const token = raw.startsWith("Bearer ") ? raw.slice(7).trim() : "";
+	const token = bearerToken(req);
 	if (!token)
 		return {
 			ok: false,
