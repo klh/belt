@@ -28,3 +28,7 @@ gate catch them — recurring offenders: non-null `!` (noNonNullAssertion),
 string `+ "\n"` concat (useTemplate), comma operator, unused vars/imports,
 use-before-declaration. biome owns code formatting; prettier owns markdown
 only — never enable both on code (they deadlock).
+
+## UI law
+
+NEVER `innerHTML` / `document.write` (blocked by the write-gate). `document.createElement` only inside web components (lit). UI = Lit components + design tokens per klh-core-components / klh-lit-dev skills.
