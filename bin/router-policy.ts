@@ -20,11 +20,13 @@ export interface GatewayPolicy {
 	allowed_fails?: number;
 	cooldown_time?: number;
 	fallbacks?: Record<string, string[]>;
+	executor_policy: { disabled_executors: string[] };
 }
 
 interface PolicyDoc {
 	version?: number;
 	gateway?: GatewayPolicy;
+	executor_policy?: { disabled_executors?: string[] };
 }
 
 /** Native-free defaults; the committed YAML carries the same values. */
@@ -37,7 +39,15 @@ const DEFAULTS: Required<Omit<GatewayPolicy, "fallbacks">> = {
 /** Parse a policy document (tests + loader share this path). */
 export function parsePolicy(text: string): GatewayPolicy {
 	const doc = YAML.parse(text) as PolicyDoc;
-	return { ...DEFAULTS, ...(doc.gateway ?? {}) };
+	return {
+		...DEFAULTS,
+		...(doc.gateway ?? {}),
+		executor_policy: {
+			disabled_executors: (doc.executor_policy?.disabled_executors ?? []).map(
+				(s) => s.toLowerCase(),
+			),
+		},
+	};
 }
 
 /** Resolution order: explicit path → BELT_POLICY → runtime copy in the
@@ -73,4 +83,52 @@ export function emitRouterSettings(p: GatewayPolicy): string {
 		`  cooldown_time: ${p.cooldown_time}\n` +
 		(fallbackLines ? `  fallbacks:\n${fallbackLines}\n` : "")
 	);
+}
+
+// ─── W201 executor policy — model-list matching + ladder coherence ────────
+/** Attribute a model_name to its executor by prefix — the same matching the
+ *  :4100 model_list itself uses. claude* → claude, gpt* → openai, glm* →
+ *  zai; everything else (local MLX ports, LAN remotes, local-swarm) is
+ *  local-executor by construction. */
+export function executorOfModelName(name: string): string {
+	const n = name.toLowerCase();
+	if (n.startsWith("claude")) return "claude";
+	if (n.startsWith("gpt")) return "openai";
+	if (n.startsWith("glm")) return "zai";
+	return "local";
+}
+
+/** Drop entries whose executor is disabled by the policy; the dropped names
+ *  come back for stderr logging + ladder pruning. */
+export function applyExecutorPolicy<T extends { name: string }>(
+	entries: T[],
+	policy: GatewayPolicy,
+): { kept: T[]; dropped: string[] } {
+	const disabled = new Set(policy.executor_policy.disabled_executors);
+	const kept: T[] = [];
+	const dropped: string[] = [];
+	for (const e of entries) {
+		if (disabled.has(executorOfModelName(e.name))) dropped.push(e.name);
+		else kept.push(e);
+	}
+	return { kept, dropped };
+}
+
+/** Keep the emitted ladders coherent with the surviving model_list: rungs
+ *  referencing dropped names vanish; a dropped group head kills its whole
+ *  ladder line (an emptied line drops entirely). */
+export function pruneFallbacks(
+	policy: GatewayPolicy,
+	alive: Set<string>,
+): GatewayPolicy {
+	const fb = policy.fallbacks;
+	if (!fb) return policy;
+	const fallbacks: Record<string, string[]> = {};
+	for (const [head, rungs] of Object.entries(fb)) {
+		if (!alive.has(head)) continue;
+		const kept = rungs.filter((r) => alive.has(r));
+		if (kept.length === 0) continue;
+		fallbacks[head] = kept;
+	}
+	return { ...policy, fallbacks };
 }

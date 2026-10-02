@@ -33,3 +33,11 @@ gateway:
   cooldown_time: 30
   fallbacks:
     glm-5.3-flash: [local-swarm, gpt-5.2, claude-sonnet-5]
+
+# W201 EXECUTOR POLICY (owner directive 2026-10-02): claude + openai OFF
+# until further notice — local llms + z.ai only. gateway-config.ts drops
+# matching cloud-tier model_list entries and prunes every ladder rung that
+# references them at each regen. The committed ladder above keeps the full
+# rungs — flip the deny-list to [] and regen to restore.
+executor_policy:
+  disabled_executors: [claude, openai]
