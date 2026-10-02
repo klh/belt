@@ -93,7 +93,8 @@ bun bench-suite.ts --port 8901 --model mlx-community/Qwen3-Coder-30B-A3B-Instruc
   self-contained HTML graph)
 - [`bench/benchmarks.jsonl`](bench/benchmarks.jsonl) — the measured record
   (committed)
-- [`bench/RESULTS.md`](bench/RESULTS.md) — the numbers behind the current fleet
+- [`benchmarks.md`](benchmarks.md) — the canonical curated bench tables and
+  rejection log (owner law 2026-10-02); `bench/RESULTS.md` is a historical stub
 - [`docs/add-a-model.md`](docs/add-a-model.md) — **how to add a new model**:
   registry → download → serve → bench → adopt/reject, with the rejection log
 
@@ -137,7 +138,7 @@ Full doctrine with the measured table: [`docs/routing.md`](docs/routing.md).
   bench discipline and the survey-rejection log
 - [Routing doctrine](docs/routing.md) — the measured decision table + rules
 - [Fleet findings](docs/fleet-findings.md) — calibration notes and gotchas
-  (wired limit, uv symlink gotcha, rapid-mlx A/B numbers)
+  (wired limit, uv symlink gotcha); bench tables live in [benchmarks.md](benchmarks.md)
 
 ## License
 

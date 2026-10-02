@@ -1,19 +1,16 @@
-# Bench results — 2026-09-23 fleet runs
+# RESULTS.md — historical stub
 
-Raw record: [`benchmarks.jsonl`](benchmarks.jsonl) (116 entries, standard
-4-prompt suite, medians decide). Machine: M5 Max 128 GB, rapid-mlx engine,
-prefix + response caching on. Every adoption/rejection in
-[`docs/add-a-model.md`](../docs/add-a-model.md) traces to lines in this file.
+Moved per owner law (2026-10-02): curated tables live in
+[benchmarks.md](../../benchmarks.md), questions in
+[bench-questions.md](../../bench-questions.md). **Do not store bench data
+here.** The 2026-09-23 fleet snapshot is preserved below for provenance.
 
-## Current fleet (medians, tok/s)
+---
 
-| Port | Specialist        | Model                  | Median | Note                        |
-| ---- | ----------------- | ---------------------- | ------ | --------------------------- |
-| 8901 | ⚡ code           | Qwen3-Coder-30B-A3B    | 123.7  | bf16 KV (int8 KV A/B'd out) |
-| 8902 | 🏠 extract        | Qwen3-4B               | 158.9  | fastest port in the fleet   |
-| 8903 | 🧠 reason         | Qwen3.5-35B-A3B        | 147.9  | MoE, 3B active              |
-| 8906 | 🌐 danish/general | Qwen3.5-9B (think-off) | 85.2   | on-demand tier              |
-| 8913 | 🔀 rerank         | Qwen3-Reranker-0.6B    | —      | rerank route, not tok/s     |
+## Historical snapshot (2026-09-23 fleet runs)
+
+Raw record: [`benchmarks.jsonl`](benchmarks.jsonl). Machine: M5 Max 128 GB,
+rapid-mlx engine, prefix + response caching on.
 
 ## The A/B stories these numbers settled
 

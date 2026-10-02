@@ -5,18 +5,15 @@ Anthropic-compatible router, so most agent traffic never leaves the machine.
 This doc records what we measured, what we swapped, and the gotchas that cost us
 time — so a new Mac can skip straight to the good config.
 
-Measured on an M5 Max 128GB, macOS 26. Numbers are directional (n=4 prompts,
-temp 0), logged over time in a JSONL benchmark store.
+Measured on an M5 Max 128GB, macOS 26. **All benchmark numbers live in
+[benchmarks.md](../benchmarks.md)** (owner law, 2026-10-02) — do not store
+bench data in this doc; raw records in bench/benchmarks.jsonl.
 
 ## Runner: rapid-mlx over mlx_lm.server
 
 A/B on identical prompts (4-prompt battery, warm, temp 0, 350 max tokens):
-
-| Port    | Model                             | mlx_lm.server | rapid-mlx 0.14.3 | Delta    |
-| ------- | --------------------------------- | ------------- | ---------------- | -------- |
-| code    | Qwen3-Coder-30B-A3B-Instruct-4bit | 91.9 tok/s    | 121.8 tok/s      | **+33%** |
-| reason  | Qwen3.8-27B-4bit                  | 24.8 tok/s    | 29.5 tok/s       | **+19%** |
-| extract | Qwen3-4B-Instruct-2507-4bit       | fast already  | fast already     | ~even    |
+numbers in [benchmarks.md → Measured A/B results](../benchmarks.md#measured-ab-results).
+Short version: rapid-mlx wins (code +33%, reason +19%, extract even).
 
 Why it is faster, concretely:
 
@@ -83,23 +80,18 @@ architecture prose → classified → 27B; personal email asks never touch the 2
 
 ## Classifier shootout (Jev-style typed routing)
 
-| Model                      | Accuracy                                                  | Latency | RAM  | Verdict                                            |
-| -------------------------- | --------------------------------------------------------- | ------- | ---- | -------------------------------------------------- |
-| Kev-9B                     | 5/5, p 0.98–1.00                                          | ~800ms  | 18GB | OOM-killed by macOS in a RAM spike                 |
-| **Kev-4B**                 | 5/5, p 0.98–1.00                                          | ~1s     | ~8GB | **in production**, launchd-managed                 |
-| Laya-MLX 421M (ModernBERT) | 3/5 — personal collapses into "coding" at 0.94 confidence | 9–28ms  | <1GB | rejected: a 40% misroute rate beats any speed gain |
-| Laya-multilingual 322M     | 3/5                                                       | 9–28ms  | <1GB | rejected                                           |
-
-`needs_strong`-style questions come back mushy from Kev (0.17–0.44) — use
-`use_case` only unless you calibrate that head yourself.
+Numbers and verdicts moved to
+[benchmarks.md → Decision-model backends](../benchmarks.md#decision-model-backends)
+(owner law 2026-10-02: bench data lives only there). The durable lessons:
+a 40% misroute rate beats any speed gain; Kev's `needs_strong` head comes
+back mushy — use `use_case` only unless you calibrate that head yourself.
 
 ## Benchmarking discipline
 
-Everything measured lands in an append-only JSONL (`benchmarks.jsonl`) with
-suite/model/metric/meta, plus a self-contained HTML SVG trend graph. Four
-standard prompts (TS coding, web component, architecture trade-offs, Danish
-prose), warm, temp 0, fixed max_tokens, auto-logged per run. Over time this is
-what tells you whether an engine upgrade actually helped.
+Moved to [bench-questions.md](../bench-questions.md) — per-class question
+sets, sample-size laws and runner contracts live there; curated tables in
+[benchmarks.md](../benchmarks.md); raw append-only records in
+bench/benchmarks.jsonl.
 
 ## System-level notes (Apple Silicon / Metal)
 

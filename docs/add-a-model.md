@@ -51,9 +51,10 @@ curl -s http://localhost:PORT/v1/chat/completions -H 'content-type: application/
 
 ## 4. Bench it
 
-The standard rig is the 4-prompt suite (TS dedupe, web component, trade-offs,
-Danish email — the Danish prompt is deliberate: multilingual is a fleet
-requirement).
+The standard rig is the 4-prompt suite — exact question text and sample-size
+laws in [bench-questions.md](../bench-questions.md); curated numbers in
+[benchmarks.md](../benchmarks.md). The Danish prompt is deliberate:
+multilingual is a fleet requirement.
 
 ```bash
 cd ~/.claude/local-llm
@@ -69,8 +70,9 @@ House rules:
   justifies a swap; quality probes (owner-fork replay, determinate-answer
   probes) gate adoption
 - **A/B engine flags too** — e.g. the 8901 kv-cache A/B: `--kv-cache-dtype
-int8` benched −26% at short contexts (dequant overhead dominates; bf16 KV
-  stays). Comment the numbers in the registry.
+int8` lost clearly at short contexts (dequant overhead dominates; bf16 KV
+  stays — numbers in [benchmarks.md](../benchmarks.md)). Comment the outcome
+  in the registry.
 
 ## 5. Adopt or reject
 
@@ -80,13 +82,9 @@ int8` benched −26% at short contexts (dequant overhead dominates; bf16 KV
 
 ## Rejection log
 
-| Date       | Model                                  | Verdict                                                                                                |
-| ---------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| 2026-09-27 | Qwen3.8-27B (dense)                    | 28.3 vs 138.5 tok/s at equal probe quality — the :8903 slot stays Qwen3.5-35B-A3B                      |
-| 2026-09-27 | GLM-5.x locally                        | 204–418 GB at 4-bit; no fit in 128 GB — remote-only                                                    |
-| 2026-09-27 | Xing4.0-29B-A4B                        | MLA+MTP unproven in MLX, no expected edge over Qwen3.5-35B-A3B                                         |
-| 2026-09-27 | Fastino-Nemotron-3.5-Lightning-Finance | English-only; no Danish context. General local model + own docs wins for niche extraction              |
-| 2026-09-27 | Intern-Decision-4B                     | 12/15 vs production's 13/15 on the fork replay, CUDA-only serving; revisit only if an MLX port appears |
+Moved to the [rejection log in benchmarks.md](../benchmarks.md#rejection-log)
+(owner law 2026-10-02 — bench data lives only there). New rejections get a
+row there, with the date and the bench numbers that justified them.
 
 ## Tips
 
