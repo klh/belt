@@ -11,8 +11,12 @@
 // leaves the machine).
 
 import { appendFileSync } from "node:fs";
+import { createAdmission, overloaded } from "./admission.ts";
+import { promptFingerprint } from "./prompt-fingerprint.ts";
 import { byPort, fallbackFor, type Specialist } from "./registry.ts";
 import { ensureUp } from "./spawner.ts";
+
+const admission = createAdmission();
 
 const HOME = process.env.HOME;
 const PREFS_FILE = `${HOME}/.claude/local-llm/prefs.json`;
@@ -544,158 +548,182 @@ Bun.serve({
 			classifier = classifier ? `${classifier}+danish` : "danish";
 		}
 
-		const maxTokens = Math.min(body.max_tokens ?? 1024, 4096);
-		const temperature = body.temperature ?? 0.7;
-
-		// OpenAI-format messages + /no_think for Qwen3 models
-		const messages = (body.messages ?? []).map((m) => ({
-			role: m.role === "assistant" ? "assistant" : "user",
-			content: blocksOf(m),
-		}));
-		if (!messages.some((m) => m.role === "system")) {
-			messages.unshift({ role: "system", content: "/no_think" });
-		} else {
-			messages[0].content += " /no_think";
+		// admission control: bound in-flight per routed port; overflow → 429 +
+		// Retry-After so the gateway ladder takes its next hop
+		const release = admission.tryAcquire(route.port);
+		if (!release) {
+			logRouting({
+				category: route.role,
+				port: route.port,
+				...promptFingerprint(text),
+				outcome: "overloaded",
+			});
+			return overloaded(route.port, admission);
 		}
+		try {
+			const maxTokens = Math.min(body.max_tokens ?? 1024, 4096);
+			const temperature = body.temperature ?? 0.7;
 
-		let response = "";
-		let usedPort = route.port;
-		let usedModel = route.model;
-		const note: string[] = [
-			`complexity ${score.total.toFixed(2)} → ${score.tier}${isCode ? "+code" : ""}${classifier ? ` ${classifier}` : ""}`,
-		];
-
-		// selftest hook: _force_dead_port swaps the primary target while keeping
-		// route identity — fallbackFor() still maps from the real route
-		let primary = route;
-		if (Number.isFinite(Number(body._force_dead_port))) {
-			primary = {
-				...route,
-				port: Number(body._force_dead_port) as Specialist["port"],
-				model: "selftest-dead",
-			};
-			note.push(`forced dead primary :${primary.port}`);
-		}
-
-		// ondemand tier: spawn on first request (single-flight); residents rely
-		// on launchd KeepAlive instead (routing rule 2). Cold load is visible in
-		// the note — never a silent fallback (that was the W1 defect).
-		if (route.tier === "ondemand") {
-			const ens = await ensureUp(route);
-			if (ens.up) {
-				if (ens.cold)
-					note.push(
-						`ondemand :${route.port} ready (cold ${(ens.waitedMs / 1000).toFixed(1)}s)`,
-					);
+			// OpenAI-format messages + /no_think for Qwen3 models
+			const messages = (body.messages ?? []).map((m) => ({
+				role: m.role === "assistant" ? "assistant" : "user",
+				content: blocksOf(m),
+			}));
+			if (!messages.some((m) => m.role === "system")) {
+				messages.unshift({ role: "system", content: "/no_think" });
 			} else {
-				note.push(
-					`ondemand :${route.port} DOWN (${ens.error ?? "spawn failed"})`,
-				);
+				messages[0].content += " /no_think";
 			}
-		}
 
-		// 1) primary specialist
-		let attempt = await viaLocal(primary, messages, maxTokens, temperature);
-		const errors: string[] = [];
-		if (!attempt.ok)
-			errors.push(`:${primary.port} ${attempt.error ?? "empty"}`);
+			let response = "";
+			let usedPort = route.port;
+			let usedModel = route.model;
+			const note: string[] = [
+				`complexity ${score.total.toFixed(2)} → ${score.tier}${isCode ? "+code" : ""}${classifier ? ` ${classifier}` : ""}`,
+			];
 
-		// 2) bounded fallback: one alternate specialist
-		if (!attempt.ok) {
-			const fb = fallbackFor(route.port);
-			if (fb) {
-				note.push(`fallback → :${fb.port}`);
-				attempt = await viaLocal(fb, messages, maxTokens, temperature);
-				usedPort = fb.port;
-				usedModel = fb.model;
-				if (!attempt.ok) errors.push(`:${fb.port} ${attempt.error ?? "empty"}`);
+			// selftest hook: _force_dead_port swaps the primary target while keeping
+			// route identity — fallbackFor() still maps from the real route
+			let primary = route;
+			if (Number.isFinite(Number(body._force_dead_port))) {
+				primary = {
+					...route,
+					port: Number(body._force_dead_port) as Specialist["port"],
+					model: "selftest-dead",
+				};
+				note.push(`forced dead primary :${primary.port}`);
 			}
-		}
-		if (attempt.ok) response = attempt.response;
 
-		// 3) cloud escalation — prefs-gated, COMPLEX+ only, never in cost mode
-		const cloudAllowed =
-			prefs.allow_cloud === true && prefs.cost_speed !== "cost";
-		const cloudWarranted =
-			score.tier === "COMPLEX" ||
-			score.tier === "VERY_COMPLEX" ||
-			prefs.cost_speed === "quality";
-		if (!response && cloudAllowed && cloudWarranted) {
-			try {
-				response = await viaCloud(
-					body.messages,
-					maxTokens,
-					score.tier !== "VERY_COMPLEX",
-				);
-				if (response) {
-					usedPort = 0;
-					usedModel = `z.ai:${score.tier === "VERY_COMPLEX" ? "glm-5.3" : "glm-5.3-flash"}`;
-					note.push("escalated → cloud(z.ai)");
+			// ondemand tier: spawn on first request (single-flight); residents rely
+			// on launchd KeepAlive instead (routing rule 2). Cold load is visible in
+			// the note — never a silent fallback (that was the W1 defect).
+			if (route.tier === "ondemand") {
+				const ens = await ensureUp(route);
+				if (ens.up) {
+					if (ens.cold)
+						note.push(
+							`ondemand :${route.port} ready (cold ${(ens.waitedMs / 1000).toFixed(1)}s)`,
+						);
+				} else {
+					note.push(
+						`ondemand :${route.port} DOWN (${ens.error ?? "spawn failed"})`,
+					);
 				}
-			} catch {
-				note.push("cloud escalation failed");
 			}
-		}
 
-		if (!response) {
+			// 1) primary specialist
+			let attempt = await viaLocal(primary, messages, maxTokens, temperature);
+			const errors: string[] = [];
+			if (!attempt.ok)
+				errors.push(`:${primary.port} ${attempt.error ?? "empty"}`);
+
+			// 2) bounded fallback: one alternate specialist
+			if (!attempt.ok) {
+				const fb = fallbackFor(route.port);
+				const fbRelease = fb ? admission.tryAcquire(fb.port) : null;
+				if (fb && !fbRelease)
+					note.push(`fallback :${fb.port} at max in-flight`);
+				if (fb && fbRelease) {
+					note.push(`fallback → :${fb.port}`);
+					try {
+						attempt = await viaLocal(fb, messages, maxTokens, temperature);
+					} finally {
+						fbRelease();
+					}
+					usedPort = fb.port;
+					usedModel = fb.model;
+					if (!attempt.ok)
+						errors.push(`:${fb.port} ${attempt.error ?? "empty"}`);
+				}
+			}
+			if (attempt.ok) response = attempt.response;
+
+			// 3) cloud escalation — prefs-gated, COMPLEX+ only, never in cost mode
+			const cloudAllowed =
+				prefs.allow_cloud === true && prefs.cost_speed !== "cost";
+			const cloudWarranted =
+				score.tier === "COMPLEX" ||
+				score.tier === "VERY_COMPLEX" ||
+				prefs.cost_speed === "quality";
+			if (!response && cloudAllowed && cloudWarranted) {
+				try {
+					response = await viaCloud(
+						body.messages,
+						maxTokens,
+						score.tier !== "VERY_COMPLEX",
+					);
+					if (response) {
+						usedPort = 0;
+						usedModel = `z.ai:${score.tier === "VERY_COMPLEX" ? "glm-5.3" : "glm-5.3-flash"}`;
+						note.push("escalated → cloud(z.ai)");
+					}
+				} catch {
+					note.push("cloud escalation failed");
+				}
+			}
+
+			if (!response) {
+				logRouting({
+					category: route.role,
+					model: usedModel,
+					port: usedPort,
+					duration_ms: Date.now() - startTime,
+					...promptFingerprint(text),
+					complexity: score.total,
+					tier: score.tier,
+					outcome: "empty",
+				});
+				return Response.json(
+					{
+						type: "error",
+						error: {
+							type: "api_error",
+							message: `router: all routes empty (${[...note, ...errors].join("; ")})`,
+						},
+					},
+					{ status: 502 },
+				);
+			}
+
 			logRouting({
 				category: route.role,
 				model: usedModel,
 				port: usedPort,
 				duration_ms: Date.now() - startTime,
-				prompt: text.slice(0, 80),
+				...promptFingerprint(text),
 				complexity: score.total,
 				tier: score.tier,
-				outcome: "empty",
+				escalated: usedPort === 0 ? "z.ai" : undefined,
 			});
-			return Response.json(
-				{
-					type: "error",
-					error: {
-						type: "api_error",
-						message: `router: all routes empty (${[...note, ...errors].join("; ")})`,
+
+			return Response.json({
+				id: `msg_${route.role}_${Date.now()}`,
+				type: "message",
+				role: "assistant",
+				model: body.model,
+				content: [{ type: "text", text: response }],
+				stop_reason: "end_turn",
+				usage: { input_tokens: 0, output_tokens: 0 },
+				_routing: {
+					tier: score.tier,
+					complexity: score.total.toFixed(3),
+					category: route.role,
+					port: usedPort,
+					model: usedModel,
+					note: note.join("; "),
+					prefs: {
+						cost_speed: prefs.cost_speed ?? "balanced",
+						allow_cloud: prefs.allow_cloud === true,
+						profile: prefs.profile ?? [],
 					},
+					dimensions: Object.fromEntries(
+						Object.entries(score.dimensions).map(([k, v]) => [k, v.toFixed(2)]),
+					),
 				},
-				{ status: 502 },
-			);
+			});
+		} finally {
+			release();
 		}
-
-		logRouting({
-			category: route.role,
-			model: usedModel,
-			port: usedPort,
-			duration_ms: Date.now() - startTime,
-			prompt: text.slice(0, 80),
-			complexity: score.total,
-			tier: score.tier,
-			escalated: usedPort === 0 ? "z.ai" : undefined,
-		});
-
-		return Response.json({
-			id: `msg_${route.role}_${Date.now()}`,
-			type: "message",
-			role: "assistant",
-			model: body.model,
-			content: [{ type: "text", text: response }],
-			stop_reason: "end_turn",
-			usage: { input_tokens: 0, output_tokens: 0 },
-			_routing: {
-				tier: score.tier,
-				complexity: score.total.toFixed(3),
-				category: route.role,
-				port: usedPort,
-				model: usedModel,
-				note: note.join("; "),
-				prefs: {
-					cost_speed: prefs.cost_speed ?? "balanced",
-					allow_cloud: prefs.allow_cloud === true,
-					profile: prefs.profile ?? [],
-				},
-				dimensions: Object.fromEntries(
-					Object.entries(score.dimensions).map(([k, v]) => [k, v.toFixed(2)]),
-				),
-			},
-		});
 	},
 });
 

@@ -13,6 +13,9 @@ noted; speed rows are solid, quality rows need ≥130 paired questions
 (33 → ±15pts, 130 → ±7, 530 → ±4) — anything smaller is a smoke test; score
 per class, never blended; one lever at a time; re-run after any model bump.
 Runner: `bun bin/bench-suite.ts --port <port> --model <id> --label <short>`.
+TTFT/prefill: `bun bin/bench-suite.ts --ttft --port <port> --sizes 2000,8000,32000`
+(cold + prefix-cache-hit TTFT medians; meta: engine, revision, flags, power,
+thermal; refuses without `/tmp/bench-ac-ok`).
 Fit bench: `bun bin/bench-fit.ts`.
 
 ## Chat tiers — M5 Max 128GB (fleet medians, 2026-09-23)

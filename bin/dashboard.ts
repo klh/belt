@@ -541,13 +541,13 @@ requests leave the machine unless cloud fallback is enabled.
 ## Ports
 
 - :4000  router — Anthropic-compatible /v1/messages shim in front of the fleet (cloud fallback configurable via prefs)
-- :8901  code — Qwen3-Coder-30B-A3B-Instruct-4bit, 16 GB RAM, resident
-- :8902  extract — Qwen3-4B-Instruct-2507-4bit, 2 GB, resident
+- :8901  code — Qwen3-Coder-30B-A3B-Instruct-4bit, 18 GB RAM, resident
+- :8902  extract — Qwen3-4B-Instruct-2507-4bit, 2.5 GB, resident
 - :8903  reason — Qwen3.5-35B-A3B-4bit, 20 GB, resident
-- :8906  danish/general — Qwen3.5-9B-MLX-4bit, 5.6 GB, on-demand
+- :8906  danish/general — Qwen3.5-9B-MLX-4bit, 5 GB, on-demand
 - :8912  kev — jaredpalmer/kev-4b typed-question classifier, ~8 GB, resident (external, via ~/dev/kev)
-- :8913  rerank — Qwen3-Reranker-0.6B-4bit, 1 GB, resident
-- :8907  embeddings — context-rag embed_server.py, started on demand (not part of belt)
+- :8913  rerank — Qwen3-Reranker-0.6B-4bit, 0.5 GB, resident
+- :8907  embeddings — context-rag embed_server.py, started on demand (external, declared in registry EXTERNAL)
 - :7791  this dashboard (GET / page, GET /api/status JSON snapshot)
 
 ## Machine-readable status

@@ -19,9 +19,16 @@ const suite = get("--suite") ?? "fleet";
 const THINK_OFF = process.argv.includes("--thinking-off");
 if (!port) {
 	console.error(
-		"usage: bench-suite.ts --port N --model <id> [--label L] [--suite S]",
+		"usage: bench-suite.ts --port N --model <id> [--label L] [--suite S] [--ttft --sizes 2000,8000,32000]",
 	);
 	process.exit(1);
+}
+
+// --ttft: prefill / time-to-first-token mode (bench-ttft.ts); the decode
+// battery below stays untouched for comparability with historical rows.
+if (args.includes("--ttft")) {
+	const { ttftMain } = await import("./bench-ttft.ts");
+	process.exit(await ttftMain(args));
 }
 
 const PROMPTS = [
@@ -66,7 +73,10 @@ async function ask(content: string) {
 		}),
 		signal: AbortSignal.timeout(300_000),
 	});
-	const d = JSON.parse(sanitize(await r.text())) as any;
+	const d = JSON.parse(sanitize(await r.text())) as {
+		usage?: { completion_tokens?: number };
+		choices?: Array<{ message?: { content?: string } }>;
+	};
 	const secs = (performance.now() - t0) / 1000;
 	const tok = d.usage?.completion_tokens ?? 0;
 	const txt: string = d.choices?.[0]?.message?.content ?? "";

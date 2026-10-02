@@ -37,12 +37,12 @@ Change a model in one place, everything follows.
 
 | Port | Model                             | Role                       | RAM    | Engine |
 | ---- | --------------------------------- | -------------------------- | ------ | ------ |
-| 8901 | Qwen3-Coder-30B-A3B-Instruct-4bit | code (MoE, 3B active)      | ~16GB  | rapid  |
-| 8902 | Qwen3-4B-Instruct-2507-4bit       | extract/simple             | ~2GB   | rapid  |
+| 8901 | Qwen3-Coder-30B-A3B-Instruct-4bit | code (MoE, 3B active)      | ~18GB  | rapid  |
+| 8902 | Qwen3-4B-Instruct-2507-4bit       | extract/simple             | ~2.5GB | rapid  |
 | 8903 | Qwen3.5-35B-A3B-4bit              | reason/architecture        | ~20GB  | rapid  |
-| 8906 | Qwen3.5-9B-4bit                   | danish/general (on demand) | ~5.6GB | rapid  |
+| 8906 | Qwen3.5-9B-4bit                   | danish/general (on demand) | ~5GB   | rapid  |
 | 8912 | Kev-4B decision model             | classifier leg             | ~8GB   | kev    |
-| 8913 | Qwen3-Reranker-0.6B-4bit          | rerank (prompt protocol)   | ~0.4GB | rapid  |
+| 8913 | Qwen3-Reranker-0.6B-4bit          | rerank (prompt protocol)   | ~0.5GB | rapid  |
 
 Gotcha found live: rapid-mlx 0.15.x serves `/v1/embeddings` but has **no
 `/v1/rerank`**. The 0.6B reranker still works — Qwen3-Reranker's native
