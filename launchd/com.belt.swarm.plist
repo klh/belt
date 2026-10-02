@@ -24,6 +24,6 @@
         <key>PATH</key>
         <string>__HOME__/.local/bin:__HOME__/.local/share/uv/tools/mlx-lm/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
     </dict>
-    <!-- Swarm: 3 specialists (~20GB) + router. 108GB free for apps + KV cache. -->
+    <!-- Swarm: resident specialists (see bin/registry.ts, ~41GB) + router. -->
 </dict>
 </plist>

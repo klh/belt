@@ -20,11 +20,11 @@ import it; change a model in the registry and both follow.
 
 | Port | Role                     | Model                                                                    | RAM         | Tier      | Engine    |
 | ---- | ------------------------ | ------------------------------------------------------------------------ | ----------- | --------- | --------- |
-| 8901 | ⚡ code                  | Qwen3-Coder-30B-A3B-Instruct-4bit                                        | 16 GB       | resident  | rapid-mlx |
-| 8902 | 🏠 extract               | Qwen3-4B-Instruct-2507-4bit                                              | 2 GB        | resident  | rapid-mlx |
-| 8903 | 🧠 reason                | Qwen3.5-35B-A3B-4bit                                                     | 20 GB ~38GB | resident  | rapid-mlx |
-| 8906 | 🌐 danish/general        | Qwen3.5-9B-MLX-4bit                                                      | 5.6 GB      | on-demand | rapid-mlx |
-| 8913 | 🔀 rerank                | Qwen3-Reranker-0.6B-4bit                                                 | 1 GB        | resident  | rapid-mlx |
+| 8901 | ⚡ code                  | Qwen3-Coder-30B-A3B-Instruct-4bit                                        | 18 GB       | resident  | rapid-mlx |
+| 8902 | 🏠 extract               | Qwen3-4B-Instruct-2507-4bit                                              | 2.5 GB      | resident  | rapid-mlx |
+| 8903 | 🧠 reason                | Qwen3.5-35B-A3B-4bit                                                     | 20 GB       | resident  | rapid-mlx |
+| 8906 | 🌐 danish/general        | Qwen3.5-9B-MLX-4bit                                                      | 5 GB        | on-demand | rapid-mlx |
+| 8913 | 🔀 rerank                | Qwen3-Reranker-0.6B-4bit                                                 | 0.5 GB      | resident  | rapid-mlx |
 | 8912 | 🗂 kev (typed classifier) | `jaredpalmer/kev-4b` via [~/dev/kev](https://github.com/jaredpalmer/kev) | ~8 GB       | resident  | external  |
 
 Embeddings retired from the swarm (2026-09-23): `mlx_lm` 0.31.x dropped the
@@ -87,7 +87,14 @@ bun bench-suite.ts --port 8901 --model mlx-community/Qwen3-Coder-30B-A3B-Instruc
 
 - `bin/bench-suite.ts` — standard 4-prompt bench (TS dedupe, web component,
   trade-offs, Danish email) + optional `--thinking-off`; logs each prompt and a
-  median to `benchmarks.jsonl` via `bench-log.ts`
+  median to `benchmarks.jsonl` via `bench-log.ts`. `--ttft --sizes
+  2000,8000,32000` switches to the prefill bench (`bin/bench-ttft.ts`): cold
+  and prefix-cache-hit time-to-first-token medians, prefill tok/s, with
+  engine / revision / flags / power / thermal meta per row
+- Router admission: the `:4000` shim caps in-flight requests per port
+  (`BELT_MAX_INFLIGHT`, default 4); overflow → `429` + `Retry-After`
+  (`BELT_RETRY_AFTER_S`, default 2). The routing log records a prompt sha256
+  prefix + length, never prompt text
 - `bin/bench-log.ts` — append-only history at
   `~/.claude-insights/benchmarks.jsonl`; `list` / `report` (trend table +
   self-contained HTML graph)
