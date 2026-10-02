@@ -322,6 +322,75 @@ function buildPrompt(hint: string, candidates: FitCandidate[]): string {
 	].join("\n");
 }
 
+// ─── Kev backend (W225): the same fit question as SystemOne typed calls —
+// no text decode for the answers, typed heads with probabilities. ───
+const KEV_PORT = process.env.KEV_PORT ?? 8912;
+
+/** Parse buildPrompt's fixed format back into structured input (we own the
+ *  format; the classifyAndCache prompt-string seam stays untouched). */
+export function parsePrompt(prompt: string): {
+	hint: string;
+	candidates: string[];
+} {
+	const hint = /^Task hint: "(.+)"$/m.exec(prompt)?.[1] ?? "";
+	const candidates = prompt
+		.split("\n")
+		.filter((l) => l.startsWith("- "))
+		.map((l) => l.slice(2));
+	return { hint, candidates };
+}
+
+async function callClassifierKev(prompt: string): Promise<string> {
+	const { hint, candidates } = parsePrompt(prompt);
+	const r = await fetch(`http://127.0.0.1:${KEV_PORT}/v1/systemone`, {
+		method: "POST",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({
+			state: JSON.stringify({ hint, candidates }),
+			model: "kev-latest",
+			questions: {
+				placement: {
+					type: "choice",
+					instructions:
+						"Which placement class best fits this task for long-running work?",
+					criteria: {
+						local: "runs on this machine's swarm",
+						remote: "another machine on the LAN",
+						cloud: "paid cloud API",
+					},
+				},
+				longrun: {
+					type: "noul",
+					instructions: "Is this long-running work? true or false",
+				},
+				confidence: {
+					type: "score",
+					instructions: "Confidence in the placement choice",
+					criteria: ["none", "low", "medium", "high", "certain"],
+				},
+			},
+		}),
+		signal: AbortSignal.timeout(CALL_TIMEOUT_MS),
+	});
+	if (!r.ok) throw new Error(`HTTP ${r.status} from :${KEV_PORT}`);
+	const w = (await r.json()) as {
+		answers?: Record<
+			string,
+			{ choice?: string; noul?: number; score?: number }
+		>;
+	};
+	const a = w.answers ?? {};
+	const placement = a.placement?.choice ?? "local";
+	const longrun = (a.longrun?.noul ?? 0) >= 0.5;
+	const confidence = Math.min(1, Math.max(0, (a.confidence?.score ?? 0) / 4));
+	return JSON.stringify({
+		placement,
+		model_glob: null,
+		longrun,
+		confidence: Math.round(confidence * 100) / 100,
+	});
+}
+
 // ─── background classification (async, off the hot path) ───
 /** Classify + cache — the testable core (caller injected; tests count calls
  *  to prove same-task = one model call). Returns false when nothing was
@@ -347,6 +416,16 @@ async function runClassification(
 	candidates: FitCandidate[],
 ): Promise<void> {
 	let up = await probeClassifier();
+	// W225: BELT_FIT_BACKEND=kev routes the typed verdict to the SystemOne
+	// decision model (:8912) — no chat-completions, no JSON text decode
+	if (process.env.BELT_FIT_BACKEND === "kev") {
+		const ok = await classifyAndCache(sig, hint, candidates, callClassifierKev);
+		if (!ok)
+			console.error(
+				`[fit-classifier] kev verdict unparseable for sig ${sig} — regex-only stands`,
+			);
+		return;
+	}
 	if (!up) {
 		spawnClassifier();
 		await new Promise((r) => setTimeout(r, 1500));
