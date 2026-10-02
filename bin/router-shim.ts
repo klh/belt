@@ -2,7 +2,8 @@
 // router-shim.ts — LLM specialist swarm router v3.
 // Anthropic API format on :4000 → complexity-scored routing across the local
 // mlx swarm, bounded fallback to an alternate specialist, then optional cloud
-// escalation (prefs-gated).
+// escalation (prefs-gated). Policy + upstream I/O live in router-core.ts
+// (importable for tests); stream:true is piped through as Anthropic SSE.
 //
 // Routing preference + cloud switch live in prefs.json (same dir):
 //   { "cost_speed": "balanced"|"cost"|"speed"|"quality", "allow_cloud": bool }
@@ -14,6 +15,21 @@ import { appendFileSync } from "node:fs";
 import { createAdmission, overloaded } from "./admission.ts";
 import { promptFingerprint } from "./prompt-fingerprint.ts";
 import { byPort, fallbackFor, type Specialist } from "./registry.ts";
+import {
+	type AnthropicBody,
+	anthropicSseFromOpenAi,
+	anthropicSseFromText,
+	applyBudget,
+	callHonoringRetryAfter,
+	classifierText,
+	kevEligible,
+	openLocalStream,
+	retryAfterMs,
+	scoreComplexity,
+	stopReason,
+	toOpenAiMessages,
+	viaLocal,
+} from "./router-core.ts";
 import { ensureUp } from "./spawner.ts";
 
 const admission = createAdmission();
@@ -33,6 +49,8 @@ type Prefs = {
 	cost_speed?: "balanced" | "cost" | "speed" | "quality";
 	allow_cloud?: boolean;
 	profile?: string[];
+	routing_table?: Record<string, number>;
+	kev?: { enabled?: boolean; port?: number; ambiguity_band?: [number, number] };
 };
 async function loadPrefs(): Promise<Prefs> {
 	try {
@@ -40,78 +58,6 @@ async function loadPrefs(): Promise<Prefs> {
 	} catch {
 		return {};
 	}
-}
-
-// ─── 7-dimension complexity scoring (LiteLLM Auto Router pattern) ───
-interface ComplexityScore {
-	total: number; // 0..1 (higher = more complex)
-	tier: "SIMPLE" | "MEDIUM" | "COMPLEX" | "VERY_COMPLEX";
-	dimensions: Record<string, number>;
-}
-
-const CODE_PATTERNS =
-	/\b(function|class|interface|type\s|const\s|let\s|var\s|import\s|export\s|def\s|public\s|private\s|async\s|await|return|=>|\.ts|\.tsx|\.js|\.py|\.cs|typescript|javascript|python|csharp|refactor|debug|compile|lint|api|endpoint|component|hook|docker|kubernetes|algorithm|implement|optimize)\b/i;
-const REASONING_MARKERS =
-	/\b(analyze|explain|compare|evaluate|design|architect|strategy|why|how\s+does|what\s+if|pros\s+and\s+cons|trade.?off|implications|consequences|root\s+cause|derive|prove|justify|critique)\b/i;
-const TECHNICAL_TERMS =
-	/\b(distributed|concurrency|latency|throughput|scalab|migration|protocol|authentication|encryption|database|schema|middleware|microservice|monolith|event.?driven|state\s+machine|compiler|runtime|garbage\s+collection)\b/i;
-const SIMPLE_INDICATORS =
-	/^(reply|respond|list|name|give\s+me|tell\s+me|what\s+is|who\s+is|when\s+is|where\s+is|how\s+many|convert|translate|summarize\s+this|format\s+this|sort\s+this)\b/i;
-const MULTI_STEP =
-	/\b(first.*then|step\s+\d|also\s+after|additionally|furthermore|meanwhile|subsequently|before\s+that|after\s+that|next\s+you|finally)\b/i;
-const QUESTION_DEPTH =
-	/\b(underlying|fundamental|philosophical|theoretical|abstract|conceptual|architectural|systemic|holistic|nuanced|paradox|dilemma|emergence)\b/i;
-
-function scoreComplexity(text: string): ComplexityScore {
-	const lower = text.toLowerCase();
-	const words = text.split(/\s+/).length;
-
-	const dimensions: Record<string, number> = {
-		tokenCount: Math.min(words / 200, 1),
-		codePresence: CODE_PATTERNS.test(text) ? 0.8 : 0,
-		reasoningMarkers:
-			(lower.match(new RegExp(REASONING_MARKERS.source, "gi")) ?? []).length *
-			0.25,
-		technicalTerms:
-			(lower.match(new RegExp(TECHNICAL_TERMS.source, "gi")) ?? []).length *
-			0.2,
-		simpleIndicators: SIMPLE_INDICATORS.test(text.trim()) ? -0.3 : 0, // NEGATIVE weight
-		multiStep: MULTI_STEP.test(lower) ? 0.3 : 0,
-		questionComplexity: QUESTION_DEPTH.test(lower) ? 0.4 : 0,
-	};
-
-	for (const k of Object.keys(dimensions)) {
-		dimensions[k] = Math.max(0, Math.min(1, dimensions[k]));
-	}
-
-	const weights: Record<string, number> = {
-		tokenCount: 0.15,
-		codePresence: 0.25,
-		reasoningMarkers: 0.25,
-		technicalTerms: 0.1,
-		simpleIndicators: 0.1,
-		multiStep: 0.05,
-		questionComplexity: 0.1,
-	};
-
-	let total = 0;
-	for (const [dim, weight] of Object.entries(weights)) {
-		total += dimensions[dim] * weight;
-	}
-	total = Math.max(0, Math.min(1, total));
-
-	// code tasks always route to coder regardless of complexity
-	if (dimensions.codePresence > 0.5) {
-		return { total, tier: "MEDIUM", dimensions };
-	}
-
-	let tier: ComplexityScore["tier"];
-	if (total < TIER_THRESHOLDS.SIMPLE) tier = "SIMPLE";
-	else if (total < TIER_THRESHOLDS.MEDIUM) tier = "MEDIUM";
-	else if (total < TIER_THRESHOLDS.COMPLEX) tier = "COMPLEX";
-	else tier = "VERY_COMPLEX";
-
-	return { total, tier, dimensions };
 }
 
 // arithmetic lane: a pure-math ask is evaluated directly, never sent to an
@@ -201,9 +147,6 @@ function arithmeticAnswer(text: string): string | null {
 	);
 }
 
-// Lower thresholds (were too conservative — 0.221 scored as SIMPLE)
-const TIER_THRESHOLDS = { SIMPLE: 0.15, MEDIUM: 0.35, COMPLEX: 0.6 };
-
 // ─── routes derived from registry.ts (single source of truth) ───
 // fail fast at boot on a misconfigured registry, not mid-request
 const specialist = (port: number): Specialist => {
@@ -236,96 +179,28 @@ function isDanish(text: string): boolean {
 	return strong >= 2 || (strong >= 1 && weak >= 1) || weak >= 3;
 }
 
-// ─── specialist call (OpenAI format) ───
-async function viaLocal(
-	r: { port: number; model: string },
-	messages: unknown[],
-	maxTokens: number,
-	temperature: number,
-): Promise<{ ok: boolean; response: string; error?: string }> {
-	let text = "";
-	try {
-		const res = await fetch(`http://localhost:${r.port}/v1/chat/completions`, {
-			method: "POST",
-			headers: { "content-type": "application/json" },
-			signal: AbortSignal.timeout(120_000),
-			body: JSON.stringify({
-				model: r.model,
-				messages,
-				max_tokens: maxTokens,
-				temperature,
-				stream: false,
-				// Qwen3.8 thinking is template-controlled — /no_think in the prompt
-				// doesn't reach it; the kwarg does (other templates ignore it).
-				// thinking is template-controlled on Qwen3.8 + Qwen3.5: disable for
-				// speed (both verified direct-answer with this off, Sep 23)
-				...(r.port === 8903 || r.port === 8906
-					? { chat_template_kwargs: { enable_thinking: false } }
-					: {}),
-			}),
-		});
-		text = await res.text();
-		// mlx_lm occasionally emits raw newlines inside JSON strings — try strict
-		// parse first (preserves unicode), fall back to escaping control chars.
-		// OpenAI-format chat completion response — the fields the shim consumes
-		let j: {
-			error?: string | { message?: string };
-			choices?: Array<{
-				finish_reason?: string;
-				message?: { content?: string; reasoning_content?: string };
-			}>;
-		};
-		try {
-			j = JSON.parse(text);
-		} catch {
-			j = JSON.parse(text.replace(/\n/g, "\\n"));
-		}
-		if (j.error) {
-			return {
-				ok: false,
-				response: "",
-				error:
-					typeof j.error === "string"
-						? j.error
-						: (j.error.message ?? "specialist error"),
-			};
-		}
-		const msg = j.choices?.[0]?.message ?? {};
-		const strip = (s: string) =>
-			s.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
-		const response =
-			strip(msg.content || "") || strip(msg.reasoning_content || "");
-		if (!response) {
-			return {
-				ok: false,
-				response: "",
-				error: `empty (finish=${j.choices?.[0]?.finish_reason ?? "?"}, keys=${Object.keys(msg).join("+") || "none"})`,
-			};
-		}
-		return { ok: true, response };
-	} catch (e) {
-		const msg = e instanceof Error ? e.message : String(e);
-		return {
-			ok: false,
-			response: "",
-			error: `${msg}${text ? ` | raw: ${text.slice(0, 120)}` : ""}`,
-		};
-	}
-}
-
 // ─── cloud escalation (z.ai, Anthropic format; creds read at request time,
-// never logged or cached) ───
+// never logged or cached). Budget policy applies (GLM always thinks); an
+// upstream 429 surfaces its Retry-After instead of an empty answer. ───
 async function viaCloud(
-	messages: unknown[],
+	body: AnthropicBody,
 	maxTokens: number,
 	wantFast: boolean,
-): Promise<string> {
+): Promise<{
+	text: string;
+	model: string;
+	status?: number;
+	retryAfterMs?: number;
+	note?: string;
+}> {
+	const model = wantFast ? "glm-5.3-flash" : "glm-5.3";
 	const settings = JSON.parse(
 		await Bun.file(`${HOME}/.claude/settings.json`).text(),
 	);
 	const tok = settings.env?.ANTHROPIC_AUTH_TOKEN;
 	const base = settings.env?.ANTHROPIC_BASE_URL;
-	if (!tok || !base) return "";
+	if (!tok || !base) return { text: "", model };
+	const budget = applyBudget(model, maxTokens);
 	const res = await fetch(`${base}/v1/messages`, {
 		method: "POST",
 		headers: {
@@ -336,16 +211,31 @@ async function viaCloud(
 		},
 		signal: AbortSignal.timeout(120_000),
 		body: JSON.stringify({
-			model: wantFast ? "glm-5.3-flash[1m]" : "glm-5.3[1m]",
-			max_tokens: maxTokens,
-			messages,
+			model: `${model}[1m]`,
+			max_tokens: budget.maxTokens,
+			...(body.system === undefined ? {} : { system: body.system }),
+			messages: body.messages,
 		}),
 	});
+	if (res.status === 429) {
+		await res.body?.cancel();
+		return {
+			text: "",
+			model,
+			status: 429,
+			retryAfterMs: retryAfterMs(res.headers.get("retry-after")),
+		};
+	}
 	const j = (await res.json()) as { content?: Array<{ text?: string }> };
-	return (j.content ?? [])
-		.map((b) => b.text ?? "")
-		.join("")
-		.trim();
+	return {
+		text: (j.content ?? [])
+			.map((b) => b.text ?? "")
+			.join("")
+			.trim(),
+		model,
+		status: res.status,
+		note: budget.note,
+	};
 }
 
 // selftest: fire one request whose primary target is a dead port, asserting
@@ -416,8 +306,68 @@ if (process.argv[2] === "selftest-danish") {
 // ─── Anthropic↔OpenAI shim ───
 // BELT_ROUTER_PORT: side-by-side runs (tests, canary) without disturbing :4000.
 const ROUTER_PORT = Number(process.env.BELT_ROUTER_PORT ?? 4000);
+
+type Attempt = {
+	ok: boolean;
+	error?: string;
+	status?: number;
+	retryAfterMs?: number;
+};
+
+/** Primary → one bounded fallback (admission-gated). The fallback slot is
+ *  returned, not released: a stream holds it until the last byte. */
+async function ladder<R extends Attempt>(
+	route: Specialist,
+	primary: Specialist,
+	call: (t: Specialist) => Promise<R>,
+	note: string[],
+	errors: string[],
+): Promise<{
+	result: R;
+	used: Specialist;
+	fbRelease?: () => void;
+	retryAfterMs?: number;
+}> {
+	let result = await callHonoringRetryAfter(() => call(primary));
+	let used = primary;
+	let retryAfter =
+		result.status === 429 ? (result.retryAfterMs ?? 0) : undefined;
+	if (result.ok) return { result, used };
+	errors.push(`:${primary.port} ${result.error ?? "empty"}`);
+	const fb = fallbackFor(route.port);
+	if (!fb) return { result, used, retryAfterMs: retryAfter };
+	const fbRelease = admission.tryAcquire(fb.port);
+	if (!fbRelease) {
+		note.push(`fallback :${fb.port} at max in-flight`);
+		return { result, used, retryAfterMs: retryAfter };
+	}
+	note.push(`fallback → :${fb.port}`);
+	result = await callHonoringRetryAfter(() => call(fb));
+	used = fb;
+	if (result.status === 429)
+		retryAfter = Math.max(retryAfter ?? 0, result.retryAfterMs ?? 0);
+	if (result.ok) return { result, used, fbRelease };
+	fbRelease();
+	errors.push(`:${fb.port} ${result.error ?? "empty"}`);
+	return { result, used, retryAfterMs: retryAfter };
+}
+
+// header = ASCII essentials only (the note carries "→"); full _routing rides
+// in message_start
+const sseHeaders = (routing: Record<string, unknown>) => ({
+	"content-type": "text/event-stream",
+	"cache-control": "no-cache",
+	"x-belt-routing": JSON.stringify({
+		tier: routing.tier,
+		category: routing.category,
+		port: routing.port,
+		model: routing.model,
+	}).replace(/[^\x20-\x7e]/g, "?"),
+});
+
 Bun.serve({
 	port: ROUTER_PORT,
+	idleTimeout: 0, // streams may idle through a long prefill
 	async fetch(req) {
 		const url = new URL(req.url);
 
@@ -429,13 +379,7 @@ Bun.serve({
 			return Response.json({ error: "not found" }, { status: 404 });
 		}
 
-		let body: {
-			model?: string;
-			max_tokens?: number;
-			temperature?: number;
-			messages?: Array<{ role: unknown; content: unknown }>;
-			_force_dead_port?: number;
-		};
+		let body: AnthropicBody;
 		try {
 			body = await req.json();
 		} catch {
@@ -443,18 +387,8 @@ Bun.serve({
 		}
 
 		const startTime = Date.now();
-		const blocksOf = (m: { content: unknown }): string =>
-			typeof m.content === "string"
-				? m.content
-				: Array.isArray(m.content)
-					? m.content
-							.map((b) => {
-								const t = (b as { text?: unknown } | null)?.text;
-								return typeof t === "string" ? t : "";
-							})
-							.join("")
-					: "";
-		const text = (body.messages ?? []).map(blocksOf).join(" ");
+		const text = classifierText(body);
+		const wantStream = body.stream === true;
 
 		// score complexity and select specialist:
 		//   code-ish → coder; everything non-SIMPLE prose → 27B general; else 4B
@@ -464,15 +398,22 @@ Bun.serve({
 		// arithmetic lane — zero tokens, zero model calls
 		const arith = arithmeticAnswer(text);
 		if (arith !== null) {
+			const id = `msg_arith_${Date.now()}`;
+			const routing = { tier: "SIMPLE", category: "arithmetic" };
+			if (wantStream)
+				return new Response(
+					anthropicSseFromText(arith, { id, model: body.model, routing }),
+					{ headers: sseHeaders(routing) },
+				);
 			return Response.json({
-				id: `msg_arith_${Date.now()}`,
+				id,
 				type: "message",
 				role: "assistant",
 				model: body.model,
 				content: [{ type: "text", text: arith }],
 				stop_reason: "end_turn",
 				usage: { input_tokens: 0, output_tokens: 0 },
-				_routing: { tier: "SIMPLE", category: "arithmetic" },
+				_routing: routing,
 			});
 		}
 
@@ -484,18 +425,20 @@ Bun.serve({
 				: TIER_ROUTES.COMPLEX;
 
 		// ambiguity band → Kev typed-question classifier decides by use case
-		// (routing table from prefs); kev down/slow ⇒ regex result stands
+		// (routing table from prefs); kev down/slow ⇒ regex result stands.
+		// Prompts past Kev's context window skip the serial hop (W270).
 		let classifier = "";
 		const band: [number, number] = prefs.kev?.ambiguity_band ?? [0.25, 0.45];
 		const inBand = score.total >= band[0] && score.total <= band[1];
-		if (
+		const kevWanted =
 			prefs.kev?.enabled &&
 			!isCode &&
-			(inBand || score.tier === "VERY_COMPLEX")
-		) {
+			(inBand || score.tier === "VERY_COMPLEX");
+		if (kevWanted && !kevEligible(text)) classifier = "kev-skipped:long";
+		else if (kevWanted) {
 			try {
 				const kr = await fetch(
-					`http://127.0.0.1:${prefs.kev.port ?? 8912}/v1/systemone`,
+					`http://127.0.0.1:${prefs.kev?.port ?? 8912}/v1/systemone`,
 					{
 						method: "POST",
 						headers: { "content-type": "application/json" },
@@ -560,27 +503,48 @@ Bun.serve({
 			});
 			return overloaded(route.port, admission);
 		}
+		let handedOff = false; // a live stream owns `release` until its last byte
 		try {
-			const maxTokens = Math.min(body.max_tokens ?? 1024, 4096);
+			const clientMax = Math.min(body.max_tokens ?? 1024, 4096);
 			const temperature = body.temperature ?? 0.7;
-
-			// OpenAI-format messages + /no_think for Qwen3 models
-			const messages = (body.messages ?? []).map((m) => ({
-				role: m.role === "assistant" ? "assistant" : "user",
-				content: blocksOf(m),
-			}));
-			if (!messages.some((m) => m.role === "system")) {
-				messages.unshift({ role: "system", content: "/no_think" });
-			} else {
-				messages[0].content += " /no_think";
-			}
+			const messages = toOpenAiMessages(body);
 
 			let response = "";
-			let usedPort = route.port;
+			let finish: string | undefined;
+			let usedPort: number = route.port;
 			let usedModel = route.model;
 			const note: string[] = [
 				`complexity ${score.total.toFixed(2)} → ${score.tier}${isCode ? "+code" : ""}${classifier ? ` ${classifier}` : ""}`,
 			];
+			const errors: string[] = [];
+			const routingInfo = () => ({
+				tier: score.tier,
+				complexity: score.total.toFixed(3),
+				category: route.role,
+				port: usedPort,
+				model: usedModel,
+				note: note.join("; "),
+				prefs: {
+					cost_speed: prefs.cost_speed ?? "balanced",
+					allow_cloud: prefs.allow_cloud === true,
+					profile: prefs.profile ?? [],
+				},
+				dimensions: Object.fromEntries(
+					Object.entries(score.dimensions).map(([k, v]) => [k, v.toFixed(2)]),
+				),
+			});
+			const logDone = (extra: Record<string, unknown>) =>
+				logRouting({
+					category: route.role,
+					model: usedModel,
+					port: usedPort,
+					duration_ms: Date.now() - startTime,
+					...promptFingerprint(text),
+					complexity: score.total,
+					tier: score.tier,
+					stream: wantStream || undefined,
+					...extra,
+				});
 
 			// selftest hook: _force_dead_port swaps the primary target while keeping
 			// route identity — fallbackFor() still maps from the real route
@@ -611,34 +575,81 @@ Bun.serve({
 				}
 			}
 
-			// 1) primary specialist
-			let attempt = await viaLocal(primary, messages, maxTokens, temperature);
-			const errors: string[] = [];
-			if (!attempt.ok)
-				errors.push(`:${primary.port} ${attempt.error ?? "empty"}`);
+			// budget policy per target model (thinking off / min budget)
+			const budgetFor = (t: Specialist) => {
+				const b = applyBudget(t.model, clientMax);
+				if (b.note) note.push(b.note);
+				return b;
+			};
 
-			// 2) bounded fallback: one alternate specialist
-			if (!attempt.ok) {
-				const fb = fallbackFor(route.port);
-				const fbRelease = fb ? admission.tryAcquire(fb.port) : null;
-				if (fb && !fbRelease)
-					note.push(`fallback :${fb.port} at max in-flight`);
-				if (fb && fbRelease) {
-					note.push(`fallback → :${fb.port}`);
-					try {
-						attempt = await viaLocal(fb, messages, maxTokens, temperature);
-					} finally {
-						fbRelease();
-					}
-					usedPort = fb.port;
-					usedModel = fb.model;
-					if (!attempt.ok)
-						errors.push(`:${fb.port} ${attempt.error ?? "empty"}`);
+			let retryAfter: number | undefined;
+			if (wantStream) {
+				// streamed: TTFT = the specialist's first token, not the full answer
+				const opened = await ladder(
+					route,
+					primary,
+					(t) => {
+						const b = budgetFor(t);
+						return openLocalStream(t, messages, b.maxTokens, temperature, {
+							extra: b.extra,
+						});
+					},
+					note,
+					errors,
+				);
+				usedPort = opened.used.port;
+				usedModel = opened.used.model;
+				retryAfter = opened.retryAfterMs;
+				if (opened.result.ok) {
+					const routing = routingInfo();
+					const fbRelease = opened.fbRelease;
+					const stream = anthropicSseFromOpenAi(
+						opened.result.body,
+						{
+							id: `msg_${route.role}_${Date.now()}`,
+							model: body.model,
+							routing,
+						},
+						(r) => {
+							fbRelease?.();
+							release();
+							logDone({
+								outcome: r.error
+									? "stream-error"
+									: r.chars
+										? undefined
+										: "empty",
+								finish: r.finish,
+							});
+						},
+					);
+					handedOff = true;
+					return new Response(stream, { headers: sseHeaders(routing) });
+				}
+			} else {
+				const got = await ladder(
+					route,
+					primary,
+					(t) => {
+						const b = budgetFor(t);
+						return viaLocal(t, messages, b.maxTokens, temperature, {
+							extra: b.extra,
+						});
+					},
+					note,
+					errors,
+				);
+				got.fbRelease?.();
+				usedPort = got.used.port;
+				usedModel = got.used.model;
+				retryAfter = got.retryAfterMs;
+				if (got.result.ok) {
+					response = got.result.response;
+					finish = got.result.finish;
 				}
 			}
-			if (attempt.ok) response = attempt.response;
 
-			// 3) cloud escalation — prefs-gated, COMPLEX+ only, never in cost mode
+			// cloud escalation — prefs-gated, COMPLEX+ only, never in cost mode
 			const cloudAllowed =
 				prefs.allow_cloud === true && prefs.cost_speed !== "cost";
 			const cloudWarranted =
@@ -647,14 +658,18 @@ Bun.serve({
 				prefs.cost_speed === "quality";
 			if (!response && cloudAllowed && cloudWarranted) {
 				try {
-					response = await viaCloud(
-						body.messages,
-						maxTokens,
+					const c = await viaCloud(
+						body,
+						clientMax,
 						score.tier !== "VERY_COMPLEX",
 					);
-					if (response) {
+					if (c.note) note.push(c.note);
+					if (c.status === 429)
+						retryAfter = Math.max(retryAfter ?? 0, c.retryAfterMs ?? 0);
+					if (c.text) {
+						response = c.text;
 						usedPort = 0;
-						usedModel = `z.ai:${score.tier === "VERY_COMPLEX" ? "glm-5.3" : "glm-5.3-flash"}`;
+						usedModel = `z.ai:${c.model}`;
 						note.push("escalated → cloud(z.ai)");
 					}
 				} catch {
@@ -663,16 +678,23 @@ Bun.serve({
 			}
 
 			if (!response) {
-				logRouting({
-					category: route.role,
-					model: usedModel,
-					port: usedPort,
-					duration_ms: Date.now() - startTime,
-					...promptFingerprint(text),
-					complexity: score.total,
-					tier: score.tier,
-					outcome: "empty",
-				});
+				// every hop saturated → 429 with the longest upstream Retry-After so
+				// the caller's ladder backs off instead of retrying a 502
+				if (retryAfter !== undefined) {
+					logDone({ outcome: "upstream-429" });
+					const s = Math.max(1, Math.ceil(retryAfter / 1000));
+					return Response.json(
+						{
+							type: "error",
+							error: {
+								type: "overloaded_error",
+								message: `router: upstream 429 (${[...note, ...errors].join("; ")}); retry after ${s}s`,
+							},
+						},
+						{ status: 429, headers: { "retry-after": String(s) } },
+					);
+				}
+				logDone({ outcome: "empty" });
 				return Response.json(
 					{
 						type: "error",
@@ -685,44 +707,30 @@ Bun.serve({
 				);
 			}
 
-			logRouting({
-				category: route.role,
-				model: usedModel,
-				port: usedPort,
-				duration_ms: Date.now() - startTime,
-				...promptFingerprint(text),
-				complexity: score.total,
-				tier: score.tier,
-				escalated: usedPort === 0 ? "z.ai" : undefined,
-			});
-
+			logDone({ escalated: usedPort === 0 ? "z.ai" : undefined, finish });
+			const id = `msg_${route.role}_${Date.now()}`;
+			const routing = routingInfo();
+			if (wantStream)
+				return new Response(
+					anthropicSseFromText(
+						response,
+						{ id, model: body.model, routing },
+						finish,
+					),
+					{ headers: sseHeaders(routing) },
+				);
 			return Response.json({
-				id: `msg_${route.role}_${Date.now()}`,
+				id,
 				type: "message",
 				role: "assistant",
 				model: body.model,
 				content: [{ type: "text", text: response }],
-				stop_reason: "end_turn",
+				stop_reason: stopReason(finish),
 				usage: { input_tokens: 0, output_tokens: 0 },
-				_routing: {
-					tier: score.tier,
-					complexity: score.total.toFixed(3),
-					category: route.role,
-					port: usedPort,
-					model: usedModel,
-					note: note.join("; "),
-					prefs: {
-						cost_speed: prefs.cost_speed ?? "balanced",
-						allow_cloud: prefs.allow_cloud === true,
-						profile: prefs.profile ?? [],
-					},
-					dimensions: Object.fromEntries(
-						Object.entries(score.dimensions).map(([k, v]) => [k, v.toFixed(2)]),
-					),
-				},
+				_routing: routing,
 			});
 		} finally {
-			release();
+			if (!handedOff) release();
 		}
 	},
 });
