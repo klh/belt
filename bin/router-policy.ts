@@ -74,3 +74,56 @@ export function emitRouterSettings(p: GatewayPolicy): string {
 		(fallbackLines ? `  fallbacks:\n${fallbackLines}\n` : "")
 	);
 }
+
+// ─── direct-tier bypass (W270) ───
+// Bench 2026-10-02 (REPORT.md, n=12, speed STRONG): stack-engine-local vs
+// local-direct = 1.35-3.92× wall, +0.5-2.2 s TTFT per call — the LiteLLM
+// proxy hop itself (Python request path + latency-based-routing bookkeeping),
+// not belt code. Hot local classes therefore skip :4100 and hit the
+// specialist port directly; the gateway keeps cloud ladders + fallbacks.
+// Policy data lives in routing-policy.yaml `direct:` (alias → base URL).
+
+export type DirectTiers = Record<string, string>;
+
+const LOOPBACK =
+	/^http:\/\/(127\.0\.0\.1|localhost|\[::1\]):\d{2,5}(\/v1)?\/?$/;
+
+/** Parse the `direct:` section. Only loopback http bases are accepted — a
+ *  bypass skips the gateway's auth + accounting, so it must stay on-box. */
+export function parseDirect(text: string): DirectTiers {
+	const doc = YAML.parse(text) as { direct?: Record<string, unknown> };
+	const out: DirectTiers = {};
+	for (const [alias, base] of Object.entries(doc.direct ?? {})) {
+		if (typeof base !== "string" || !LOOPBACK.test(base))
+			throw new Error(
+				`router-policy: direct.${alias} must be a loopback http base, got ${JSON.stringify(base)}`,
+			);
+		out[alias] = base.replace(/\/$/, "").replace(/(\/v1)?$/, "/v1");
+	}
+	return out;
+}
+
+export function loadDirectTiers(explicitPath?: string): DirectTiers {
+	const candidates = [
+		explicitPath,
+		process.env.BELT_POLICY,
+		`${process.env.HOME}/.claude/local-llm/routing-policy.yaml`,
+		new URL("./routing-policy.yaml", import.meta.url).pathname,
+	].filter((p): p is string => typeof p === "string" && p.length > 0);
+	for (const p of candidates) {
+		if (!existsSync(p)) continue;
+		return parseDirect(readFileSync(p, "utf8"));
+	}
+	return {};
+}
+
+/** Where an OpenAI-wire client should send `model`: the specialist port for
+ *  a direct tier, else the gateway. */
+export function resolveTarget(
+	model: string,
+	gatewayBase: string,
+	direct: DirectTiers = loadDirectTiers(),
+): { base: string; direct: boolean } {
+	const d = direct[model];
+	return d ? { base: d, direct: true } : { base: gatewayBase, direct: false };
+}

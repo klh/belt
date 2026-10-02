@@ -33,3 +33,15 @@ gateway:
   cooldown_time: 30
   fallbacks:
     glm-5.3-flash: [local-swarm, gpt-5.2, claude-sonnet-5]
+
+# Direct-tier bypass (W270) — hot local classes skip the LiteLLM hop.
+# Bench 2026-10-02 (REPORT.md): litellm on local = 1.35-3.92× wall vs the
+# same :890x port direct (+0.5-2.2 s TTFT). Clients resolve a model alias
+# with resolveTarget() (bin/router-policy.ts); gateway-config emits the map
+# to ~/.claude/local-llm/direct-tiers.json for non-TS consumers. Loopback
+# http bases only. On-demand :8906 (local-general) stays behind the gateway:
+# it may be cold, and the gateway/router own spawn + fallback.
+direct:
+  local-coder: http://127.0.0.1:8901/v1
+  local-extract: http://127.0.0.1:8902/v1
+  local-reason: http://127.0.0.1:8903/v1

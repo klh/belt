@@ -4,7 +4,11 @@
 // ~/.claude/local-llm/litellm.yaml (mode 600 — carries the zai key reference,
 // resolved at runtime via os.environ/Z_AI_API_KEY, never inline).
 import { readFileSync } from "node:fs";
-import { emitRouterSettings, loadGatewayPolicy } from "./router-policy.ts";
+import {
+	emitRouterSettings,
+	loadDirectTiers,
+	loadGatewayPolicy,
+} from "./router-policy.ts";
 import { buildRemoteEntries } from "./remotes-validate.ts";
 
 const HOME = process.env.HOME ?? "/Users/kk";
@@ -146,3 +150,7 @@ await Bun.write(out, fullYaml);
 console.log(
 	`wrote ${out}: ${entries.length} models — ${discovered.map((d) => `${d.port}=${d.id.slice(13, 40)}`).join(", ")}`,
 );
+// W270 direct-tier bypass map for non-TS clients (TS uses resolveTarget()).
+const directOut = `${HOME}/.claude/local-llm/direct-tiers.json`;
+await Bun.write(directOut, `${JSON.stringify(loadDirectTiers(), null, 2)}\n`);
+console.log(`wrote ${directOut}`);

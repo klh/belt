@@ -27,3 +27,24 @@ reasons per row there.
 4. **claude-fast checks the local swarm first** — cloud escalation fires only when local failed twice AND the task is COMPLEX+ (SIMPLE/MEDIUM never leave the machine); falls back cleanly if the local stack is down.
 5. **Model selection is task-shaped**: code → :8901, menial → :8902, reasoning → :8903, Danish → :8906, rerank → :8913.
 6. **Degraded mode**: remote tokens expire → `ANTHROPIC_BASE_URL=http://127.0.0.1:4000` keeps Claude Code on the local swarm at local speed; every workload class stays covered (verified end-to-end 2026-09-27).
+
+## Router-shim bench fixes (W270, REPORT.md 2026-10-02)
+
+- **Code signal**: strong signals (fence, language, "write a function",
+  call signature, declarations) route to `:8901`; generic weak words
+  (`api`, `return`, `debug`…) need 2 distinct hits and never count past
+  1500 words — log haystacks stay on `:8903`.
+- **`system` forwarded**: the Anthropic `system` prompt reaches the
+  specialist (was dropped); a short one (≤2000 chars) is also classified.
+- **Kev gate**: the Kev pre-hop runs only when the prompt fits Kev's
+  context (registry `contextTokens`, 384) — no serial hop ahead of a long prefill.
+- **Streaming**: `stream:true` pipes specialist SSE as Anthropic SSE
+  (TTFT = first token); `_routing` rides in `message_start`, ASCII essentials in
+  `x-belt-routing`. `finish_reason: length` → `stop_reason: max_tokens`.
+- **Budget policy** (`BUDGET_RULES` in `bin/router-core.ts`): Qwen3.5 →
+  thinking off; always-thinking GLM-5.3(-flash) below 2048 tokens → budget raised.
+- **Upstream 429**: Retry-After ≤ `BELT_RETRY_WAIT_CAP_MS` (2 s) is waited out
+  on the same specialist; longer → fallback; all hops 429 → router answers 429
+  with the longest Retry-After.
+- **Direct tiers**: `routing-policy.yaml` `direct:` lists hot local aliases that
+  skip the LiteLLM hop (`resolveTarget()`; `direct-tiers.json` for non-TS clients).
