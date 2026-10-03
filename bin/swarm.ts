@@ -26,6 +26,7 @@ import {
 	Supervisor,
 	TRANSITION_LOG,
 } from "./supervisor.ts";
+import { info } from "./log.ts";
 
 const HOME = process.env.HOME;
 // download-only — server argv lives in spawner.ts (spawnArgs), shared with the
@@ -132,7 +133,7 @@ async function cmdStart(): Promise<void> {
 async function cmdSupervise(): Promise<void> {
 	const other = otherSupervisorAlive();
 	if (other) {
-		console.log(`supervisor already running (pid ${other}) — exiting`);
+		info(`supervisor already running (pid ${other}) — exiting`);
 		return;
 	}
 	const sup = new Supervisor(fleetTargets(), {
@@ -144,7 +145,7 @@ async function cmdSupervise(): Promise<void> {
 	// reloading 40GB of weights.
 	for (const sig of ["SIGTERM", "SIGINT"] as const)
 		process.on(sig, () => sup.stop());
-	console.log(`🩺 supervising → ${STATUS_FILE}`);
+	info(`🩺 supervising → ${STATUS_FILE}`);
 	await sup.run();
 }
 
