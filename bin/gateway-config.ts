@@ -1,6 +1,6 @@
-// bin/gateway-config.ts — generate the LiteLLM gateway config from belt's runtime
-// config + live local ports (single source of truth: remotes.json; local ids
-// discovered from each port's /v1/models, never invented). Output is PRIVATE:
+// bin/gateway-config.ts — generate the LiteLLM gateway config from belt's
+// registry (local tiers: bin/registry.ts via registry-emit) + remotes.json
+// (remote tiers). Output is PRIVATE:
 // ~/.claude/local-llm/litellm.yaml (mode 600 — carries the zai key reference,
 // resolved at runtime via os.environ/Z_AI_API_KEY, never inline).
 import { readFileSync } from "node:fs";
@@ -10,6 +10,8 @@ import {
 	loadGatewayPolicy,
 } from "./router-policy.ts";
 import { buildRemoteEntries } from "./remotes-validate.ts";
+import { chatEntries } from "./registry.ts";
+import { litellmRows } from "./registry-emit.ts";
 
 const HOME = process.env.HOME ?? "/Users/kk";
 const REMOTES_PATH = `${HOME}/.claude/local-llm/remotes.json`;
@@ -28,35 +30,31 @@ try {
 	process.exit(1);
 }
 
-const LOCAL_PORTS: [number, string, string][] = [
-	// port, belt-facing alias, role note — reranker (:8913) excluded: rerank
-	// API, not chat; :4000 shim excluded: it is Anthropic INGRESS for Claude
-	[8901, "local-coder", "code generation, multi-file edits, refactors"],
-	[8902, "local-extract", "menial extraction, short drafts, cheap tasks"],
-	[8903, "local-reason", "reasoning, planning, hard problems"],
-	[8906, "local-general", "general, Danish, multilingual"],
-];
-
+// W271: local tiers are GENERATED from the registry (bin/registry.ts) — the
+// one place an LLM is registered. Chat-class rows only (reranker / embed /
+// classify speak other APIs; the :4000 shim is Anthropic INGRESS for Claude).
+// A best-effort live probe warns on registry↔served drift, never decides.
+const locals = chatEntries();
 const discovered: { port: number; id: string }[] = [];
-for (const [port] of LOCAL_PORTS) {
-	const r = await fetch(`http://127.0.0.1:${port}/v1/models`).then((x) =>
-		x.json(),
-	);
-	discovered.push({ port, id: r.data[0].id });
+for (const e of locals) {
+	try {
+		const r = (await fetch(`http://127.0.0.1:${e.port}/v1/models`, {
+			signal: AbortSignal.timeout(2000),
+		}).then((x) => x.json())) as { data?: { id?: string }[] };
+		const id = r.data?.[0]?.id;
+		if (id) discovered.push({ port: e.port, id });
+		if (id && id !== e.model)
+			console.error(
+				`gateway-config: drift :${e.port} serves ${id}, registry says ${e.model}`,
+			);
+	} catch {
+		console.error(
+			`gateway-config: :${e.port} not answering (registry row kept)`,
+		);
+	}
 }
 
-const entries: string[] = [];
-for (const [port, alias] of LOCAL_PORTS) {
-	const id = discovered.find((d) => d.port === port)?.id;
-	if (!id) continue;
-	entries.push(
-		`  - model_name: ${alias}\n` +
-			`    litellm_params:\n` +
-			`      model: openai/${id}\n` +
-			`      api_base: http://127.0.0.1:${port}/v1\n` +
-			`      api_key: local`,
-	);
-}
+const entries: string[] = litellmRows(locals);
 // Remote tiers: validated + built by remotes-validate (W192) — invalid
 // machines/endpoints are skipped + warned on stderr, never interpolated.
 const remotesBuilt = buildRemoteEntries(remotesRaw);
@@ -148,7 +146,7 @@ const fullYaml =
 const out = `${HOME}/.claude/local-llm/litellm.yaml`;
 await Bun.write(out, fullYaml);
 console.log(
-	`wrote ${out}: ${entries.length} models — ${discovered.map((d) => `${d.port}=${d.id.slice(13, 40)}`).join(", ")}`,
+	`wrote ${out}: ${locals.length} local + ${remotesBuilt.entries.length} remote models — live ${discovered.map((d) => `${d.port}=${d.id.slice(13, 40)}`).join(", ")}`,
 );
 // W270 direct-tier bypass map for non-TS clients (TS uses resolveTarget()).
 const directOut = `${HOME}/.claude/local-llm/direct-tiers.json`;

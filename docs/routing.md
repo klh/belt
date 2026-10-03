@@ -48,3 +48,19 @@ reasons per row there.
   with the longest Retry-After.
 - **Direct tiers**: `routing-policy.yaml` `direct:` lists hot local aliases that
   skip the LiteLLM hop (`resolveTarget()`; `direct-tiers.json` for non-TS clients).
+## Model registration (W271)
+Every servable LLM is registered in ONE place: `bin/registry.ts`
+(`SPECIALISTS` + `EXTERNAL`, each with an `alias`). Everything downstream is
+generated, hash-stable (same registry → byte-identical output):
+```sh
+bun bin/registry-emit.ts litellm   # LiteLLM model_list (:4100 engine)
+bun bin/registry-emit.ts direct    # routing-policy `direct:` tiers
+bun bin/registry-emit.ts buckle    # buckle upstreams.yaml groups (merge via BUCKLE_UPSTREAMS)
+bun bin/registry-emit.ts json      # registry document
+bun bin/registry-emit.ts all --out DIR
+```
+`bin/gateway-config.ts` builds its local tiers from the registry (live
+`/v1/models` only warns on drift). The router shim serves
+`GET /registry.json` with a strong `ETag` (`If-None-Match` → 304). Each row
+and the document carry `source: local | hub:<name>` — hub-fed mode (a hub
+serves its registry, spokes pull) is designed, not yet wired.

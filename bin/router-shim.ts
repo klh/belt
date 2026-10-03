@@ -30,6 +30,7 @@ import {
 	toOpenAiMessages,
 	viaLocal,
 } from "./router-core.ts";
+import { registryResponse } from "./registry-emit.ts";
 import { ensureUp } from "./spawner.ts";
 
 const admission = createAdmission();
@@ -374,6 +375,13 @@ Bun.serve({
 		if (req.method === "GET" && url.pathname === "/health/liveliness") {
 			return Response.json({ status: "alive", router: "complexity-v3" });
 		}
+
+		// W271: the full registry (ETag'd); hubs proxy it, spokes pull it
+		if (
+			(req.method === "GET" || req.method === "HEAD") &&
+			url.pathname === "/registry.json"
+		)
+			return registryResponse(req);
 
 		if (req.method !== "POST" || url.pathname !== "/v1/messages") {
 			return Response.json({ error: "not found" }, { status: 404 });
