@@ -1,0 +1,1251 @@
+{
+ "class": "e",
+ "name": "decision",
+ "generator": "arena-gen-1",
+ "seed": "bench-arena/2026-10-02",
+ "max_tokens": 1024,
+ "effort": "low",
+ "note": "labels by construction against the sealed `criteria` text; `legacy` = bench-fit 12, no ground truth, unscored",
+ "tasks": [
+  {
+   "id": "e000",
+   "text": "Write integration tests for the cron scheduler service.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e001",
+   "text": "Use the attached 120k-token specification to explain the retry policy.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e002",
+   "text": "Write a short, friendly message in French to my neighbour about the new recycling bins.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e003",
+   "text": "From the attached 95,000-token contract, summarise every clause about GDPR obligations.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e004",
+   "text": "Classify this support ticket as billing, shipping or returns: \"My parcel never arrived and I was charged twice.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e005",
+   "text": "I explicitly require the frontier cloud model for this, nothing local: review the auth token refresh flow.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e006",
+   "text": "Without writing any code, compare the trade-offs of a single Postgres primary to a primary with two read replicas.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e007",
+   "text": "Here is our 180k-token monorepo dump; find every caller of data retention.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e008",
+   "text": "Write a short, friendly message in Danish to my neighbour about the broken heater in the stairwell.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e009",
+   "text": "Analyze the main risks of 40,000 users each making 30 requests per hour at 120 ms per request.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e010",
+   "text": "Without writing any code, compare the trade-offs of 40,000 users each making 30 requests per hour at 120 ms per request.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e011",
+   "text": "Write a short, friendly message in Spanish to my neighbour about tomorrow's barbecue.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e012",
+   "text": "Add strict type annotations to the payment webhook handler.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e013",
+   "text": "Generate a photorealistic image of tonight's train departures from Copenhagen.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e014",
+   "text": "Remove the memory leak in the CSV importer module.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e015",
+   "text": "Remove the memory leak in the auth middleware.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e016",
+   "text": "Estimate with explicit arithmetic the server capacity needed for letting every team deploy straight to production on Fridays.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e017",
+   "text": "From the attached 95,000-token contract, summarise every clause about data retention.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e018",
+   "text": "Plan, step by step and without code, a phased move from letting every team deploy straight to production on Fridays.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e019",
+   "text": "Write a short, friendly message in German to my neighbour about tomorrow's barbecue.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e020",
+   "text": "Browse the live web right now and report the current status of our office dog wearing a party hat.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e021",
+   "text": "I explicitly require the frontier cloud model for this, nothing local: review the retry policy.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e022",
+   "text": "Produce a 30-second video clip of the wheelchair access for Friday.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e023",
+   "text": "Across the attached 60k-token incident log, list each occurrence of the retry policy.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e024",
+   "text": "Browse the live web right now and report the current status of tonight's train departures from Copenhagen.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e025",
+   "text": "Browse the live web right now and report the current status of the wheelchair access for Friday.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e026",
+   "text": "Fix the failing unit test in the cron scheduler service.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e027",
+   "text": "Transcribe the attached 20-minute audio recording of the product launch keynote.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e028",
+   "text": "Transcribe the attached 20-minute audio recording of the wheelchair access for Friday.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e029",
+   "text": "Refactor the rate limiter class.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e030",
+   "text": "Phone the venue and ask about the product launch keynote.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e031",
+   "text": "Without writing any code, compare the trade-offs of letting every team deploy straight to production on Fridays.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e032",
+   "text": "Plan, step by step and without code, a phased move from 40,000 users each making 30 requests per hour at 120 ms per request.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e033",
+   "text": "Work out step by step whether it is cheaper to run a modular monolith versus microservices for a three-person team.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e034",
+   "text": "Remove the memory leak in the rate limiter class.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e035",
+   "text": "Transcribe the attached 20-minute audio recording of the quarterly all-hands meeting.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e036",
+   "text": "List every email address that appears in this note: \"My parcel never arrived and I was charged twice.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e037",
+   "text": "Generate a photorealistic image of the quarterly all-hands meeting.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e038",
+   "text": "Plan, step by step and without code, a phased move from nightly batch jobs on spot instances versus reserved instances.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e039",
+   "text": "Write a short, friendly message in Swedish to my neighbour about the parking situation.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e040",
+   "text": "List every email address that appears in this note: \"name: api\\nreplicas: 3\\nport: 8080\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e041",
+   "text": "Convert this YAML snippet to JSON: \"Loved the fast delivery, but the box was dented.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e042",
+   "text": "I explicitly require the frontier cloud model for this, nothing local: review the billing API.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e043",
+   "text": "Tag the sentiment (positive/negative/neutral) of this review: \"name: api\\nreplicas: 3\\nport: 8080\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e044",
+   "text": "List every email address that appears in this note: \"Loved the fast delivery, but the box was dented.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e045",
+   "text": "Across the attached 60k-token incident log, list each occurrence of data retention.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e046",
+   "text": "Remove the memory leak in the payment webhook handler.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e047",
+   "text": "Analyze the main risks of a single Postgres primary to a primary with two read replicas.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e048",
+   "text": "Produce a 30-second video clip of the product launch keynote.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e049",
+   "text": "Use the attached 120k-token specification to explain data retention.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e050",
+   "text": "Fix the failing unit test in the rate limiter class.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e051",
+   "text": "Add strict type annotations to the cron scheduler service.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e052",
+   "text": "Write a short, friendly message in German to my neighbour about the new recycling bins.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e053",
+   "text": "Classify this support ticket as billing, shipping or returns: \"name: api\\nreplicas: 3\\nport: 8080\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e054",
+   "text": "Analyze the main risks of nightly batch jobs on spot instances versus reserved instances.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e055",
+   "text": "I explicitly require the frontier cloud model for this, nothing local: review GDPR obligations.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e056",
+   "text": "Write a short, friendly message in French to my neighbour about the broken heater in the stairwell.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e057",
+   "text": "Without writing any code, compare the trade-offs of a modular monolith versus microservices for a three-person team.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e058",
+   "text": "Plan, step by step and without code, a phased move from a single Postgres primary to a primary with two read replicas.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e059",
+   "text": "Refactor the auth middleware.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e060",
+   "text": "Tag the sentiment (positive/negative/neutral) of this review: \"My parcel never arrived and I was charged twice.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e061",
+   "text": "Work out step by step whether it is cheaper to run letting every team deploy straight to production on Fridays.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e062",
+   "text": "Tag the sentiment (positive/negative/neutral) of this review: \"Ping ops@corp.test or lea@corp.test about the outage.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e063",
+   "text": "Here is our 180k-token monorepo dump; find every caller of the retry policy.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e064",
+   "text": "Phone the venue and ask about our office dog wearing a party hat.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e065",
+   "text": "Write integration tests for the auth middleware.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e066",
+   "text": "Write a short, friendly message in German to my neighbour about the parking situation.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e067",
+   "text": "Write a short, friendly message in Danish to my neighbour about a lost cat.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e068",
+   "text": "Write a short, friendly message in French to my neighbour about a lost cat.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e069",
+   "text": "Here is our 180k-token monorepo dump; find every caller of the billing API.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e070",
+   "text": "Add strict type annotations to the rate limiter class.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e071",
+   "text": "Write a short, friendly message in Swedish to my neighbour about a lost cat.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e072",
+   "text": "Tag the sentiment (positive/negative/neutral) of this review: \"Loved the fast delivery, but the box was dented.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e073",
+   "text": "Write integration tests for the payment webhook handler.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e074",
+   "text": "Convert this YAML snippet to JSON: \"My parcel never arrived and I was charged twice.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e075",
+   "text": "Fix the failing unit test in the auth middleware.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e076",
+   "text": "Pull the invoice number and due date out of this email: \"name: api\\nreplicas: 3\\nport: 8080\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e077",
+   "text": "Work out step by step whether it is cheaper to run a single Postgres primary to a primary with two read replicas.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e078",
+   "text": "Write a short, friendly message in Spanish to my neighbour about the parking situation.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e079",
+   "text": "Add strict type annotations to the CSV importer module.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e080",
+   "text": "Write a short, friendly message in French to my neighbour about tomorrow's barbecue.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e081",
+   "text": "List every email address that appears in this note: \"Ping ops@corp.test or lea@corp.test about the outage.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e082",
+   "text": "Classify this support ticket as billing, shipping or returns: \"Loved the fast delivery, but the box was dented.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e083",
+   "text": "Refactor the payment webhook handler.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e084",
+   "text": "Here is our 180k-token monorepo dump; find every caller of the auth token refresh flow.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e085",
+   "text": "Fix the failing unit test in the payment webhook handler.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e086",
+   "text": "Write a short, friendly message in German to my neighbour about a lost cat.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e087",
+   "text": "Implement retry with exponential backoff in the CSV importer module.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e088",
+   "text": "Generate a photorealistic image of the product launch keynote.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e089",
+   "text": "I explicitly require the frontier cloud model for this, nothing local: review data retention.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e090",
+   "text": "Browse the live web right now and report the current status of the product launch keynote.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e091",
+   "text": "Write a short, friendly message in Spanish to my neighbour about the broken heater in the stairwell.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e092",
+   "text": "Fix the failing unit test in the CSV importer module.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e093",
+   "text": "Transcribe the attached 20-minute audio recording of our office dog wearing a party hat.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e094",
+   "text": "Write a short, friendly message in Danish to my neighbour about tomorrow's barbecue.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e095",
+   "text": "Here is our 180k-token monorepo dump; find every caller of GDPR obligations.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e096",
+   "text": "Work out step by step whether it is cheaper to run 40,000 users each making 30 requests per hour at 120 ms per request.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e097",
+   "text": "Refactor the CSV importer module.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e098",
+   "text": "Write a short, friendly message in Danish to my neighbour about the new recycling bins.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e099",
+   "text": "Implement retry with exponential backoff in the cron scheduler service.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e100",
+   "text": "Work out step by step whether it is cheaper to run nightly batch jobs on spot instances versus reserved instances.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e101",
+   "text": "Implement retry with exponential backoff in the rate limiter class.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e102",
+   "text": "Write a short, friendly message in Swedish to my neighbour about the broken heater in the stairwell.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e103",
+   "text": "Classify this support ticket as billing, shipping or returns: \"Invoice INV-2231 is due 2026-11-03, contact ap@acme.test.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e104",
+   "text": "Pull the invoice number and due date out of this email: \"Ping ops@corp.test or lea@corp.test about the outage.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e105",
+   "text": "Pull the invoice number and due date out of this email: \"My parcel never arrived and I was charged twice.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e106",
+   "text": "Convert this YAML snippet to JSON: \"Ping ops@corp.test or lea@corp.test about the outage.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e107",
+   "text": "Phone the venue and ask about the wheelchair access for Friday.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e108",
+   "text": "Estimate with explicit arithmetic the server capacity needed for a single Postgres primary to a primary with two read replicas.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e109",
+   "text": "Convert this YAML snippet to JSON: \"Invoice INV-2231 is due 2026-11-03, contact ap@acme.test.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e110",
+   "text": "Produce a 30-second video clip of our office dog wearing a party hat.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e111",
+   "text": "Analyze the main risks of a modular monolith versus microservices for a three-person team.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e112",
+   "text": "Write a short, friendly message in Swedish to my neighbour about tomorrow's barbecue.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e113",
+   "text": "Remove the memory leak in the cron scheduler service.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e114",
+   "text": "Estimate with explicit arithmetic the server capacity needed for nightly batch jobs on spot instances versus reserved instances.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e115",
+   "text": "Generate a photorealistic image of the wheelchair access for Friday.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  },
+  {
+   "id": "e116",
+   "text": "Write a short, friendly message in Spanish to my neighbour about a lost cat.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e117",
+   "text": "List every email address that appears in this note: \"Invoice INV-2231 is due 2026-11-03, contact ap@acme.test.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e118",
+   "text": "Pull the invoice number and due date out of this email: \"Invoice INV-2231 is due 2026-11-03, contact ap@acme.test.\"",
+   "label": "extract",
+   "check": {
+    "kind": "tier",
+    "expect": "extract"
+   }
+  },
+  {
+   "id": "e119",
+   "text": "Use the attached 120k-token specification to explain GDPR obligations.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e120",
+   "text": "Add strict type annotations to the auth middleware.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e121",
+   "text": "Write integration tests for the CSV importer module.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e122",
+   "text": "From the attached 95,000-token contract, summarise every clause about the auth token refresh flow.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e123",
+   "text": "Across the attached 60k-token incident log, list each occurrence of the auth token refresh flow.",
+   "label": "cloud",
+   "check": {
+    "kind": "tier",
+    "expect": "cloud"
+   }
+  },
+  {
+   "id": "e124",
+   "text": "Write a short, friendly message in French to my neighbour about the parking situation.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e125",
+   "text": "Analyze the main risks of letting every team deploy straight to production on Fridays.",
+   "label": "reason",
+   "check": {
+    "kind": "tier",
+    "expect": "reason"
+   }
+  },
+  {
+   "id": "e126",
+   "text": "Write a short, friendly message in Swedish to my neighbour about the new recycling bins.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e127",
+   "text": "Write integration tests for the rate limiter class.",
+   "label": "coder",
+   "check": {
+    "kind": "tier",
+    "expect": "coder"
+   }
+  },
+  {
+   "id": "e128",
+   "text": "Write a short, friendly message in Danish to my neighbour about the parking situation.",
+   "label": "general",
+   "check": {
+    "kind": "tier",
+    "expect": "general"
+   }
+  },
+  {
+   "id": "e129",
+   "text": "Phone the venue and ask about tonight's train departures from Copenhagen.",
+   "label": "none",
+   "check": {
+    "kind": "tier",
+    "expect": "none"
+   }
+  }
+ ],
+ "criteria": {
+  "coder": "writing, fixing, refactoring or testing source code",
+  "extract": "pulling fields out of supplied text, short labelling or classification, or format conversion; no open-ended reasoning",
+  "reason": "multi-step analysis, planning, maths or trade-off evaluation in English, without writing code",
+  "general": "casual chat, translation, or writing in a language other than English",
+  "cloud": "input stated to be larger than 32k tokens, or the user explicitly demands the frontier cloud model",
+  "none": "none of these: needs non-text output or a capability no text model has (image/audio/video generation, live web browsing, phone calls)"
+ },
+ "legacy": [
+  {
+   "id": "fit01",
+   "text": "fix flaky async test in a scheduler service",
+   "scored": false
+  },
+  {
+   "id": "fit02",
+   "text": "write a Danish summary of this quarterly report",
+   "scored": false
+  },
+  {
+   "id": "fit03",
+   "text": "generate a React component for a pricing table",
+   "scored": false
+  },
+  {
+   "id": "fit04",
+   "text": "refactor the payment reconciliation module",
+   "scored": false
+  },
+  {
+   "id": "fit05",
+   "text": "explain this stack trace to a junior dev",
+   "scored": false
+  },
+  {
+   "id": "fit06",
+   "text": "classify customer support tickets by urgency",
+   "scored": false
+  },
+  {
+   "id": "fit07",
+   "text": "optimize the image pipeline hot loop",
+   "scored": false
+  },
+  {
+   "id": "fit08",
+   "text": "draft the API contract for the new export endpoint",
+   "scored": false
+  },
+  {
+   "id": "fit09",
+   "text": "migrate the CMS database schema",
+   "scored": false
+  },
+  {
+   "id": "fit10",
+   "text": "triage which 8900-range model should serve a chat request",
+   "scored": false
+  },
+  {
+   "id": "fit11",
+   "text": "write e2e tests for the checkout flow",
+   "scored": false
+  },
+  {
+   "id": "fit12",
+   "text": "translate the onboarding emails to German",
+   "scored": false
+  }
+ ]
+}

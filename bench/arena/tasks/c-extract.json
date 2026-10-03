@@ -1,0 +1,2091 @@
+{
+ "class": "c",
+ "name": "extract",
+ "generator": "arena-gen-1",
+ "seed": "bench-arena/2026-10-02",
+ "max_tokens": 1024,
+ "effort": "low",
+ "note": "7-field JSON exact match + exact key set/types",
+ "tasks": [
+  {
+   "id": "c000",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Emma Hansen from Malmo. My order ORD-66809, placed on 16 March 2025, was for 4 units and came to 1243.49 DKK in total, which includes a 14.00 DKK shipping fee. My previous order ORD-54013 arrived fine. You can reach me at emma.hansen44@corp.test or on +45 88 31 20 52.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Emma Hansen",
+     "email": "emma.hansen44@corp.test",
+     "order_id": "ORD-66809",
+     "total": 1243.49,
+     "currency": "DKK",
+     "order_date": "2025-03-16",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c001",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #4872\nCustomer: Laura Christensen <laura.christensen17@shop.example>\nPhone: +45 70 25 59 14\nNote: customer references old order ORD-62235 (closed).\nCurrent order: ORD-47680 - 11 item(s), ordered 2026/02/07.\nAmount charged: EUR 2029.64 (shipping 7.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Laura Christensen",
+     "email": "laura.christensen17@shop.example",
+     "order_id": "ORD-47680",
+     "total": 2029.64,
+     "currency": "EUR",
+     "order_date": "2026-02-07",
+     "quantity": 11
+    }
+   }
+  },
+  {
+   "id": "c002",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nNora Thomsen placed order ORD-52164 on October 26, 2025 and wrote in ticket #3978: \"I paid 669.34 EUR for 1 pieces, shipping (15.00 EUR) included. Please reply to nora.thomsen32@mail.test.\" Agent note: do not confuse with ORD-69790; callback number +45 10 57 53 26.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Nora Thomsen",
+     "email": "nora.thomsen32@mail.test",
+     "order_id": "ORD-52164",
+     "total": 669.34,
+     "currency": "EUR",
+     "order_date": "2025-10-26",
+     "quantity": 1
+    }
+   }
+  },
+  {
+   "id": "c003",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-19510 (replaces cancelled ORD-60710)\n- date: 2025/04/09\n- quantity: 7\n- shipping: 5.00 DKK\n- grand total: 274.22 DKK\n- buyer: Nora Kristensen, Malmo\n- contact: nora.kristensen53@corp.test / +45 79 51 63 92\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Nora Kristensen",
+     "email": "nora.kristensen53@corp.test",
+     "order_id": "ORD-19510",
+     "total": 274.22,
+     "currency": "DKK",
+     "order_date": "2025-04-09",
+     "quantity": 7
+    }
+   }
+  },
+  {
+   "id": "c004",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Freja Petersen from Aarhus. My order ORD-88136, placed on 2026/05/09, was for 12 units and came to 89.81 DKK in total, which includes a 4.00 DKK shipping fee. My previous order ORD-59238 arrived fine. You can reach me at freja.petersen17@corp.test or on +45 94 96 97 86.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Freja Petersen",
+     "email": "freja.petersen17@corp.test",
+     "order_id": "ORD-88136",
+     "total": 89.81,
+     "currency": "DKK",
+     "order_date": "2026-05-09",
+     "quantity": 12
+    }
+   }
+  },
+  {
+   "id": "c005",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #3437\nCustomer: Freja Madsen <freja.madsen72@corp.test>\nPhone: +45 99 39 72 47\nNote: customer references old order ORD-12124 (closed).\nCurrent order: ORD-32261 - 2 item(s), ordered March 24, 2026.\nAmount charged: DKK 1449.63 (shipping 12.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Freja Madsen",
+     "email": "freja.madsen72@corp.test",
+     "order_id": "ORD-32261",
+     "total": 1449.63,
+     "currency": "DKK",
+     "order_date": "2026-03-24",
+     "quantity": 2
+    }
+   }
+  },
+  {
+   "id": "c006",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nMaja Nielsen placed order ORD-92359 on 24 August 2025 and wrote in ticket #3368: \"I paid 406.25 EUR for 6 pieces, shipping (6.00 EUR) included. Please reply to maja.nielsen28@mail.test.\" Agent note: do not confuse with ORD-98973; callback number +45 80 57 36 52.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Maja Nielsen",
+     "email": "maja.nielsen28@mail.test",
+     "order_id": "ORD-92359",
+     "total": 406.25,
+     "currency": "EUR",
+     "order_date": "2025-08-24",
+     "quantity": 6
+    }
+   }
+  },
+  {
+   "id": "c007",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-28630 (replaces cancelled ORD-92689)\n- date: 2025/07/03\n- quantity: 3\n- shipping: 7.00 DKK\n- grand total: 1733.58 DKK\n- buyer: Alma Moller, Lyon\n- contact: alma.moller67@corp.test / +45 83 56 54 11\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Alma Moller",
+     "email": "alma.moller67@corp.test",
+     "order_id": "ORD-28630",
+     "total": 1733.58,
+     "currency": "DKK",
+     "order_date": "2025-07-03",
+     "quantity": 3
+    }
+   }
+  },
+  {
+   "id": "c008",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Ida Madsen from Ghent. My order ORD-24912, placed on 2026/09/01, was for 4 units and came to 2458.33 USD in total, which includes a 4.00 USD shipping fee. My previous order ORD-60745 arrived fine. You can reach me at ida.madsen42@corp.test or on +45 87 25 57 71.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Ida Madsen",
+     "email": "ida.madsen42@corp.test",
+     "order_id": "ORD-24912",
+     "total": 2458.33,
+     "currency": "USD",
+     "order_date": "2026-09-01",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c009",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #3299\nCustomer: Sofie Thomsen <sofie.thomsen28@shop.example>\nPhone: +45 48 38 32 73\nNote: customer references old order ORD-75399 (closed).\nCurrent order: ORD-34537 - 9 item(s), ordered 2025/10/14.\nAmount charged: EUR 669.30 (shipping 3.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Sofie Thomsen",
+     "email": "sofie.thomsen28@shop.example",
+     "order_id": "ORD-34537",
+     "total": 669.3,
+     "currency": "EUR",
+     "order_date": "2025-10-14",
+     "quantity": 9
+    }
+   }
+  },
+  {
+   "id": "c010",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nEmma Petersen placed order ORD-99250 on September 1, 2026 and wrote in ticket #6267: \"I paid 1267.28 DKK for 9 pieces, shipping (2.00 DKK) included. Please reply to emma.petersen81@corp.test.\" Agent note: do not confuse with ORD-29747; callback number +45 24 93 49 76.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Emma Petersen",
+     "email": "emma.petersen81@corp.test",
+     "order_id": "ORD-99250",
+     "total": 1267.28,
+     "currency": "DKK",
+     "order_date": "2026-09-01",
+     "quantity": 9
+    }
+   }
+  },
+  {
+   "id": "c011",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-46448 (replaces cancelled ORD-85956)\n- date: 2026/07/06\n- quantity: 4\n- shipping: 5.00 USD\n- grand total: 1105.73 USD\n- buyer: Clara Christensen, Odense\n- contact: clara.christensen95@corp.test / +45 85 91 75 58\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Clara Christensen",
+     "email": "clara.christensen95@corp.test",
+     "order_id": "ORD-46448",
+     "total": 1105.73,
+     "currency": "USD",
+     "order_date": "2026-07-06",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c012",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Clara Petersen from Aarhus. My order ORD-39345, placed on 6 July 2026, was for 1 units and came to 1662.17 DKK in total, which includes a 2.00 DKK shipping fee. My previous order ORD-83685 arrived fine. You can reach me at clara.petersen45@example.com or on +45 38 11 72 95.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Clara Petersen",
+     "email": "clara.petersen45@example.com",
+     "order_id": "ORD-39345",
+     "total": 1662.17,
+     "currency": "DKK",
+     "order_date": "2026-07-06",
+     "quantity": 1
+    }
+   }
+  },
+  {
+   "id": "c013",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #6268\nCustomer: Oliver Madsen <oliver.madsen90@shop.example>\nPhone: +45 47 98 64 57\nNote: customer references old order ORD-27685 (closed).\nCurrent order: ORD-57533 - 5 item(s), ordered 24 May 2025.\nAmount charged: EUR 1770.27 (shipping 7.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oliver Madsen",
+     "email": "oliver.madsen90@shop.example",
+     "order_id": "ORD-57533",
+     "total": 1770.27,
+     "currency": "EUR",
+     "order_date": "2025-05-24",
+     "quantity": 5
+    }
+   }
+  },
+  {
+   "id": "c014",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSofie Thomsen placed order ORD-92917 on 23 October 2026 and wrote in ticket #2116: \"I paid 45.40 USD for 9 pieces, shipping (11.00 USD) included. Please reply to sofie.thomsen72@shop.example.\" Agent note: do not confuse with ORD-41674; callback number +45 51 76 70 26.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Sofie Thomsen",
+     "email": "sofie.thomsen72@shop.example",
+     "order_id": "ORD-92917",
+     "total": 45.4,
+     "currency": "USD",
+     "order_date": "2026-10-23",
+     "quantity": 9
+    }
+   }
+  },
+  {
+   "id": "c015",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-15061 (replaces cancelled ORD-83239)\n- date: 2025/12/16\n- quantity: 11\n- shipping: 12.00 EUR\n- grand total: 99.67 EUR\n- buyer: Victor Madsen, Porto\n- contact: victor.madsen93@mail.test / +45 62 15 35 54\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Victor Madsen",
+     "email": "victor.madsen93@mail.test",
+     "order_id": "ORD-15061",
+     "total": 99.67,
+     "currency": "EUR",
+     "order_date": "2025-12-16",
+     "quantity": 11
+    }
+   }
+  },
+  {
+   "id": "c016",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Oliver Pedersen from Odense. My order ORD-23039, placed on December 12, 2025, was for 11 units and came to 1203.59 EUR in total, which includes a 4.00 EUR shipping fee. My previous order ORD-69592 arrived fine. You can reach me at oliver.pedersen70@mail.test or on +45 42 69 61 36.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oliver Pedersen",
+     "email": "oliver.pedersen70@mail.test",
+     "order_id": "ORD-23039",
+     "total": 1203.59,
+     "currency": "EUR",
+     "order_date": "2025-12-12",
+     "quantity": 11
+    }
+   }
+  },
+  {
+   "id": "c017",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #7108\nCustomer: Alma Kristensen <alma.kristensen52@mail.test>\nPhone: +45 51 65 21 71\nNote: customer references old order ORD-48491 (closed).\nCurrent order: ORD-67051 - 7 item(s), ordered 2026/10/15.\nAmount charged: EUR 201.64 (shipping 6.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Alma Kristensen",
+     "email": "alma.kristensen52@mail.test",
+     "order_id": "ORD-67051",
+     "total": 201.64,
+     "currency": "EUR",
+     "order_date": "2026-10-15",
+     "quantity": 7
+    }
+   }
+  },
+  {
+   "id": "c018",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nLaura Nielsen placed order ORD-80619 on 2025/10/10 and wrote in ticket #9971: \"I paid 144.83 DKK for 10 pieces, shipping (15.00 DKK) included. Please reply to laura.nielsen79@shop.example.\" Agent note: do not confuse with ORD-99809; callback number +45 56 11 10 24.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Laura Nielsen",
+     "email": "laura.nielsen79@shop.example",
+     "order_id": "ORD-80619",
+     "total": 144.83,
+     "currency": "DKK",
+     "order_date": "2025-10-10",
+     "quantity": 10
+    }
+   }
+  },
+  {
+   "id": "c019",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-32317 (replaces cancelled ORD-56861)\n- date: 28 September 2026\n- quantity: 8\n- shipping: 4.00 EUR\n- grand total: 1837.66 EUR\n- buyer: Clara Kristensen, Lyon\n- contact: clara.kristensen35@mail.test / +45 91 12 79 41\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Clara Kristensen",
+     "email": "clara.kristensen35@mail.test",
+     "order_id": "ORD-32317",
+     "total": 1837.66,
+     "currency": "EUR",
+     "order_date": "2026-09-28",
+     "quantity": 8
+    }
+   }
+  },
+  {
+   "id": "c020",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Oliver Andersen from Aarhus. My order ORD-55838, placed on 24 June 2025, was for 8 units and came to 2037.69 USD in total, which includes a 13.00 USD shipping fee. My previous order ORD-25668 arrived fine. You can reach me at oliver.andersen37@shop.example or on +45 31 97 97 35.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oliver Andersen",
+     "email": "oliver.andersen37@shop.example",
+     "order_id": "ORD-55838",
+     "total": 2037.69,
+     "currency": "USD",
+     "order_date": "2025-06-24",
+     "quantity": 8
+    }
+   }
+  },
+  {
+   "id": "c021",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #6855\nCustomer: Oliver Kristensen <oliver.kristensen33@corp.test>\nPhone: +45 47 60 32 41\nNote: customer references old order ORD-83647 (closed).\nCurrent order: ORD-66673 - 2 item(s), ordered 4 October 2025.\nAmount charged: USD 2045.56 (shipping 15.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oliver Kristensen",
+     "email": "oliver.kristensen33@corp.test",
+     "order_id": "ORD-66673",
+     "total": 2045.56,
+     "currency": "USD",
+     "order_date": "2025-10-04",
+     "quantity": 2
+    }
+   }
+  },
+  {
+   "id": "c022",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nFreja Thomsen placed order ORD-19922 on 8 December 2026 and wrote in ticket #4335: \"I paid 2020.31 DKK for 9 pieces, shipping (8.00 DKK) included. Please reply to freja.thomsen46@mail.test.\" Agent note: do not confuse with ORD-96655; callback number +45 41 83 90 59.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Freja Thomsen",
+     "email": "freja.thomsen46@mail.test",
+     "order_id": "ORD-19922",
+     "total": 2020.31,
+     "currency": "DKK",
+     "order_date": "2026-12-08",
+     "quantity": 9
+    }
+   }
+  },
+  {
+   "id": "c023",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-47842 (replaces cancelled ORD-70739)\n- date: 2025/03/20\n- quantity: 6\n- shipping: 13.00 EUR\n- grand total: 47.57 EUR\n- buyer: Oliver Andersen, Porto\n- contact: oliver.andersen80@mail.test / +45 75 72 92 26\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oliver Andersen",
+     "email": "oliver.andersen80@mail.test",
+     "order_id": "ORD-47842",
+     "total": 47.57,
+     "currency": "EUR",
+     "order_date": "2025-03-20",
+     "quantity": 6
+    }
+   }
+  },
+  {
+   "id": "c024",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Clara Pedersen from Porto. My order ORD-22458, placed on May 4, 2025, was for 6 units and came to 1896.05 DKK in total, which includes a 4.00 DKK shipping fee. My previous order ORD-30564 arrived fine. You can reach me at clara.pedersen95@shop.example or on +45 31 83 23 66.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Clara Pedersen",
+     "email": "clara.pedersen95@shop.example",
+     "order_id": "ORD-22458",
+     "total": 1896.05,
+     "currency": "DKK",
+     "order_date": "2025-05-04",
+     "quantity": 6
+    }
+   }
+  },
+  {
+   "id": "c025",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #9012\nCustomer: Felix Andersen <felix.andersen93@mail.test>\nPhone: +45 23 78 75 43\nNote: customer references old order ORD-75384 (closed).\nCurrent order: ORD-45379 - 11 item(s), ordered 2025/02/01.\nAmount charged: EUR 1144.63 (shipping 7.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Felix Andersen",
+     "email": "felix.andersen93@mail.test",
+     "order_id": "ORD-45379",
+     "total": 1144.63,
+     "currency": "EUR",
+     "order_date": "2025-02-01",
+     "quantity": 11
+    }
+   }
+  },
+  {
+   "id": "c026",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nWilliam Thomsen placed order ORD-77512 on January 27, 2026 and wrote in ticket #7046: \"I paid 2279.33 USD for 11 pieces, shipping (7.00 USD) included. Please reply to william.thomsen84@shop.example.\" Agent note: do not confuse with ORD-70138; callback number +45 41 76 13 37.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "William Thomsen",
+     "email": "william.thomsen84@shop.example",
+     "order_id": "ORD-77512",
+     "total": 2279.33,
+     "currency": "USD",
+     "order_date": "2026-01-27",
+     "quantity": 11
+    }
+   }
+  },
+  {
+   "id": "c027",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-98230 (replaces cancelled ORD-26783)\n- date: 22 June 2025\n- quantity: 5\n- shipping: 5.00 DKK\n- grand total: 2221.41 DKK\n- buyer: Alma Petersen, Ghent\n- contact: alma.petersen56@corp.test / +45 61 82 18 13\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Alma Petersen",
+     "email": "alma.petersen56@corp.test",
+     "order_id": "ORD-98230",
+     "total": 2221.41,
+     "currency": "DKK",
+     "order_date": "2025-06-22",
+     "quantity": 5
+    }
+   }
+  },
+  {
+   "id": "c028",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Alma Madsen from Aarhus. My order ORD-35360, placed on August 21, 2026, was for 1 units and came to 1568.34 DKK in total, which includes a 15.00 DKK shipping fee. My previous order ORD-43121 arrived fine. You can reach me at alma.madsen78@example.com or on +45 90 39 84 81.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Alma Madsen",
+     "email": "alma.madsen78@example.com",
+     "order_id": "ORD-35360",
+     "total": 1568.34,
+     "currency": "DKK",
+     "order_date": "2026-08-21",
+     "quantity": 1
+    }
+   }
+  },
+  {
+   "id": "c029",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #4946\nCustomer: Alma Christensen <alma.christensen84@corp.test>\nPhone: +45 21 98 78 82\nNote: customer references old order ORD-31550 (closed).\nCurrent order: ORD-77557 - 7 item(s), ordered 2025/02/04.\nAmount charged: DKK 2035.43 (shipping 2.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Alma Christensen",
+     "email": "alma.christensen84@corp.test",
+     "order_id": "ORD-77557",
+     "total": 2035.43,
+     "currency": "DKK",
+     "order_date": "2025-02-04",
+     "quantity": 7
+    }
+   }
+  },
+  {
+   "id": "c030",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nNora Madsen placed order ORD-14087 on 2026/08/25 and wrote in ticket #9695: \"I paid 806.58 EUR for 2 pieces, shipping (14.00 EUR) included. Please reply to nora.madsen79@mail.test.\" Agent note: do not confuse with ORD-37678; callback number +45 76 92 38 93.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Nora Madsen",
+     "email": "nora.madsen79@mail.test",
+     "order_id": "ORD-14087",
+     "total": 806.58,
+     "currency": "EUR",
+     "order_date": "2026-08-25",
+     "quantity": 2
+    }
+   }
+  },
+  {
+   "id": "c031",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-98120 (replaces cancelled ORD-31927)\n- date: June 23, 2025\n- quantity: 9\n- shipping: 6.00 USD\n- grand total: 2186.92 USD\n- buyer: Jonas Larsen, Odense\n- contact: jonas.larsen41@corp.test / +45 15 24 65 81\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Jonas Larsen",
+     "email": "jonas.larsen41@corp.test",
+     "order_id": "ORD-98120",
+     "total": 2186.92,
+     "currency": "USD",
+     "order_date": "2025-06-23",
+     "quantity": 9
+    }
+   }
+  },
+  {
+   "id": "c032",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Ida Johansen from Malmo. My order ORD-17320, placed on 2025/02/12, was for 5 units and came to 222.59 DKK in total, which includes a 9.00 DKK shipping fee. My previous order ORD-97889 arrived fine. You can reach me at ida.johansen10@mail.test or on +45 72 36 32 14.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Ida Johansen",
+     "email": "ida.johansen10@mail.test",
+     "order_id": "ORD-17320",
+     "total": 222.59,
+     "currency": "DKK",
+     "order_date": "2025-02-12",
+     "quantity": 5
+    }
+   }
+  },
+  {
+   "id": "c033",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #2001\nCustomer: Oscar Larsen <oscar.larsen55@example.com>\nPhone: +45 68 94 34 51\nNote: customer references old order ORD-71645 (closed).\nCurrent order: ORD-66583 - 6 item(s), ordered 20 June 2025.\nAmount charged: DKK 1844.98 (shipping 15.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oscar Larsen",
+     "email": "oscar.larsen55@example.com",
+     "order_id": "ORD-66583",
+     "total": 1844.98,
+     "currency": "DKK",
+     "order_date": "2025-06-20",
+     "quantity": 6
+    }
+   }
+  },
+  {
+   "id": "c034",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOscar Moller placed order ORD-83702 on 16 August 2026 and wrote in ticket #5027: \"I paid 952.02 DKK for 5 pieces, shipping (3.00 DKK) included. Please reply to oscar.moller83@shop.example.\" Agent note: do not confuse with ORD-27003; callback number +45 20 26 31 21.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oscar Moller",
+     "email": "oscar.moller83@shop.example",
+     "order_id": "ORD-83702",
+     "total": 952.02,
+     "currency": "DKK",
+     "order_date": "2026-08-16",
+     "quantity": 5
+    }
+   }
+  },
+  {
+   "id": "c035",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-92599 (replaces cancelled ORD-30794)\n- date: June 24, 2025\n- quantity: 4\n- shipping: 2.00 DKK\n- grand total: 2147.29 DKK\n- buyer: Lars Petersen, Malmo\n- contact: lars.petersen11@shop.example / +45 25 60 78 35\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Lars Petersen",
+     "email": "lars.petersen11@shop.example",
+     "order_id": "ORD-92599",
+     "total": 2147.29,
+     "currency": "DKK",
+     "order_date": "2025-06-24",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c036",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Laura Nielsen from Odense. My order ORD-64576, placed on 2026/02/10, was for 6 units and came to 1153.61 USD in total, which includes a 6.00 USD shipping fee. My previous order ORD-44358 arrived fine. You can reach me at laura.nielsen19@example.com or on +45 88 19 75 84.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Laura Nielsen",
+     "email": "laura.nielsen19@example.com",
+     "order_id": "ORD-64576",
+     "total": 1153.61,
+     "currency": "USD",
+     "order_date": "2026-02-10",
+     "quantity": 6
+    }
+   }
+  },
+  {
+   "id": "c037",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #8120\nCustomer: Emil Nielsen <emil.nielsen89@shop.example>\nPhone: +45 18 43 84 39\nNote: customer references old order ORD-32892 (closed).\nCurrent order: ORD-69019 - 1 item(s), ordered 2025/11/27.\nAmount charged: EUR 595.38 (shipping 15.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Emil Nielsen",
+     "email": "emil.nielsen89@shop.example",
+     "order_id": "ORD-69019",
+     "total": 595.38,
+     "currency": "EUR",
+     "order_date": "2025-11-27",
+     "quantity": 1
+    }
+   }
+  },
+  {
+   "id": "c038",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nIda Pedersen placed order ORD-80229 on 27 April 2026 and wrote in ticket #9262: \"I paid 422.54 EUR for 3 pieces, shipping (11.00 EUR) included. Please reply to ida.pedersen55@corp.test.\" Agent note: do not confuse with ORD-74320; callback number +45 23 66 69 60.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Ida Pedersen",
+     "email": "ida.pedersen55@corp.test",
+     "order_id": "ORD-80229",
+     "total": 422.54,
+     "currency": "EUR",
+     "order_date": "2026-04-27",
+     "quantity": 3
+    }
+   }
+  },
+  {
+   "id": "c039",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-20973 (replaces cancelled ORD-77674)\n- date: 7 August 2025\n- quantity: 1\n- shipping: 3.00 USD\n- grand total: 319.15 USD\n- buyer: Lucas Christensen, Utrecht\n- contact: lucas.christensen17@mail.test / +45 65 31 71 97\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Lucas Christensen",
+     "email": "lucas.christensen17@mail.test",
+     "order_id": "ORD-20973",
+     "total": 319.15,
+     "currency": "USD",
+     "order_date": "2025-08-07",
+     "quantity": 1
+    }
+   }
+  },
+  {
+   "id": "c040",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Emil Rasmussen from Malmo. My order ORD-62625, placed on December 12, 2025, was for 3 units and came to 1902.21 USD in total, which includes a 7.00 USD shipping fee. My previous order ORD-76110 arrived fine. You can reach me at emil.rasmussen35@shop.example or on +45 12 81 41 30.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Emil Rasmussen",
+     "email": "emil.rasmussen35@shop.example",
+     "order_id": "ORD-62625",
+     "total": 1902.21,
+     "currency": "USD",
+     "order_date": "2025-12-12",
+     "quantity": 3
+    }
+   }
+  },
+  {
+   "id": "c041",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #5427\nCustomer: Laura Thomsen <laura.thomsen23@corp.test>\nPhone: +45 95 61 51 78\nNote: customer references old order ORD-20970 (closed).\nCurrent order: ORD-10991 - 10 item(s), ordered 2026/09/05.\nAmount charged: USD 2032.28 (shipping 15.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Laura Thomsen",
+     "email": "laura.thomsen23@corp.test",
+     "order_id": "ORD-10991",
+     "total": 2032.28,
+     "currency": "USD",
+     "order_date": "2026-09-05",
+     "quantity": 10
+    }
+   }
+  },
+  {
+   "id": "c042",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nFreja Nielsen placed order ORD-32045 on September 1, 2025 and wrote in ticket #9829: \"I paid 2070.12 DKK for 12 pieces, shipping (15.00 DKK) included. Please reply to freja.nielsen55@shop.example.\" Agent note: do not confuse with ORD-86606; callback number +45 39 90 21 52.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Freja Nielsen",
+     "email": "freja.nielsen55@shop.example",
+     "order_id": "ORD-32045",
+     "total": 2070.12,
+     "currency": "DKK",
+     "order_date": "2025-09-01",
+     "quantity": 12
+    }
+   }
+  },
+  {
+   "id": "c043",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-64487 (replaces cancelled ORD-45338)\n- date: July 25, 2025\n- quantity: 6\n- shipping: 14.00 USD\n- grand total: 937.41 USD\n- buyer: Oscar Christensen, Lyon\n- contact: oscar.christensen75@shop.example / +45 39 40 46 87\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oscar Christensen",
+     "email": "oscar.christensen75@shop.example",
+     "order_id": "ORD-64487",
+     "total": 937.41,
+     "currency": "USD",
+     "order_date": "2025-07-25",
+     "quantity": 6
+    }
+   }
+  },
+  {
+   "id": "c044",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Freja Thomsen from Ghent. My order ORD-98826, placed on 2025/05/15, was for 9 units and came to 1454.00 USD in total, which includes a 12.00 USD shipping fee. My previous order ORD-42050 arrived fine. You can reach me at freja.thomsen70@shop.example or on +45 99 91 86 24.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Freja Thomsen",
+     "email": "freja.thomsen70@shop.example",
+     "order_id": "ORD-98826",
+     "total": 1454,
+     "currency": "USD",
+     "order_date": "2025-05-15",
+     "quantity": 9
+    }
+   }
+  },
+  {
+   "id": "c045",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #5159\nCustomer: Jonas Olsen <jonas.olsen37@example.com>\nPhone: +45 70 44 21 33\nNote: customer references old order ORD-71657 (closed).\nCurrent order: ORD-59913 - 2 item(s), ordered August 4, 2025.\nAmount charged: DKK 671.02 (shipping 10.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Jonas Olsen",
+     "email": "jonas.olsen37@example.com",
+     "order_id": "ORD-59913",
+     "total": 671.02,
+     "currency": "DKK",
+     "order_date": "2025-08-04",
+     "quantity": 2
+    }
+   }
+  },
+  {
+   "id": "c046",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nFreja Petersen placed order ORD-46309 on 16 July 2025 and wrote in ticket #6327: \"I paid 1210.82 EUR for 4 pieces, shipping (3.00 EUR) included. Please reply to freja.petersen33@corp.test.\" Agent note: do not confuse with ORD-51573; callback number +45 36 73 87 98.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Freja Petersen",
+     "email": "freja.petersen33@corp.test",
+     "order_id": "ORD-46309",
+     "total": 1210.82,
+     "currency": "EUR",
+     "order_date": "2025-07-16",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c047",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-61719 (replaces cancelled ORD-76810)\n- date: 2026/08/10\n- quantity: 9\n- shipping: 12.00 DKK\n- grand total: 785.99 DKK\n- buyer: Ella Nielsen, Berlin\n- contact: ella.nielsen90@shop.example / +45 64 37 57 29\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Ella Nielsen",
+     "email": "ella.nielsen90@shop.example",
+     "order_id": "ORD-61719",
+     "total": 785.99,
+     "currency": "DKK",
+     "order_date": "2026-08-10",
+     "quantity": 9
+    }
+   }
+  },
+  {
+   "id": "c048",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Freja Kristensen from Ghent. My order ORD-50424, placed on 2025/03/11, was for 5 units and came to 676.19 USD in total, which includes a 15.00 USD shipping fee. My previous order ORD-68521 arrived fine. You can reach me at freja.kristensen68@corp.test or on +45 84 37 46 15.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Freja Kristensen",
+     "email": "freja.kristensen68@corp.test",
+     "order_id": "ORD-50424",
+     "total": 676.19,
+     "currency": "USD",
+     "order_date": "2025-03-11",
+     "quantity": 5
+    }
+   }
+  },
+  {
+   "id": "c049",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #5980\nCustomer: Clara Thomsen <clara.thomsen59@corp.test>\nPhone: +45 73 51 62 96\nNote: customer references old order ORD-26081 (closed).\nCurrent order: ORD-33567 - 4 item(s), ordered May 23, 2025.\nAmount charged: DKK 1605.96 (shipping 10.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Clara Thomsen",
+     "email": "clara.thomsen59@corp.test",
+     "order_id": "ORD-33567",
+     "total": 1605.96,
+     "currency": "DKK",
+     "order_date": "2025-05-23",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c050",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nNoah Moller placed order ORD-22060 on 21 September 2025 and wrote in ticket #5605: \"I paid 2100.96 EUR for 4 pieces, shipping (6.00 EUR) included. Please reply to noah.moller44@corp.test.\" Agent note: do not confuse with ORD-20508; callback number +45 60 70 83 85.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Noah Moller",
+     "email": "noah.moller44@corp.test",
+     "order_id": "ORD-22060",
+     "total": 2100.96,
+     "currency": "EUR",
+     "order_date": "2025-09-21",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c051",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-25047 (replaces cancelled ORD-10662)\n- date: 26 March 2025\n- quantity: 5\n- shipping: 3.00 DKK\n- grand total: 2099.87 DKK\n- buyer: Nora Moller, Malmo\n- contact: nora.moller53@shop.example / +45 93 31 60 14\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Nora Moller",
+     "email": "nora.moller53@shop.example",
+     "order_id": "ORD-25047",
+     "total": 2099.87,
+     "currency": "DKK",
+     "order_date": "2025-03-26",
+     "quantity": 5
+    }
+   }
+  },
+  {
+   "id": "c052",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Freja Olsen from Malmo. My order ORD-21704, placed on 22 September 2025, was for 12 units and came to 2113.95 USD in total, which includes a 15.00 USD shipping fee. My previous order ORD-44009 arrived fine. You can reach me at freja.olsen23@corp.test or on +45 40 86 56 28.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Freja Olsen",
+     "email": "freja.olsen23@corp.test",
+     "order_id": "ORD-21704",
+     "total": 2113.95,
+     "currency": "USD",
+     "order_date": "2025-09-22",
+     "quantity": 12
+    }
+   }
+  },
+  {
+   "id": "c053",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #2886\nCustomer: Sofie Thomsen <sofie.thomsen59@corp.test>\nPhone: +45 39 53 38 14\nNote: customer references old order ORD-11991 (closed).\nCurrent order: ORD-85377 - 10 item(s), ordered November 16, 2025.\nAmount charged: DKK 325.34 (shipping 12.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Sofie Thomsen",
+     "email": "sofie.thomsen59@corp.test",
+     "order_id": "ORD-85377",
+     "total": 325.34,
+     "currency": "DKK",
+     "order_date": "2025-11-16",
+     "quantity": 10
+    }
+   }
+  },
+  {
+   "id": "c054",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nFreja Jensen placed order ORD-68206 on 26 August 2026 and wrote in ticket #8557: \"I paid 2453.72 USD for 10 pieces, shipping (7.00 USD) included. Please reply to freja.jensen91@example.com.\" Agent note: do not confuse with ORD-11949; callback number +45 44 39 20 24.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Freja Jensen",
+     "email": "freja.jensen91@example.com",
+     "order_id": "ORD-68206",
+     "total": 2453.72,
+     "currency": "USD",
+     "order_date": "2026-08-26",
+     "quantity": 10
+    }
+   }
+  },
+  {
+   "id": "c055",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-80877 (replaces cancelled ORD-60611)\n- date: 27 October 2025\n- quantity: 10\n- shipping: 10.00 EUR\n- grand total: 1114.56 EUR\n- buyer: Noah Poulsen, Utrecht\n- contact: noah.poulsen93@example.com / +45 86 95 81 62\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Noah Poulsen",
+     "email": "noah.poulsen93@example.com",
+     "order_id": "ORD-80877",
+     "total": 1114.56,
+     "currency": "EUR",
+     "order_date": "2025-10-27",
+     "quantity": 10
+    }
+   }
+  },
+  {
+   "id": "c056",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Laura Kristensen from Odense. My order ORD-96176, placed on 2026/01/04, was for 7 units and came to 376.63 EUR in total, which includes a 11.00 EUR shipping fee. My previous order ORD-31161 arrived fine. You can reach me at laura.kristensen89@corp.test or on +45 74 69 33 18.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Laura Kristensen",
+     "email": "laura.kristensen89@corp.test",
+     "order_id": "ORD-96176",
+     "total": 376.63,
+     "currency": "EUR",
+     "order_date": "2026-01-04",
+     "quantity": 7
+    }
+   }
+  },
+  {
+   "id": "c057",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #8659\nCustomer: Maja Larsen <maja.larsen67@corp.test>\nPhone: +45 67 86 56 65\nNote: customer references old order ORD-65873 (closed).\nCurrent order: ORD-81495 - 4 item(s), ordered 20 October 2026.\nAmount charged: EUR 2473.33 (shipping 8.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Maja Larsen",
+     "email": "maja.larsen67@corp.test",
+     "order_id": "ORD-81495",
+     "total": 2473.33,
+     "currency": "EUR",
+     "order_date": "2026-10-20",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c058",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOliver Pedersen placed order ORD-66574 on 2025/03/15 and wrote in ticket #1458: \"I paid 1406.76 DKK for 3 pieces, shipping (6.00 DKK) included. Please reply to oliver.pedersen25@mail.test.\" Agent note: do not confuse with ORD-68797; callback number +45 84 16 71 70.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oliver Pedersen",
+     "email": "oliver.pedersen25@mail.test",
+     "order_id": "ORD-66574",
+     "total": 1406.76,
+     "currency": "DKK",
+     "order_date": "2025-03-15",
+     "quantity": 3
+    }
+   }
+  },
+  {
+   "id": "c059",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-90765 (replaces cancelled ORD-37226)\n- date: June 7, 2026\n- quantity: 3\n- shipping: 10.00 USD\n- grand total: 673.87 USD\n- buyer: Nora Larsen, Ghent\n- contact: nora.larsen54@example.com / +45 34 47 92 52\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Nora Larsen",
+     "email": "nora.larsen54@example.com",
+     "order_id": "ORD-90765",
+     "total": 673.87,
+     "currency": "USD",
+     "order_date": "2026-06-07",
+     "quantity": 3
+    }
+   }
+  },
+  {
+   "id": "c060",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Nora Nielsen from Odense. My order ORD-65614, placed on April 28, 2026, was for 4 units and came to 2087.50 USD in total, which includes a 14.00 USD shipping fee. My previous order ORD-87833 arrived fine. You can reach me at nora.nielsen91@shop.example or on +45 52 67 44 41.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Nora Nielsen",
+     "email": "nora.nielsen91@shop.example",
+     "order_id": "ORD-65614",
+     "total": 2087.5,
+     "currency": "USD",
+     "order_date": "2026-04-28",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c061",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #2398\nCustomer: Lars Andersen <lars.andersen65@shop.example>\nPhone: +45 78 90 15 52\nNote: customer references old order ORD-78813 (closed).\nCurrent order: ORD-66497 - 6 item(s), ordered 2026/02/27.\nAmount charged: USD 483.81 (shipping 11.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Lars Andersen",
+     "email": "lars.andersen65@shop.example",
+     "order_id": "ORD-66497",
+     "total": 483.81,
+     "currency": "USD",
+     "order_date": "2026-02-27",
+     "quantity": 6
+    }
+   }
+  },
+  {
+   "id": "c062",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nEmma Poulsen placed order ORD-33445 on January 2, 2026 and wrote in ticket #1097: \"I paid 1518.80 EUR for 4 pieces, shipping (7.00 EUR) included. Please reply to emma.poulsen91@corp.test.\" Agent note: do not confuse with ORD-23790; callback number +45 36 56 12 14.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Emma Poulsen",
+     "email": "emma.poulsen91@corp.test",
+     "order_id": "ORD-33445",
+     "total": 1518.8,
+     "currency": "EUR",
+     "order_date": "2026-01-02",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c063",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-96181 (replaces cancelled ORD-93135)\n- date: 1 January 2025\n- quantity: 12\n- shipping: 5.00 USD\n- grand total: 2310.26 USD\n- buyer: Lars Poulsen, Odense\n- contact: lars.poulsen56@corp.test / +45 16 97 32 28\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Lars Poulsen",
+     "email": "lars.poulsen56@corp.test",
+     "order_id": "ORD-96181",
+     "total": 2310.26,
+     "currency": "USD",
+     "order_date": "2025-01-01",
+     "quantity": 12
+    }
+   }
+  },
+  {
+   "id": "c064",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Sofie Petersen from Aarhus. My order ORD-22581, placed on March 1, 2026, was for 12 units and came to 226.18 DKK in total, which includes a 12.00 DKK shipping fee. My previous order ORD-20881 arrived fine. You can reach me at sofie.petersen97@example.com or on +45 40 34 58 94.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Sofie Petersen",
+     "email": "sofie.petersen97@example.com",
+     "order_id": "ORD-22581",
+     "total": 226.18,
+     "currency": "DKK",
+     "order_date": "2026-03-01",
+     "quantity": 12
+    }
+   }
+  },
+  {
+   "id": "c065",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #1603\nCustomer: Freja Andersen <freja.andersen10@example.com>\nPhone: +45 79 32 81 25\nNote: customer references old order ORD-98590 (closed).\nCurrent order: ORD-21051 - 9 item(s), ordered 2025/08/15.\nAmount charged: EUR 362.93 (shipping 14.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Freja Andersen",
+     "email": "freja.andersen10@example.com",
+     "order_id": "ORD-21051",
+     "total": 362.93,
+     "currency": "EUR",
+     "order_date": "2025-08-15",
+     "quantity": 9
+    }
+   }
+  },
+  {
+   "id": "c066",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nJonas Jensen placed order ORD-37854 on 16 March 2026 and wrote in ticket #5247: \"I paid 830.42 DKK for 1 pieces, shipping (2.00 DKK) included. Please reply to jonas.jensen96@shop.example.\" Agent note: do not confuse with ORD-76413; callback number +45 83 41 30 36.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Jonas Jensen",
+     "email": "jonas.jensen96@shop.example",
+     "order_id": "ORD-37854",
+     "total": 830.42,
+     "currency": "DKK",
+     "order_date": "2026-03-16",
+     "quantity": 1
+    }
+   }
+  },
+  {
+   "id": "c067",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-90167 (replaces cancelled ORD-90468)\n- date: 2026/09/28\n- quantity: 8\n- shipping: 8.00 USD\n- grand total: 1474.20 USD\n- buyer: Jonas Pedersen, Berlin\n- contact: jonas.pedersen96@example.com / +45 20 79 64 28\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Jonas Pedersen",
+     "email": "jonas.pedersen96@example.com",
+     "order_id": "ORD-90167",
+     "total": 1474.2,
+     "currency": "USD",
+     "order_date": "2026-09-28",
+     "quantity": 8
+    }
+   }
+  },
+  {
+   "id": "c068",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Victor Moller from Porto. My order ORD-80422, placed on May 4, 2026, was for 7 units and came to 294.66 USD in total, which includes a 15.00 USD shipping fee. My previous order ORD-77243 arrived fine. You can reach me at victor.moller63@mail.test or on +45 57 77 56 56.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Victor Moller",
+     "email": "victor.moller63@mail.test",
+     "order_id": "ORD-80422",
+     "total": 294.66,
+     "currency": "USD",
+     "order_date": "2026-05-04",
+     "quantity": 7
+    }
+   }
+  },
+  {
+   "id": "c069",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #2709\nCustomer: Felix Petersen <felix.petersen88@corp.test>\nPhone: +45 53 85 75 20\nNote: customer references old order ORD-81791 (closed).\nCurrent order: ORD-62505 - 10 item(s), ordered June 11, 2025.\nAmount charged: EUR 249.03 (shipping 8.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Felix Petersen",
+     "email": "felix.petersen88@corp.test",
+     "order_id": "ORD-62505",
+     "total": 249.03,
+     "currency": "EUR",
+     "order_date": "2025-06-11",
+     "quantity": 10
+    }
+   }
+  },
+  {
+   "id": "c070",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nJonas Petersen placed order ORD-45297 on 15 August 2026 and wrote in ticket #7855: \"I paid 534.18 DKK for 6 pieces, shipping (10.00 DKK) included. Please reply to jonas.petersen76@corp.test.\" Agent note: do not confuse with ORD-40160; callback number +45 68 38 39 38.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Jonas Petersen",
+     "email": "jonas.petersen76@corp.test",
+     "order_id": "ORD-45297",
+     "total": 534.18,
+     "currency": "DKK",
+     "order_date": "2026-08-15",
+     "quantity": 6
+    }
+   }
+  },
+  {
+   "id": "c071",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-54393 (replaces cancelled ORD-20344)\n- date: 21 July 2026\n- quantity: 5\n- shipping: 2.00 USD\n- grand total: 1844.70 USD\n- buyer: Jonas Rasmussen, Berlin\n- contact: jonas.rasmussen47@example.com / +45 55 67 31 74\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Jonas Rasmussen",
+     "email": "jonas.rasmussen47@example.com",
+     "order_id": "ORD-54393",
+     "total": 1844.7,
+     "currency": "USD",
+     "order_date": "2026-07-21",
+     "quantity": 5
+    }
+   }
+  },
+  {
+   "id": "c072",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Oliver Madsen from Odense. My order ORD-63480, placed on April 17, 2026, was for 6 units and came to 1886.90 EUR in total, which includes a 7.00 EUR shipping fee. My previous order ORD-25916 arrived fine. You can reach me at oliver.madsen98@example.com or on +45 50 91 52 98.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oliver Madsen",
+     "email": "oliver.madsen98@example.com",
+     "order_id": "ORD-63480",
+     "total": 1886.9,
+     "currency": "EUR",
+     "order_date": "2026-04-17",
+     "quantity": 6
+    }
+   }
+  },
+  {
+   "id": "c073",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #4611\nCustomer: Emil Olsen <emil.olsen23@example.com>\nPhone: +45 66 36 35 78\nNote: customer references old order ORD-55833 (closed).\nCurrent order: ORD-76212 - 1 item(s), ordered August 4, 2025.\nAmount charged: USD 268.44 (shipping 9.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Emil Olsen",
+     "email": "emil.olsen23@example.com",
+     "order_id": "ORD-76212",
+     "total": 268.44,
+     "currency": "USD",
+     "order_date": "2025-08-04",
+     "quantity": 1
+    }
+   }
+  },
+  {
+   "id": "c074",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nEmil Madsen placed order ORD-30410 on November 13, 2025 and wrote in ticket #8983: \"I paid 602.04 EUR for 6 pieces, shipping (9.00 EUR) included. Please reply to emil.madsen73@mail.test.\" Agent note: do not confuse with ORD-92563; callback number +45 42 21 11 79.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Emil Madsen",
+     "email": "emil.madsen73@mail.test",
+     "order_id": "ORD-30410",
+     "total": 602.04,
+     "currency": "EUR",
+     "order_date": "2025-11-13",
+     "quantity": 6
+    }
+   }
+  },
+  {
+   "id": "c075",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-62318 (replaces cancelled ORD-70460)\n- date: 12 January 2025\n- quantity: 5\n- shipping: 15.00 EUR\n- grand total: 1159.37 EUR\n- buyer: Emma Rasmussen, Berlin\n- contact: emma.rasmussen70@corp.test / +45 45 42 81 13\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Emma Rasmussen",
+     "email": "emma.rasmussen70@corp.test",
+     "order_id": "ORD-62318",
+     "total": 1159.37,
+     "currency": "EUR",
+     "order_date": "2025-01-12",
+     "quantity": 5
+    }
+   }
+  },
+  {
+   "id": "c076",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Ella Petersen from Lyon. My order ORD-66689, placed on 2026/12/10, was for 5 units and came to 1952.96 DKK in total, which includes a 7.00 DKK shipping fee. My previous order ORD-31652 arrived fine. You can reach me at ella.petersen52@mail.test or on +45 71 26 22 52.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Ella Petersen",
+     "email": "ella.petersen52@mail.test",
+     "order_id": "ORD-66689",
+     "total": 1952.96,
+     "currency": "DKK",
+     "order_date": "2026-12-10",
+     "quantity": 5
+    }
+   }
+  },
+  {
+   "id": "c077",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #5864\nCustomer: Laura Thomsen <laura.thomsen79@example.com>\nPhone: +45 35 85 50 72\nNote: customer references old order ORD-46492 (closed).\nCurrent order: ORD-46559 - 12 item(s), ordered July 18, 2026.\nAmount charged: DKK 1784.31 (shipping 13.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Laura Thomsen",
+     "email": "laura.thomsen79@example.com",
+     "order_id": "ORD-46559",
+     "total": 1784.31,
+     "currency": "DKK",
+     "order_date": "2026-07-18",
+     "quantity": 12
+    }
+   }
+  },
+  {
+   "id": "c078",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOliver Petersen placed order ORD-73566 on January 5, 2026 and wrote in ticket #8980: \"I paid 1774.51 EUR for 10 pieces, shipping (11.00 EUR) included. Please reply to oliver.petersen96@mail.test.\" Agent note: do not confuse with ORD-77777; callback number +45 34 15 98 60.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oliver Petersen",
+     "email": "oliver.petersen96@mail.test",
+     "order_id": "ORD-73566",
+     "total": 1774.51,
+     "currency": "EUR",
+     "order_date": "2026-01-05",
+     "quantity": 10
+    }
+   }
+  },
+  {
+   "id": "c079",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-84209 (replaces cancelled ORD-94985)\n- date: 24 October 2026\n- quantity: 12\n- shipping: 11.00 EUR\n- grand total: 727.61 EUR\n- buyer: Victor Thomsen, Lyon\n- contact: victor.thomsen88@corp.test / +45 73 44 38 30\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Victor Thomsen",
+     "email": "victor.thomsen88@corp.test",
+     "order_id": "ORD-84209",
+     "total": 727.61,
+     "currency": "EUR",
+     "order_date": "2026-10-24",
+     "quantity": 12
+    }
+   }
+  },
+  {
+   "id": "c080",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Lars Kristensen from Porto. My order ORD-36722, placed on 4 August 2025, was for 5 units and came to 1509.62 EUR in total, which includes a 5.00 EUR shipping fee. My previous order ORD-10532 arrived fine. You can reach me at lars.kristensen46@shop.example or on +45 33 30 87 92.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Lars Kristensen",
+     "email": "lars.kristensen46@shop.example",
+     "order_id": "ORD-36722",
+     "total": 1509.62,
+     "currency": "EUR",
+     "order_date": "2025-08-04",
+     "quantity": 5
+    }
+   }
+  },
+  {
+   "id": "c081",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #9354\nCustomer: Jonas Olsen <jonas.olsen51@example.com>\nPhone: +45 52 61 93 95\nNote: customer references old order ORD-25124 (closed).\nCurrent order: ORD-52535 - 4 item(s), ordered 2025/09/19.\nAmount charged: EUR 1040.97 (shipping 11.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Jonas Olsen",
+     "email": "jonas.olsen51@example.com",
+     "order_id": "ORD-52535",
+     "total": 1040.97,
+     "currency": "EUR",
+     "order_date": "2025-09-19",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c082",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nLaura Pedersen placed order ORD-16937 on 2026/03/03 and wrote in ticket #9259: \"I paid 2356.15 DKK for 4 pieces, shipping (13.00 DKK) included. Please reply to laura.pedersen52@example.com.\" Agent note: do not confuse with ORD-56224; callback number +45 52 46 38 52.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Laura Pedersen",
+     "email": "laura.pedersen52@example.com",
+     "order_id": "ORD-16937",
+     "total": 2356.15,
+     "currency": "DKK",
+     "order_date": "2026-03-03",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c083",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-63437 (replaces cancelled ORD-79055)\n- date: 2026/10/07\n- quantity: 9\n- shipping: 14.00 EUR\n- grand total: 1517.88 EUR\n- buyer: Jonas Christensen, Ghent\n- contact: jonas.christensen29@example.com / +45 11 50 10 89\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Jonas Christensen",
+     "email": "jonas.christensen29@example.com",
+     "order_id": "ORD-63437",
+     "total": 1517.88,
+     "currency": "EUR",
+     "order_date": "2026-10-07",
+     "quantity": 9
+    }
+   }
+  },
+  {
+   "id": "c084",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Oliver Thomsen from Odense. My order ORD-75754, placed on 23 April 2026, was for 2 units and came to 370.93 DKK in total, which includes a 14.00 DKK shipping fee. My previous order ORD-69005 arrived fine. You can reach me at oliver.thomsen57@corp.test or on +45 27 46 98 22.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oliver Thomsen",
+     "email": "oliver.thomsen57@corp.test",
+     "order_id": "ORD-75754",
+     "total": 370.93,
+     "currency": "DKK",
+     "order_date": "2026-04-23",
+     "quantity": 2
+    }
+   }
+  },
+  {
+   "id": "c085",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #3137\nCustomer: Clara Nielsen <clara.nielsen81@example.com>\nPhone: +45 42 48 42 55\nNote: customer references old order ORD-57509 (closed).\nCurrent order: ORD-78434 - 3 item(s), ordered February 24, 2025.\nAmount charged: DKK 492.14 (shipping 7.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Clara Nielsen",
+     "email": "clara.nielsen81@example.com",
+     "order_id": "ORD-78434",
+     "total": 492.14,
+     "currency": "DKK",
+     "order_date": "2025-02-24",
+     "quantity": 3
+    }
+   }
+  },
+  {
+   "id": "c086",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nAlma Poulsen placed order ORD-53219 on 2026/03/18 and wrote in ticket #4472: \"I paid 1923.84 USD for 2 pieces, shipping (3.00 USD) included. Please reply to alma.poulsen37@corp.test.\" Agent note: do not confuse with ORD-63586; callback number +45 38 47 98 64.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Alma Poulsen",
+     "email": "alma.poulsen37@corp.test",
+     "order_id": "ORD-53219",
+     "total": 1923.84,
+     "currency": "USD",
+     "order_date": "2026-03-18",
+     "quantity": 2
+    }
+   }
+  },
+  {
+   "id": "c087",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-21024 (replaces cancelled ORD-43404)\n- date: 1 March 2026\n- quantity: 4\n- shipping: 9.00 USD\n- grand total: 825.17 USD\n- buyer: Ida Nielsen, Malmo\n- contact: ida.nielsen21@shop.example / +45 12 21 38 92\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Ida Nielsen",
+     "email": "ida.nielsen21@shop.example",
+     "order_id": "ORD-21024",
+     "total": 825.17,
+     "currency": "USD",
+     "order_date": "2026-03-01",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c088",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Emma Madsen from Utrecht. My order ORD-48397, placed on 2025/05/10, was for 7 units and came to 340.13 EUR in total, which includes a 13.00 EUR shipping fee. My previous order ORD-58356 arrived fine. You can reach me at emma.madsen81@mail.test or on +45 27 12 54 97.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Emma Madsen",
+     "email": "emma.madsen81@mail.test",
+     "order_id": "ORD-48397",
+     "total": 340.13,
+     "currency": "EUR",
+     "order_date": "2025-05-10",
+     "quantity": 7
+    }
+   }
+  },
+  {
+   "id": "c089",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #6263\nCustomer: Lucas Thomsen <lucas.thomsen3@corp.test>\nPhone: +45 99 89 89 46\nNote: customer references old order ORD-64611 (closed).\nCurrent order: ORD-73138 - 8 item(s), ordered 20 December 2025.\nAmount charged: EUR 1826.85 (shipping 15.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Lucas Thomsen",
+     "email": "lucas.thomsen3@corp.test",
+     "order_id": "ORD-73138",
+     "total": 1826.85,
+     "currency": "EUR",
+     "order_date": "2025-12-20",
+     "quantity": 8
+    }
+   }
+  },
+  {
+   "id": "c090",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nIda Larsen placed order ORD-72802 on 2026/08/17 and wrote in ticket #1116: \"I paid 1802.18 EUR for 3 pieces, shipping (7.00 EUR) included. Please reply to ida.larsen78@corp.test.\" Agent note: do not confuse with ORD-46813; callback number +45 57 34 89 98.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Ida Larsen",
+     "email": "ida.larsen78@corp.test",
+     "order_id": "ORD-72802",
+     "total": 1802.18,
+     "currency": "EUR",
+     "order_date": "2026-08-17",
+     "quantity": 3
+    }
+   }
+  },
+  {
+   "id": "c091",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-78764 (replaces cancelled ORD-16009)\n- date: April 4, 2025\n- quantity: 5\n- shipping: 12.00 EUR\n- grand total: 2121.30 EUR\n- buyer: Lars Kristensen, Odense\n- contact: lars.kristensen49@corp.test / +45 85 85 52 16\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Lars Kristensen",
+     "email": "lars.kristensen49@corp.test",
+     "order_id": "ORD-78764",
+     "total": 2121.3,
+     "currency": "EUR",
+     "order_date": "2025-04-04",
+     "quantity": 5
+    }
+   }
+  },
+  {
+   "id": "c092",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Emil Johansen from Odense. My order ORD-70578, placed on November 23, 2025, was for 4 units and came to 2315.19 DKK in total, which includes a 3.00 DKK shipping fee. My previous order ORD-29916 arrived fine. You can reach me at emil.johansen77@example.com or on +45 54 40 50 63.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Emil Johansen",
+     "email": "emil.johansen77@example.com",
+     "order_id": "ORD-70578",
+     "total": 2315.19,
+     "currency": "DKK",
+     "order_date": "2025-11-23",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c093",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #9051\nCustomer: Oscar Petersen <oscar.petersen90@mail.test>\nPhone: +45 13 19 46 38\nNote: customer references old order ORD-51671 (closed).\nCurrent order: ORD-34660 - 11 item(s), ordered June 9, 2025.\nAmount charged: EUR 374.77 (shipping 15.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oscar Petersen",
+     "email": "oscar.petersen90@mail.test",
+     "order_id": "ORD-34660",
+     "total": 374.77,
+     "currency": "EUR",
+     "order_date": "2025-06-09",
+     "quantity": 11
+    }
+   }
+  },
+  {
+   "id": "c094",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nLucas Christensen placed order ORD-69385 on April 16, 2026 and wrote in ticket #7592: \"I paid 732.87 USD for 8 pieces, shipping (5.00 USD) included. Please reply to lucas.christensen91@mail.test.\" Agent note: do not confuse with ORD-37883; callback number +45 42 78 87 58.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Lucas Christensen",
+     "email": "lucas.christensen91@mail.test",
+     "order_id": "ORD-69385",
+     "total": 732.87,
+     "currency": "USD",
+     "order_date": "2026-04-16",
+     "quantity": 8
+    }
+   }
+  },
+  {
+   "id": "c095",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-91518 (replaces cancelled ORD-12091)\n- date: 2026/10/24\n- quantity: 1\n- shipping: 12.00 USD\n- grand total: 808.26 USD\n- buyer: Maja Hansen, Porto\n- contact: maja.hansen11@corp.test / +45 57 28 12 16\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Maja Hansen",
+     "email": "maja.hansen11@corp.test",
+     "order_id": "ORD-91518",
+     "total": 808.26,
+     "currency": "USD",
+     "order_date": "2026-10-24",
+     "quantity": 1
+    }
+   }
+  },
+  {
+   "id": "c096",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Maja Poulsen from Ghent. My order ORD-50711, placed on 14 August 2026, was for 10 units and came to 2163.11 EUR in total, which includes a 10.00 EUR shipping fee. My previous order ORD-48039 arrived fine. You can reach me at maja.poulsen94@example.com or on +45 86 62 31 88.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Maja Poulsen",
+     "email": "maja.poulsen94@example.com",
+     "order_id": "ORD-50711",
+     "total": 2163.11,
+     "currency": "EUR",
+     "order_date": "2026-08-14",
+     "quantity": 10
+    }
+   }
+  },
+  {
+   "id": "c097",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #5891\nCustomer: Felix Madsen <felix.madsen75@corp.test>\nPhone: +45 39 18 40 74\nNote: customer references old order ORD-59655 (closed).\nCurrent order: ORD-89047 - 1 item(s), ordered February 24, 2026.\nAmount charged: DKK 1175.87 (shipping 3.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Felix Madsen",
+     "email": "felix.madsen75@corp.test",
+     "order_id": "ORD-89047",
+     "total": 1175.87,
+     "currency": "DKK",
+     "order_date": "2026-02-24",
+     "quantity": 1
+    }
+   }
+  },
+  {
+   "id": "c098",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nIda Johansen placed order ORD-29382 on 2026/06/19 and wrote in ticket #4196: \"I paid 950.83 USD for 10 pieces, shipping (12.00 USD) included. Please reply to ida.johansen53@shop.example.\" Agent note: do not confuse with ORD-85738; callback number +45 16 60 84 74.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Ida Johansen",
+     "email": "ida.johansen53@shop.example",
+     "order_id": "ORD-29382",
+     "total": 950.83,
+     "currency": "USD",
+     "order_date": "2026-06-19",
+     "quantity": 10
+    }
+   }
+  },
+  {
+   "id": "c099",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-92209 (replaces cancelled ORD-21105)\n- date: 2026/06/14\n- quantity: 6\n- shipping: 12.00 DKK\n- grand total: 1399.69 DKK\n- buyer: Felix Johansen, Aarhus\n- contact: felix.johansen79@mail.test / +45 65 15 38 25\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Felix Johansen",
+     "email": "felix.johansen79@mail.test",
+     "order_id": "ORD-92209",
+     "total": 1399.69,
+     "currency": "DKK",
+     "order_date": "2026-06-14",
+     "quantity": 6
+    }
+   }
+  },
+  {
+   "id": "c100",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Laura Kristensen from Aarhus. My order ORD-27172, placed on 16 October 2026, was for 11 units and came to 1496.97 EUR in total, which includes a 13.00 EUR shipping fee. My previous order ORD-53429 arrived fine. You can reach me at laura.kristensen34@example.com or on +45 10 41 44 28.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Laura Kristensen",
+     "email": "laura.kristensen34@example.com",
+     "order_id": "ORD-27172",
+     "total": 1496.97,
+     "currency": "EUR",
+     "order_date": "2026-10-16",
+     "quantity": 11
+    }
+   }
+  },
+  {
+   "id": "c101",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #1067\nCustomer: Oliver Jensen <oliver.jensen3@example.com>\nPhone: +45 66 51 13 71\nNote: customer references old order ORD-62107 (closed).\nCurrent order: ORD-90537 - 9 item(s), ordered 3 April 2025.\nAmount charged: DKK 319.69 (shipping 8.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oliver Jensen",
+     "email": "oliver.jensen3@example.com",
+     "order_id": "ORD-90537",
+     "total": 319.69,
+     "currency": "DKK",
+     "order_date": "2025-04-03",
+     "quantity": 9
+    }
+   }
+  },
+  {
+   "id": "c102",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nFreja Jensen placed order ORD-29210 on 2026/09/01 and wrote in ticket #7312: \"I paid 1486.98 EUR for 8 pieces, shipping (10.00 EUR) included. Please reply to freja.jensen2@example.com.\" Agent note: do not confuse with ORD-98259; callback number +45 19 18 58 73.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Freja Jensen",
+     "email": "freja.jensen2@example.com",
+     "order_id": "ORD-29210",
+     "total": 1486.98,
+     "currency": "EUR",
+     "order_date": "2026-09-01",
+     "quantity": 8
+    }
+   }
+  },
+  {
+   "id": "c103",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-83318 (replaces cancelled ORD-34881)\n- date: 2025/10/01\n- quantity: 3\n- shipping: 14.00 DKK\n- grand total: 169.14 DKK\n- buyer: Sofie Poulsen, Porto\n- contact: sofie.poulsen91@mail.test / +45 20 39 92 78\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Sofie Poulsen",
+     "email": "sofie.poulsen91@mail.test",
+     "order_id": "ORD-83318",
+     "total": 169.14,
+     "currency": "DKK",
+     "order_date": "2025-10-01",
+     "quantity": 3
+    }
+   }
+  },
+  {
+   "id": "c104",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Freja Hansen from Odense. My order ORD-90312, placed on April 3, 2025, was for 8 units and came to 1266.68 DKK in total, which includes a 6.00 DKK shipping fee. My previous order ORD-17014 arrived fine. You can reach me at freja.hansen14@shop.example or on +45 56 82 50 25.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Freja Hansen",
+     "email": "freja.hansen14@shop.example",
+     "order_id": "ORD-90312",
+     "total": 1266.68,
+     "currency": "DKK",
+     "order_date": "2025-04-03",
+     "quantity": 8
+    }
+   }
+  },
+  {
+   "id": "c105",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #4093\nCustomer: Nora Christensen <nora.christensen15@example.com>\nPhone: +45 23 87 82 35\nNote: customer references old order ORD-85001 (closed).\nCurrent order: ORD-58698 - 11 item(s), ordered 26 January 2025.\nAmount charged: EUR 1027.19 (shipping 13.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Nora Christensen",
+     "email": "nora.christensen15@example.com",
+     "order_id": "ORD-58698",
+     "total": 1027.19,
+     "currency": "EUR",
+     "order_date": "2025-01-26",
+     "quantity": 11
+    }
+   }
+  },
+  {
+   "id": "c106",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOliver Nielsen placed order ORD-62626 on 2026/10/27 and wrote in ticket #6559: \"I paid 1173.77 DKK for 3 pieces, shipping (3.00 DKK) included. Please reply to oliver.nielsen60@example.com.\" Agent note: do not confuse with ORD-21753; callback number +45 76 58 98 57.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oliver Nielsen",
+     "email": "oliver.nielsen60@example.com",
+     "order_id": "ORD-62626",
+     "total": 1173.77,
+     "currency": "DKK",
+     "order_date": "2026-10-27",
+     "quantity": 3
+    }
+   }
+  },
+  {
+   "id": "c107",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-79299 (replaces cancelled ORD-10109)\n- date: July 8, 2025\n- quantity: 4\n- shipping: 9.00 DKK\n- grand total: 1132.32 DKK\n- buyer: Sofie Jensen, Aarhus\n- contact: sofie.jensen42@example.com / +45 45 92 71 73\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Sofie Jensen",
+     "email": "sofie.jensen42@example.com",
+     "order_id": "ORD-79299",
+     "total": 1132.32,
+     "currency": "DKK",
+     "order_date": "2025-07-08",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c108",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Maja Thomsen from Ghent. My order ORD-26751, placed on 26 April 2026, was for 11 units and came to 1943.40 USD in total, which includes a 11.00 USD shipping fee. My previous order ORD-60829 arrived fine. You can reach me at maja.thomsen92@example.com or on +45 40 10 25 22.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Maja Thomsen",
+     "email": "maja.thomsen92@example.com",
+     "order_id": "ORD-26751",
+     "total": 1943.4,
+     "currency": "USD",
+     "order_date": "2026-04-26",
+     "quantity": 11
+    }
+   }
+  },
+  {
+   "id": "c109",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #1304\nCustomer: Maja Poulsen <maja.poulsen34@shop.example>\nPhone: +45 99 13 91 48\nNote: customer references old order ORD-17833 (closed).\nCurrent order: ORD-81081 - 5 item(s), ordered 2026/09/27.\nAmount charged: EUR 1790.48 (shipping 6.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Maja Poulsen",
+     "email": "maja.poulsen34@shop.example",
+     "order_id": "ORD-81081",
+     "total": 1790.48,
+     "currency": "EUR",
+     "order_date": "2026-09-27",
+     "quantity": 5
+    }
+   }
+  },
+  {
+   "id": "c110",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOliver Rasmussen placed order ORD-59296 on February 17, 2025 and wrote in ticket #7684: \"I paid 991.67 USD for 11 pieces, shipping (13.00 USD) included. Please reply to oliver.rasmussen48@mail.test.\" Agent note: do not confuse with ORD-28206; callback number +45 66 92 55 81.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oliver Rasmussen",
+     "email": "oliver.rasmussen48@mail.test",
+     "order_id": "ORD-59296",
+     "total": 991.67,
+     "currency": "USD",
+     "order_date": "2025-02-17",
+     "quantity": 11
+    }
+   }
+  },
+  {
+   "id": "c111",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-51379 (replaces cancelled ORD-52226)\n- date: 2026/10/17\n- quantity: 11\n- shipping: 11.00 DKK\n- grand total: 2484.97 DKK\n- buyer: Victor Pedersen, Malmo\n- contact: victor.pedersen9@example.com / +45 92 23 22 46\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Victor Pedersen",
+     "email": "victor.pedersen9@example.com",
+     "order_id": "ORD-51379",
+     "total": 2484.97,
+     "currency": "DKK",
+     "order_date": "2026-10-17",
+     "quantity": 11
+    }
+   }
+  },
+  {
+   "id": "c112",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Felix Moller from Porto. My order ORD-85910, placed on 1 July 2025, was for 4 units and came to 1775.36 DKK in total, which includes a 3.00 DKK shipping fee. My previous order ORD-47027 arrived fine. You can reach me at felix.moller74@shop.example or on +45 81 19 44 33.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Felix Moller",
+     "email": "felix.moller74@shop.example",
+     "order_id": "ORD-85910",
+     "total": 1775.36,
+     "currency": "DKK",
+     "order_date": "2025-07-01",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c113",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #1920\nCustomer: Lucas Thomsen <lucas.thomsen89@corp.test>\nPhone: +45 72 33 23 79\nNote: customer references old order ORD-14370 (closed).\nCurrent order: ORD-35809 - 6 item(s), ordered 21 January 2025.\nAmount charged: EUR 1543.73 (shipping 7.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Lucas Thomsen",
+     "email": "lucas.thomsen89@corp.test",
+     "order_id": "ORD-35809",
+     "total": 1543.73,
+     "currency": "EUR",
+     "order_date": "2025-01-21",
+     "quantity": 6
+    }
+   }
+  },
+  {
+   "id": "c114",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nVictor Christensen placed order ORD-46487 on 2025/09/11 and wrote in ticket #2439: \"I paid 1671.86 EUR for 2 pieces, shipping (13.00 EUR) included. Please reply to victor.christensen57@corp.test.\" Agent note: do not confuse with ORD-55464; callback number +45 27 25 57 76.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Victor Christensen",
+     "email": "victor.christensen57@corp.test",
+     "order_id": "ORD-46487",
+     "total": 1671.86,
+     "currency": "EUR",
+     "order_date": "2025-09-11",
+     "quantity": 2
+    }
+   }
+  },
+  {
+   "id": "c115",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-61822 (replaces cancelled ORD-31969)\n- date: 15 November 2026\n- quantity: 8\n- shipping: 13.00 DKK\n- grand total: 1800.60 DKK\n- buyer: Victor Andersen, Ghent\n- contact: victor.andersen72@corp.test / +45 69 50 38 94\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Victor Andersen",
+     "email": "victor.andersen72@corp.test",
+     "order_id": "ORD-61822",
+     "total": 1800.6,
+     "currency": "DKK",
+     "order_date": "2026-11-15",
+     "quantity": 8
+    }
+   }
+  },
+  {
+   "id": "c116",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Lucas Pedersen from Berlin. My order ORD-75075, placed on 2026/09/06, was for 10 units and came to 1874.40 DKK in total, which includes a 5.00 DKK shipping fee. My previous order ORD-44826 arrived fine. You can reach me at lucas.pedersen31@mail.test or on +45 84 38 97 93.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Lucas Pedersen",
+     "email": "lucas.pedersen31@mail.test",
+     "order_id": "ORD-75075",
+     "total": 1874.4,
+     "currency": "DKK",
+     "order_date": "2026-09-06",
+     "quantity": 10
+    }
+   }
+  },
+  {
+   "id": "c117",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #5090\nCustomer: Victor Olsen <victor.olsen8@mail.test>\nPhone: +45 83 62 68 67\nNote: customer references old order ORD-22914 (closed).\nCurrent order: ORD-35909 - 12 item(s), ordered 2025/05/11.\nAmount charged: DKK 1227.52 (shipping 10.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Victor Olsen",
+     "email": "victor.olsen8@mail.test",
+     "order_id": "ORD-35909",
+     "total": 1227.52,
+     "currency": "DKK",
+     "order_date": "2025-05-11",
+     "quantity": 12
+    }
+   }
+  },
+  {
+   "id": "c118",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nEmil Olsen placed order ORD-43501 on August 4, 2025 and wrote in ticket #2527: \"I paid 369.95 USD for 1 pieces, shipping (5.00 USD) included. Please reply to emil.olsen18@corp.test.\" Agent note: do not confuse with ORD-91711; callback number +45 56 18 54 96.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Emil Olsen",
+     "email": "emil.olsen18@corp.test",
+     "order_id": "ORD-43501",
+     "total": 369.95,
+     "currency": "USD",
+     "order_date": "2025-08-04",
+     "quantity": 1
+    }
+   }
+  },
+  {
+   "id": "c119",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-39410 (replaces cancelled ORD-25370)\n- date: October 20, 2026\n- quantity: 11\n- shipping: 14.00 USD\n- grand total: 1954.96 USD\n- buyer: Ella Hansen, Berlin\n- contact: ella.hansen13@shop.example / +45 24 41 19 20\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Ella Hansen",
+     "email": "ella.hansen13@shop.example",
+     "order_id": "ORD-39410",
+     "total": 1954.96,
+     "currency": "USD",
+     "order_date": "2026-10-20",
+     "quantity": 11
+    }
+   }
+  },
+  {
+   "id": "c120",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Jonas Madsen from Malmo. My order ORD-36645, placed on October 12, 2025, was for 8 units and came to 468.47 USD in total, which includes a 11.00 USD shipping fee. My previous order ORD-37297 arrived fine. You can reach me at jonas.madsen98@mail.test or on +45 25 88 42 49.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Jonas Madsen",
+     "email": "jonas.madsen98@mail.test",
+     "order_id": "ORD-36645",
+     "total": 468.47,
+     "currency": "USD",
+     "order_date": "2025-10-12",
+     "quantity": 8
+    }
+   }
+  },
+  {
+   "id": "c121",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #3731\nCustomer: Nora Rasmussen <nora.rasmussen43@corp.test>\nPhone: +45 74 33 50 52\nNote: customer references old order ORD-35471 (closed).\nCurrent order: ORD-61839 - 10 item(s), ordered 10 October 2026.\nAmount charged: EUR 928.43 (shipping 5.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Nora Rasmussen",
+     "email": "nora.rasmussen43@corp.test",
+     "order_id": "ORD-61839",
+     "total": 928.43,
+     "currency": "EUR",
+     "order_date": "2026-10-10",
+     "quantity": 10
+    }
+   }
+  },
+  {
+   "id": "c122",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOliver Nielsen placed order ORD-86924 on 9 August 2025 and wrote in ticket #3063: \"I paid 396.78 DKK for 1 pieces, shipping (11.00 DKK) included. Please reply to oliver.nielsen85@corp.test.\" Agent note: do not confuse with ORD-43617; callback number +45 95 41 22 21.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oliver Nielsen",
+     "email": "oliver.nielsen85@corp.test",
+     "order_id": "ORD-86924",
+     "total": 396.78,
+     "currency": "DKK",
+     "order_date": "2025-08-09",
+     "quantity": 1
+    }
+   }
+  },
+  {
+   "id": "c123",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-77006 (replaces cancelled ORD-47489)\n- date: 2025/03/13\n- quantity: 3\n- shipping: 14.00 USD\n- grand total: 258.92 USD\n- buyer: Lars Petersen, Utrecht\n- contact: lars.petersen13@mail.test / +45 89 85 79 37\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Lars Petersen",
+     "email": "lars.petersen13@mail.test",
+     "order_id": "ORD-77006",
+     "total": 258.92,
+     "currency": "USD",
+     "order_date": "2025-03-13",
+     "quantity": 3
+    }
+   }
+  },
+  {
+   "id": "c124",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Freja Pedersen from Porto. My order ORD-99234, placed on March 3, 2025, was for 10 units and came to 1243.69 USD in total, which includes a 2.00 USD shipping fee. My previous order ORD-19800 arrived fine. You can reach me at freja.pedersen26@example.com or on +45 84 16 79 93.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Freja Pedersen",
+     "email": "freja.pedersen26@example.com",
+     "order_id": "ORD-99234",
+     "total": 1243.69,
+     "currency": "USD",
+     "order_date": "2025-03-03",
+     "quantity": 10
+    }
+   }
+  },
+  {
+   "id": "c125",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #1130\nCustomer: Felix Kristensen <felix.kristensen65@corp.test>\nPhone: +45 88 46 90 67\nNote: customer references old order ORD-45147 (closed).\nCurrent order: ORD-34457 - 1 item(s), ordered 2025/03/08.\nAmount charged: USD 1460.54 (shipping 5.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Felix Kristensen",
+     "email": "felix.kristensen65@corp.test",
+     "order_id": "ORD-34457",
+     "total": 1460.54,
+     "currency": "USD",
+     "order_date": "2025-03-08",
+     "quantity": 1
+    }
+   }
+  },
+  {
+   "id": "c126",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nNoah Thomsen placed order ORD-93793 on 2026/03/01 and wrote in ticket #3863: \"I paid 1337.95 EUR for 5 pieces, shipping (5.00 EUR) included. Please reply to noah.thomsen58@mail.test.\" Agent note: do not confuse with ORD-13435; callback number +45 53 67 57 18.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Noah Thomsen",
+     "email": "noah.thomsen58@mail.test",
+     "order_id": "ORD-93793",
+     "total": 1337.95,
+     "currency": "EUR",
+     "order_date": "2026-03-01",
+     "quantity": 5
+    }
+   }
+  },
+  {
+   "id": "c127",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nOrder summary\n- ref: ORD-72783 (replaces cancelled ORD-65597)\n- date: 2026/12/18\n- quantity: 8\n- shipping: 5.00 DKK\n- grand total: 2223.19 DKK\n- buyer: Oscar Petersen, Ghent\n- contact: oscar.petersen59@shop.example / +45 52 31 68 25\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oscar Petersen",
+     "email": "oscar.petersen59@shop.example",
+     "order_id": "ORD-72783",
+     "total": 2223.19,
+     "currency": "DKK",
+     "order_date": "2026-12-18",
+     "quantity": 8
+    }
+   }
+  },
+  {
+   "id": "c128",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nHi team, this is Oliver Jensen from Berlin. My order ORD-59293, placed on April 25, 2026, was for 4 units and came to 1903.19 USD in total, which includes a 9.00 USD shipping fee. My previous order ORD-23311 arrived fine. You can reach me at oliver.jensen64@corp.test or on +45 76 22 85 92.\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Oliver Jensen",
+     "email": "oliver.jensen64@corp.test",
+     "order_id": "ORD-59293",
+     "total": 1903.19,
+     "currency": "USD",
+     "order_date": "2026-04-25",
+     "quantity": 4
+    }
+   }
+  },
+  {
+   "id": "c129",
+   "prompt": "Extract the order details from the message below. Return ONLY a JSON object with exactly these keys: \"customer_name\" (string), \"email\" (string), \"order_id\" (string), \"total\" (number, the order total), \"currency\" (ISO 4217 code string), \"order_date\" (string, YYYY-MM-DD), \"quantity\" (integer).\n\nMessage:\n\"\"\"\nSupport ticket #4544\nCustomer: Lucas Johansen <lucas.johansen45@example.com>\nPhone: +45 39 40 15 91\nNote: customer references old order ORD-43313 (closed).\nCurrent order: ORD-75703 - 4 item(s), ordered November 14, 2025.\nAmount charged: EUR 1633.46 (shipping 13.00 included).\n\"\"\"",
+   "check": {
+    "kind": "extract",
+    "expect": {
+     "customer_name": "Lucas Johansen",
+     "email": "lucas.johansen45@example.com",
+     "order_id": "ORD-75703",
+     "total": 1633.46,
+     "currency": "EUR",
+     "order_date": "2025-11-14",
+     "quantity": 4
+    }
+   }
+  }
+ ]
+}
