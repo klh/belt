@@ -58,6 +58,11 @@ as "would this candidate serve the request" for belt routing. Rerankers
 score relevance, not content. Metric: accuracy at 0.5 (or AUC). Grow to
 ≥130 pairs before claiming quality separation.
 
+Run 2026-10-03 (smoke): acc@0.5 4/10 under every instruct wording; ranking
+within a query 3/3; p50 22ms warm. Bare card labels score degenerate
+all-no — candidates must carry text. Full findings: the reranker section
+in benchmarks.md.
+
 1. fix flaky async test in a scheduler service | coder-30B card | 1
 2. fix flaky async test in a scheduler service | danish-9B card | 0
 3. write a Danish summary of this quarterly report | danish-9B card | 1
