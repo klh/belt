@@ -227,6 +227,10 @@ export function applyBudget(
 	const rule = rules.find((r) => r.match.test(model));
 	if (!rule) return { maxTokens, extra: {} };
 	if (rule.thinking === "off") return { maxTokens, extra: rule.offExtra ?? {} };
+	// Probe-scale budgets (< 64: health pings, liveness checks) are explicit —
+	// raising them to minBudget turns a 1-token pong into a 2048-token thinking
+	// request (2026-10-03: bench preflight timed out on exactly this).
+	if (maxTokens < 64) return { maxTokens, extra: {} };
 	if (maxTokens >= rule.minBudget) return { maxTokens, extra: {} };
 	return {
 		maxTokens: rule.minBudget,
