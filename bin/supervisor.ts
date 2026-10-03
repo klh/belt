@@ -4,6 +4,10 @@
 // resident :890x specialists the swarm launches) are respawned when they die;
 // external / on-demand targets are probed and reported only — never touched.
 //
+// litellm (:4100, W277) is owned too: spawned with keys read from the 0600
+// files at spawn time, probed on /v1/models WITH auth (200/401 = serving),
+// and preflighted for its prisma dependency (litellm-target.ts).
+//
 // Owned-target loop (per port, independent — a 90s model load on :8903 never
 // delays healing :4000):
 //   probe (TCP connect, then HTTP GET healthPath; any HTTP reply = serving)
@@ -30,6 +34,7 @@ import {
 import { connect } from "node:net";
 import { dirname } from "node:path";
 import { EXTERNAL, residentSet, SPECIALISTS } from "./registry.ts";
+import { litellmTarget } from "./litellm-target.ts";
 import { mlxLogPath, spawnArgs } from "./spawner.ts";
 
 const HOME = process.env.HOME ?? "";
@@ -40,7 +45,12 @@ export const TRANSITION_LOG =
 	process.env.BELT_SUPERVISOR_LOG ?? `${LOG_DIR}/belt-supervisor.log`;
 export const ROUTER_SCRIPT = `${HOME}/.claude/local-llm/router-shim.ts`;
 
-export type Kind = "router" | "specialist" | "ondemand" | "external";
+export type Kind =
+	| "router"
+	| "specialist"
+	| "gateway"
+	| "ondemand"
+	| "external";
 export type State =
 	| "unknown"
 	| "up"
@@ -68,6 +78,12 @@ export interface Target {
 	spawn?: () => Child;
 	bindTimeoutMs?: number;
 	killHung?: boolean;
+	/** Extra probe headers (e.g. auth), built per probe — never logged. */
+	probeHeaders?: () => Record<string, string>;
+	/** HTTP statuses that count as serving; omitted = any reply. */
+	okStatus?: number[];
+	/** Startup dependency check: null = ok, string = alert reason. */
+	preflight?: () => string | null;
 }
 
 export interface ProbeResult {
@@ -90,6 +106,7 @@ export interface TargetStatus {
 	pid: number | null;
 	nextRetryAt: string | null;
 	lastError: string | null;
+	preflightError?: string | null;
 }
 
 export interface StatusDoc {
@@ -188,19 +205,28 @@ export const tcpProbe = (
 		sock.once("error", () => done(false));
 	});
 
-/** Any HTTP response (even 404) means the server's request loop is alive. */
+export interface HttpProbeOptions {
+	headers?: Record<string, string>;
+	/** Statuses that count as serving; omitted = any reply (even 404). */
+	okStatus?: number[];
+}
+
+/** Any HTTP response (even 404) means the server's request loop is alive,
+ *  unless okStatus narrows what counts as healthy. */
 export const httpProbe = async (
 	port: number,
 	path = "/health",
 	host = "127.0.0.1",
 	timeoutMs = 2000,
+	opts: HttpProbeOptions = {},
 ): Promise<boolean> => {
 	try {
 		const r = await fetch(`http://${host}:${port}${path}`, {
+			headers: opts.headers,
 			signal: AbortSignal.timeout(timeoutMs),
 		});
 		await r.body?.cancel();
-		return true;
+		return opts.okStatus ? opts.okStatus.includes(r.status) : true;
 	} catch {
 		return false;
 	}
@@ -209,7 +235,11 @@ export const httpProbe = async (
 export async function probeTarget(t: Target): Promise<ProbeResult> {
 	const host = t.host ?? "127.0.0.1";
 	if (!(await tcpProbe(t.port, host))) return { tcp: false, http: false };
-	return { tcp: true, http: await httpProbe(t.port, t.healthPath, host) };
+	const http = await httpProbe(t.port, t.healthPath, host, 2000, {
+		headers: t.probeHeaders?.(),
+		okStatus: t.okStatus,
+	});
+	return { tcp: true, http };
 }
 
 /** SIGKILL whatever listens on the port (argument-array lsof, no shell). */
@@ -312,6 +342,26 @@ export class Supervisor {
 		}
 		mkdirSync(dirname(this.opts.statusFile), { recursive: true });
 		mkdirSync(dirname(this.opts.logFile), { recursive: true });
+		for (const t of targets) this.preflight(t);
+	}
+
+	/** Startup dependency check: log + alert, never auto-fix in-process. */
+	private preflight(t: Target): void {
+		if (!t.preflight) return;
+		let err: string | null;
+		try {
+			err = t.preflight();
+		} catch (e) {
+			err = `preflight threw: ${String(e)}`;
+		}
+		const s = this.status.get(t.port) as TargetStatus;
+		s.preflightError = err;
+		s.alert = isAlert(t.kind, t.owned, s.state) || err !== null;
+		if (err)
+			appendFileSync(
+				this.opts.logFile,
+				`${iso(this.opts.now())} :${t.port} ${t.name} PREFLIGHT FAIL (${err})\n`,
+			);
 	}
 
 	async run(): Promise<void> {
@@ -386,7 +436,7 @@ export class Supervisor {
 			s.state = state;
 			s.since = iso(now);
 		}
-		s.alert = isAlert(t.kind, t.owned, s.state);
+		s.alert = isAlert(t.kind, t.owned, s.state) || Boolean(s.preflightError);
 		this.flush();
 	}
 
@@ -602,12 +652,6 @@ export function fleetTargets(): Target[] {
 			healthPath: "/health",
 		});
 	}
-	targets.push({
-		name: "gateway",
-		port: 4100,
-		kind: "external",
-		owned: false,
-		healthPath: "/health",
-	});
+	targets.push(litellmTarget());
 	return targets;
 }

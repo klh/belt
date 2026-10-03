@@ -9,11 +9,14 @@
 //   bun swarm.ts download    — download all specialist models
 //   bun swarm.ts restart     — stop + start
 //   bun swarm.ts supervise   — long-running self-heal loop (launchd KeepAlive):
-//                              respawns the :4000 shim + resident specialists
-//                              with backoff + circuit breaker (supervisor.ts)
+//                              respawns the :4000 shim, resident specialists
+//                              and the :4100 litellm engine with backoff +
+//                              circuit breaker (supervisor.ts). `serve` is an
+//                              alias (com.suspenders.local-llm runs `serve`).
 
 import { spawn, execSync } from "node:child_process";
 import { SPECIALISTS, DOWNLOAD_MODELS, residentSet } from "./registry.ts";
+import { LITELLM_PORT } from "./litellm-target.ts";
 import { spawnArgs, mlxLogPath } from "./spawner.ts";
 import {
 	fleetTargets,
@@ -155,6 +158,7 @@ async function cmdStop(): Promise<void> {
 		} catch {}
 	}
 	killPort(4000);
+	killPort(LITELLM_PORT);
 	for (const s of SPECIALISTS) killPort(s.port);
 	console.log("  All stopped.");
 }
@@ -223,6 +227,7 @@ switch (cmd) {
 		await cmdDownload();
 		break;
 	case "supervise":
+	case "serve":
 		await cmdSupervise();
 		break;
 	default:

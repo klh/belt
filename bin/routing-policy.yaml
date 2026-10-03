@@ -18,7 +18,7 @@
 # ACTIVATION (coordinator step, BETWEEN fan-outs — a config reload drops
 # in-flight streams):
 #   bun bin/gateway-config.ts
-#   launchctl kickstart -k gui/$(id -u)/com.belt.gateway
+#   kill $(lsof -ti tcp:4100 -sTCP:LISTEN)   # swarm supervisor respawns :4100 (W277)
 #
 # BUDGETS: per-key/per-group rpm/tpm + spend budgets are ALSO native
 # (virtual keys + parallel_request_limiter) but need Postgres (DATABASE_URL)

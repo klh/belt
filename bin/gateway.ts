@@ -1,3 +1,7 @@
+// SUPERSEDED (W277): `swarm.ts supervise` owns :4100 (litellm-target.ts) —
+// keep com.belt.gateway UNLOADED or two restarters race for the port. This
+// wrapper stays for manual one-off runs only.
+//
 // bin/gateway.ts — launchd wrapper for the LiteLLM gateway. Keeps secrets
 // out of the plist: reads Z_AI_API_KEY from ~/.claude.json at spawn time and
 // execs the uv-installed litellm with the generated config. LITELLM_KEY
