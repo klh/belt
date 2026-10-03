@@ -27,6 +27,7 @@ import {
 	type RouteLogEntry,
 } from "./remotes.ts";
 import { metricsFor, metricsSnapshot } from "./metrics.ts";
+import { readStatus } from "./supervisor.ts";
 import { bearerToken, handleRoute } from "./route-policy.ts";
 import {
 	citizenshipGate,
@@ -617,6 +618,7 @@ const ROUTES: RouteMethods = {
 	"/api/status": ["GET", "HEAD"],
 	"/api/remotes": ["GET", "HEAD"],
 	"/api/metrics": ["GET", "HEAD"],
+	"/api/supervisor": ["GET", "HEAD"],
 	"/api/route": ["POST"],
 	"/llms.txt": ["GET", "HEAD"],
 	"/threads-mark.js": ["GET", "HEAD"],
@@ -664,6 +666,9 @@ Bun.serve({
 		if (path === "/api/status") return etagJson(req, await statusBody());
 		if (path === "/api/remotes") return json(await remotesSnapshot());
 		if (path === "/api/route") return serveRoute(req);
+		// W272 self-heal status (ports, last probe, restarts, since) written by
+		// `swarm.ts supervise`; null when no supervisor has ever run.
+		if (path === "/api/supervisor") return json(readStatus());
 		if (path === "/api/metrics")
 			return json({
 				...metricsSnapshot(),
