@@ -139,13 +139,13 @@ time — the router/engine-local rows above are pre-W270.
 
 ## Chat tiers — M5 Max 128GB (fleet medians, 2026-09-23)
 
-| Port | Role           | Model                       | GB  | tok/s (median) | Verdict                                                   |
-| ---- | -------------- | --------------------------- | --- | -------------- | --------------------------------------------------------- |
-| 8901 | code           | Qwen3-Coder-30B-A3B-4bit    | 18  | 123.7          | current coder tier                                        |
-| 8902 | extract/menial | Qwen3-4B-Instruct-2507-4bit | 2.5 | 158.9          | fastest port in fleet                                     |
-| 8903 | reason/best    | Qwen3.5-35B-A3B-4bit        | 20  | 147.9          | best quality×speed                                        |
-| 8906 | danish/general | Qwen3.5-9B-MLX-4bit         | 5   | 85.2           | on-demand                                                 |
-| 8913 | rerank         | Qwen3-Reranker-0.6B         | 0.5 | —              | rank-only (22ms p50): acc@0.5 4/10 — see reranker section |
+| Port | Role           | Model                       | GB  | tok/s (median) | Verdict                                                     |
+| ---- | -------------- | --------------------------- | --- | -------------- | ----------------------------------------------------------- |
+| 8901 | code           | Qwen3-Coder-30B-A3B-4bit    | 18  | 123.7          | current coder tier                                          |
+| 8902 | extract/menial | Qwen3-4B-Instruct-2507-4bit | 2.5 | 158.9          | fastest port in fleet                                       |
+| 8903 | reason/best    | Qwen3.5-35B-A3B-OptiQ-4bit  | 22  | 123.6          | best quality×speed — OptiQ +25% same-day (W228, 2026-10-03) |
+| 8906 | danish/general | Qwen3.5-9B-MLX-4bit         | 5   | 85.2           | on-demand                                                   |
+| 8913 | rerank         | Qwen3-Reranker-0.6B         | 0.5 | —              | rank-only (22ms p50): acc@0.5 4/10 — see reranker section   |
 
 ## Measured A/B results
 
@@ -155,6 +155,7 @@ time — the router/engine-local rows above are pre-W270.
 | bf16 KV vs int8 KV (Coder-30B)                      | 107.4 vs 87.3 tok/s        | bf16 KV wins                |
 | rapid-mlx 0.14.3 vs mlx_lm.server (code, Coder-30B) | 121.8 vs 91.9 tok/s (+33%) | rapid-mlx runner wins       |
 | rapid-mlx vs mlx_lm.server (reason, dense 27B)      | 29.5 vs 24.8 tok/s (+19%)  | rapid-mlx runner wins       |
+| Qwen3.5-35B-A3B-OptiQ vs -4bit (same model, W228)   | 107.2 vs 86.0 tok/s (+25%) | OptiQ takes the :8903 slot  |
 | Engine swap (Coder-30B, mlx_lm → rapid-mlx)         | 97.4 → 123.7 tok/s         | biggest single lever so far |
 
 ## Fit-classifier backends (W225, 2026-10-02, 12 tasks — smoke test)
@@ -201,13 +202,13 @@ rank by p_yes, never threshold. Protocol lesson: bare card labels
 
 ## W228 fleet refresh — pending (bench when: AC power + downloads done)
 
-| Candidate                   |   GB | Challenging              | Status (2026-10-03)                                                   |
-| --------------------------- | ---: | ------------------------ | --------------------------------------------------------------------- |
-| Qwen3.5-9B-OptiQ-4bit       |  7.1 | 8906 incumbent (5GB)     | **REJECTED 2026-10-03: 68.5 vs 87.0 tok/s (+3GB) — weights deleted**  |
-| Qwen3.5-35B-A3B-OptiQ-4bit  | 22.2 | 8903 incumbent (20GB)    | downloading (0.4/22.2GB)                                              |
-| Qwopus3.6-27B-Coder-oQ4-mtp | 17.0 | 8901 incumbent (18GB)    | downloading (0.3/17GB)                                                |
-| Fara1.5-27B-OptiQ-4bit      |    — | new candidate            | downloading (0.4GB)                                                   |
-| Xing4.0-29B-A4B-OptiQ-4bit  |    — | 8903 + rejection revisit | downloading (0.5GB) — the MLX port the 2026-09-27 rejection asked for |
+| Candidate                   |   GB | Challenging              | Status (2026-10-03)                                                                         |
+| --------------------------- | ---: | ------------------------ | ------------------------------------------------------------------------------------------- |
+| Qwen3.5-9B-OptiQ-4bit       |  7.1 | 8906 incumbent (5GB)     | **REJECTED 2026-10-03: 68.5 vs 87.0 tok/s (+3GB) — weights deleted**                        |
+| Qwen3.5-35B-A3B-OptiQ-4bit  | 22.2 | 8903 incumbent (20GB)    | **WON the slot 2026-10-03 (107.2 vs 86.0 nonce-cold, +25%) — swapped, old weights deleted** |
+| Qwopus3.6-27B-Coder-oQ4-mtp | 17.0 | 8901 incumbent (18GB)    | downloading (0.3/17GB)                                                                      |
+| Fara1.5-27B-OptiQ-4bit      |    — | new candidate            | downloading (0.4GB)                                                                         |
+| Xing4.0-29B-A4B-OptiQ-4bit  |    — | 8903 + rejection revisit | downloading (0.5GB) — the MLX port the 2026-09-27 rejection asked for                       |
 
 Protocol: one-by-one A/B vs the incumbent; winner keeps the slot and this
 table, loser weights get DELETED from the HF cache; rerun the full suite on

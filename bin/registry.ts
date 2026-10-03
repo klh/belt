@@ -86,16 +86,15 @@ export const SPECIALISTS: Specialist[] = [
 			"structured extraction, json shaping, summarization, fast cheap drafting",
 	},
 	{
-		// 2026-09-23 swap: Qwen3.5-35B-A3B (MoE, 3B active, 4bit ≈20GB) replaces
-		// Qwen3.8-27B (dense, 15GB) — 147.9 vs 28.3 tok/s (AC, benchmarks.md) at
-		// equal 6/6 on determinate-answer probes (smoke test, n<130); newer gen,
-		// multimodal.
+		// 2026-10-03 swap (W228): OptiQ re-quant of the same model wins the reason
+		// slot — fleet-refresh A/B 107.2 vs 86.0 tok/s (nonce-cold, load1 8.4, AC).
+		// Prior 2026-09-23 swap: 35B-A3B replaced dense Qwen3.8-27B (147.9 vs 28.3).
 		port: 8903,
-		model: "mlx-community/Qwen3.5-35B-A3B-4bit",
+		model: "mlx-community/Qwen3.5-35B-A3B-OptiQ-4bit",
 		label: "🧠 reason",
 		alias: "local-reason",
 		role: "reason",
-		ram_gb: 20,
+		ram_gb: 22,
 		contextTokens: 262_144,
 		tier: "resident",
 		engine: "rapid",
