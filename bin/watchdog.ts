@@ -25,6 +25,7 @@ import {
 	appendFileSync,
 } from "node:fs";
 import { livenessReport, renderLiveness } from "./liveness.ts";
+import { info } from "./log.ts";
 
 const CACHE = `${process.env.HOME}/.cache/claude-governor`;
 const HB_FILE = `${CACHE}/heartbeats.json`;
@@ -174,6 +175,6 @@ if (cmd === "liveness") {
 
 // ─── daemon (launchd KeepAlive) ───
 setInterval(sweep, 30_000);
-console.log(
+info(
 	`watchdog daemon: sweeping every 30s (overdue ${OVERDUE_MS / 60000}min, revoke ${REVOKE_MS / 60000}min)`,
 );
