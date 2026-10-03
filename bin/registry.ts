@@ -6,6 +6,9 @@ export interface Specialist {
 	port: SPECIALIST_PORTS;
 	model: string; // exact mlx-community id — mlx_lm validates it
 	label: string; // display + routing role
+	// belt-facing gateway alias (litellm model_name, buckle group, direct
+	// tier key) — emitters derive every downstream config from this
+	alias: string;
 	role: "code" | "extract" | "reason" | "embed" | "rerank" | "general";
 	ram_gb: number; // reconciled with benchmarks.md (the canonical table)
 	// max tokens the model is served for (native window of the weights) —
@@ -56,6 +59,7 @@ export const SPECIALISTS: Specialist[] = [
 		port: 8901,
 		model: "mlx-community/Qwen3-Coder-30B-A3B-Instruct-4bit",
 		label: "⚡ code",
+		alias: "local-coder",
 		role: "code",
 		ram_gb: 18,
 		contextTokens: 262_144,
@@ -71,6 +75,7 @@ export const SPECIALISTS: Specialist[] = [
 		port: 8902,
 		model: "mlx-community/Qwen3-4B-Instruct-2507-4bit",
 		label: "🏠 extract",
+		alias: "local-extract",
 		role: "extract",
 		ram_gb: 2.5,
 		contextTokens: 262_144,
@@ -88,6 +93,7 @@ export const SPECIALISTS: Specialist[] = [
 		port: 8903,
 		model: "mlx-community/Qwen3.5-35B-A3B-4bit",
 		label: "🧠 reason",
+		alias: "local-reason",
 		role: "reason",
 		ram_gb: 20,
 		contextTokens: 262_144,
@@ -109,6 +115,7 @@ export const SPECIALISTS: Specialist[] = [
 		port: 8906,
 		model: "mlx-community/Qwen3.5-9B-MLX-4bit",
 		label: "🌐 danish/general",
+		alias: "local-general",
 		role: "general",
 		ram_gb: 5,
 		contextTokens: 262_144,
@@ -129,6 +136,7 @@ export const SPECIALISTS: Specialist[] = [
 		port: 8913,
 		model: "mlx-community/Qwen3-Reranker-0.6B-4bit",
 		label: "🔀 rerank",
+		alias: "local-rerank",
 		role: "rerank",
 		ram_gb: 0.5,
 		contextTokens: 32_768,
@@ -147,6 +155,7 @@ export interface ExternalService {
 	port: number;
 	model: string;
 	label: string;
+	alias: string;
 	role: "classify" | "embed";
 	ram_gb: number;
 	contextTokens: number;
@@ -165,6 +174,7 @@ export const EXTERNAL: ExternalService[] = [
 		port: 8912,
 		model: "jaredpalmer/kev-4b",
 		label: "🗂 kev",
+		alias: "local-kev",
 		role: "classify",
 		ram_gb: 8,
 		contextTokens: 384,
@@ -179,6 +189,7 @@ export const EXTERNAL: ExternalService[] = [
 		port: 8907,
 		model: "mlx-community/Qwen3-Embedding-0.6B-4bit-DWQ",
 		label: "🧲 embed",
+		alias: "local-embed",
 		role: "embed",
 		ram_gb: 0.5,
 		contextTokens: 32_768,
@@ -223,4 +234,106 @@ export function fallbackFor(port: number): Specialist | undefined {
 	if (port === 8903) return byPort(8901); // reason → coder
 	if (port === 8906) return byPort(8903); // danish/general → reason
 	return undefined;
+}
+
+// ─── unified registry view (W271) ───
+// ONE flat list of every servable model — belt-launched specialists and
+// external members alike. Emitters (bin/registry-emit.ts), GET /registry.json
+// and gateway-config all read THIS; nothing else declares a port↔model pair.
+// `source` is designed for hub-fed mode: a hub serves its registry and
+// spokes pull it (`hub:<name>`); today every row is `local`.
+export type RegistrySource = "local" | `hub:${string}`;
+// chat = OpenAI /v1/chat/completions; the rest speak their own API shape
+export type ModelClass = "chat" | "embed" | "rerank" | "classify";
+
+export interface RegistryEntry {
+	port: number;
+	alias: string;
+	model: string;
+	label: string;
+	role: string;
+	class: ModelClass;
+	contextTokens: number;
+	ram_gb: number;
+	tier: "resident" | "ondemand";
+	engine: "mlx_lm" | "rapid" | "external";
+	protocol: string;
+	external: boolean;
+	owner: string;
+	source: RegistrySource;
+	good_at: string;
+}
+
+export interface RegistryDoc {
+	version: 1;
+	source: RegistrySource;
+	router: typeof ROUTER;
+	entries: RegistryEntry[];
+}
+
+export const REGISTRY_SOURCE: RegistrySource = "local";
+
+const classOf = (role: string): ModelClass => {
+	if (role === "embed" || role === "rerank" || role === "classify") return role;
+	return "chat";
+};
+
+/** Every servable model, sorted by port — the order every emitter uses. */
+export function registryEntries(
+	source: RegistrySource = REGISTRY_SOURCE,
+): RegistryEntry[] {
+	const local = SPECIALISTS.map(
+		(s): RegistryEntry => ({
+			port: s.port,
+			alias: s.alias,
+			model: s.model,
+			label: s.label,
+			role: s.role,
+			class: classOf(s.role),
+			contextTokens: s.contextTokens,
+			ram_gb: s.ram_gb,
+			tier: s.tier,
+			engine: s.engine ?? "mlx_lm",
+			protocol: SPECIALIST_PROTOCOL,
+			external: false,
+			owner: "belt swarm",
+			source,
+			good_at: s.good_at,
+		}),
+	);
+	const ext = EXTERNAL.map(
+		(e): RegistryEntry => ({
+			port: e.port,
+			alias: e.alias,
+			model: e.model,
+			label: e.label,
+			role: e.role,
+			class: classOf(e.role),
+			contextTokens: e.contextTokens,
+			ram_gb: e.ram_gb,
+			tier: e.tier,
+			engine: "external",
+			protocol: e.protocol,
+			external: true,
+			owner: e.owner,
+			source,
+			good_at: e.good_at,
+		}),
+	);
+	return [...local, ...ext].sort((a, b) => a.port - b.port);
+}
+
+/** Chat-capable OpenAI-protocol entries — what gateways can route chat to. */
+export const chatEntries = (entries = registryEntries()): RegistryEntry[] =>
+	entries.filter((e) => e.class === "chat" && e.protocol === "openai");
+
+export function registryDoc(
+	source: RegistrySource = REGISTRY_SOURCE,
+): RegistryDoc {
+	return {
+		version: 1,
+		source,
+		router: ROUTER,
+		entries: registryEntries(source),
+	};
 }

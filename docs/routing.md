@@ -27,3 +27,23 @@ reasons per row there.
 4. **claude-fast checks the local swarm first** — cloud escalation fires only when local failed twice AND the task is COMPLEX+ (SIMPLE/MEDIUM never leave the machine); falls back cleanly if the local stack is down.
 5. **Model selection is task-shaped**: code → :8901, menial → :8902, reasoning → :8903, Danish → :8906, rerank → :8913.
 6. **Degraded mode**: remote tokens expire → `ANTHROPIC_BASE_URL=http://127.0.0.1:4000` keeps Claude Code on the local swarm at local speed; every workload class stays covered (verified end-to-end 2026-09-27).
+
+## Model registration (W271)
+
+Every servable LLM is registered in ONE place: `bin/registry.ts`
+(`SPECIALISTS` + `EXTERNAL`, each with an `alias`). Everything downstream is
+generated, hash-stable (same registry → byte-identical output):
+
+```sh
+bun bin/registry-emit.ts litellm   # LiteLLM model_list (:4100 engine)
+bun bin/registry-emit.ts direct    # routing-policy `direct:` tiers
+bun bin/registry-emit.ts buckle    # buckle upstreams.yaml groups (merge via BUCKLE_UPSTREAMS)
+bun bin/registry-emit.ts json      # registry document
+bun bin/registry-emit.ts all --out DIR
+```
+
+`bin/gateway-config.ts` builds its local tiers from the registry (live
+`/v1/models` only warns on drift). The router shim serves
+`GET /registry.json` with a strong `ETag` (`If-None-Match` → 304). Each row
+and the document carry `source: local | hub:<name>` — hub-fed mode (a hub
+serves its registry, spokes pull) is designed, not yet wired.
