@@ -27,6 +27,7 @@ export interface LivenessRow {
 	since: string | null;
 	supervisorState: State | null;
 	lastError: string | null;
+	preflightError: string | null;
 }
 
 export interface LivenessReport {
@@ -66,6 +67,7 @@ export async function livenessReport(
 			const state: State = !p.tcp ? down : p.http ? "up" : "degraded";
 			const sup = doc?.targets.find((x) => x.port === t.port);
 			const supState = sup?.state ?? null;
+			const preflightError = sup?.preflightError ?? null;
 			return {
 				name: t.name,
 				port: t.port,
@@ -74,11 +76,13 @@ export async function livenessReport(
 				state,
 				alert:
 					isAlert(t.kind, t.owned, state) ||
-					(t.owned && supState === "unhealthy"),
+					(t.owned && supState === "unhealthy") ||
+					preflightError !== null,
 				restarts: sup?.restarts ?? 0,
 				since: sup?.since ?? null,
 				supervisorState: supState,
 				lastError: sup?.lastError ?? null,
+				preflightError,
 			};
 		}),
 	);
@@ -86,7 +90,7 @@ export async function livenessReport(
 		.filter((r) => r.alert)
 		.map(
 			(r) =>
-				`:${r.port} ${r.name} ${r.supervisorState === "unhealthy" ? "unhealthy (circuit open)" : r.state}${r.owned ? "" : " [external — report only]"}`,
+				`:${r.port} ${r.name} ${r.supervisorState === "unhealthy" ? "unhealthy (circuit open)" : r.state}${r.owned ? "" : " [external — report only]"}${r.preflightError ? ` preflight: ${r.preflightError}` : ""}`,
 		);
 	if (stale && rows.some((r) => r.owned))
 		alerts.unshift(

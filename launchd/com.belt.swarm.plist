@@ -9,6 +9,9 @@
         <string>/opt/homebrew/bin/bun</string>
         <string>__HOME__/.claude/local-llm/swarm.ts</string><string>supervise</string>
     </array>
+    <!-- children are services: launchd must not kill the process group when
+         the supervisor restarts — the new supervisor adopts live ports -->
+    <key>AbandonProcessGroup</key><true/>
     <key>KeepAlive</key>
     <true/>
     <key>RunAtLoad</key>
@@ -25,8 +28,9 @@
         <string>__HOME__/.local/bin:__HOME__/.local/share/uv/tools/mlx-lm/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
     </dict>
     <!-- Swarm: resident specialists (see bin/registry.ts, ~41GB) + router.
-         `supervise` is long-running: it respawns a dead :4000 shim or
-         resident specialist (backoff + circuit breaker, bin/supervisor.ts);
+         `supervise` is long-running: it respawns a dead :4000 shim, resident
+         specialist or :4100 litellm (backoff + circuit breaker,
+         bin/supervisor.ts + bin/litellm-target.ts);
          KeepAlive restarts the supervisor itself, which adopts live ports. -->
 </dict>
 </plist>
