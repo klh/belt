@@ -1,5 +1,8 @@
 # belt
 
+> Part of the klh fleet — see [ECOSYSTEM.md](ECOSYSTEM.md) for the full
+> cross-repo architecture map (speedy/suspenders/buckle/belt/klh-local).
+
 ![version](https://img.shields.io/badge/version-1.0.1-8a857e)
 
 > **Platform: Apple-silicon macOS.** belt runs MLX, which has no CUDA/ROCm path — the swarm needs an M-series Mac. Other machines and fleets can still consume it over the network: the endpoints are plain HTTP on :8901+.
