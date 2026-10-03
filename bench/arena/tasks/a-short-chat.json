@@ -1,0 +1,1701 @@
+{
+ "class": "a",
+ "name": "short-chat",
+ "generator": "arena-gen-1",
+ "seed": "bench-arena/2026-10-02",
+ "max_tokens": 1024,
+ "effort": "low",
+ "note": "instruction-following proxy (length band, required terms, no lists) — not a helpfulness judgement",
+ "tasks": [
+  {
+   "id": "a000",
+   "prompt": "In 60 to 120 words, explain load balancing to a new engineering hire. Use the exact terms \"health check\" and \"round robin\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "health check",
+     "round robin"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a001",
+   "prompt": "In 60 to 120 words, explain idempotency to a curious teenager. Use the exact terms \"retry\" and \"side effect\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "retry",
+     "side effect"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a002",
+   "prompt": "In 60 to 120 words, explain time zones to a new engineering hire. Use the exact terms \"UTC\" and \"offset\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "UTC",
+     "offset"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a003",
+   "prompt": "In 60 to 120 words, explain hash tables to a product manager. Use the exact terms \"collision\" and \"bucket\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "collision",
+     "bucket"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a004",
+   "prompt": "In 60 to 120 words, explain code review to a product manager. Use the exact terms \"diff\" and \"reviewer\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "diff",
+     "reviewer"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a005",
+   "prompt": "In 60 to 120 words, explain binary search to a new engineering hire. Use the exact terms \"sorted array\" and \"midpoint\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "sorted array",
+     "midpoint"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a006",
+   "prompt": "In 60 to 120 words, explain message queues to a curious teenager. Use the exact terms \"consumer\" and \"acknowledgement\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "consumer",
+     "acknowledgement"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a007",
+   "prompt": "In 60 to 120 words, explain WebSockets to a product manager. Use the exact terms \"handshake\" and \"full duplex\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "handshake",
+     "full duplex"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a008",
+   "prompt": "In 60 to 120 words, explain WebSockets to a curious teenager. Use the exact terms \"handshake\" and \"full duplex\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "handshake",
+     "full duplex"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a009",
+   "prompt": "In 60 to 120 words, explain hash tables to a curious teenager. Use the exact terms \"collision\" and \"bucket\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "collision",
+     "bucket"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a010",
+   "prompt": "In 60 to 120 words, explain JSON Web Tokens to a product manager. Use the exact terms \"signature\" and \"expiry\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "signature",
+     "expiry"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a011",
+   "prompt": "In 60 to 120 words, explain Git branching to a product manager. Use the exact terms \"merge commit\" and \"rebase\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "merge commit",
+     "rebase"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a012",
+   "prompt": "In 60 to 120 words, explain content delivery networks to a product manager. Use the exact terms \"edge server\" and \"cache hit\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "edge server",
+     "cache hit"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a013",
+   "prompt": "In 60 to 120 words, explain Unicode to a curious teenager. Use the exact terms \"code point\" and \"UTF-8\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "code point",
+     "UTF-8"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a014",
+   "prompt": "In 60 to 120 words, explain message queues to a product manager. Use the exact terms \"consumer\" and \"acknowledgement\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "consumer",
+     "acknowledgement"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a015",
+   "prompt": "In 60 to 120 words, explain dependency injection to a product manager. Use the exact terms \"interface\" and \"constructor\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "interface",
+     "constructor"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a016",
+   "prompt": "In 60 to 120 words, explain floating-point numbers to a curious teenager. Use the exact terms \"precision\" and \"rounding error\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "precision",
+     "rounding error"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a017",
+   "prompt": "In 60 to 120 words, explain compilers to a product manager. Use the exact terms \"parser\" and \"syntax tree\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "parser",
+     "syntax tree"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a018",
+   "prompt": "In 60 to 120 words, explain blue-green deployment to a product manager. Use the exact terms \"cutover\" and \"rollback\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "cutover",
+     "rollback"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a019",
+   "prompt": "In 60 to 120 words, explain recursion to a new engineering hire. Use the exact terms \"base case\" and \"call stack\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "base case",
+     "call stack"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a020",
+   "prompt": "In 60 to 120 words, explain code review to a curious teenager. Use the exact terms \"diff\" and \"reviewer\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "diff",
+     "reviewer"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a021",
+   "prompt": "In 60 to 120 words, explain HTTPS certificates to a new engineering hire. Use the exact terms \"certificate authority\" and \"public key\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "certificate authority",
+     "public key"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a022",
+   "prompt": "In 60 to 120 words, explain multithreading to a curious teenager. Use the exact terms \"race condition\" and \"mutex\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "race condition",
+     "mutex"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a023",
+   "prompt": "In 60 to 120 words, explain caching strategies to a product manager. Use the exact terms \"invalidation\" and \"stale data\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "invalidation",
+     "stale data"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a024",
+   "prompt": "In 60 to 120 words, explain time zones to a curious teenager. Use the exact terms \"UTC\" and \"offset\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "UTC",
+     "offset"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a025",
+   "prompt": "In 60 to 120 words, explain Unicode to a product manager. Use the exact terms \"code point\" and \"UTF-8\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "code point",
+     "UTF-8"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a026",
+   "prompt": "In 60 to 120 words, explain eventual consistency to a curious teenager. Use the exact terms \"replica\" and \"convergence\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "replica",
+     "convergence"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a027",
+   "prompt": "In 60 to 120 words, explain DNS caching to a new engineering hire. Use the exact terms \"TTL\" and \"resolver\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "TTL",
+     "resolver"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a028",
+   "prompt": "In 60 to 120 words, explain time zones to a product manager. Use the exact terms \"UTC\" and \"offset\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "UTC",
+     "offset"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a029",
+   "prompt": "In 60 to 120 words, explain semantic versioning to a curious teenager. Use the exact terms \"major version\" and \"breaking change\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "major version",
+     "breaking change"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a030",
+   "prompt": "In 60 to 120 words, explain blue-green deployment to a curious teenager. Use the exact terms \"cutover\" and \"rollback\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "cutover",
+     "rollback"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a031",
+   "prompt": "In 60 to 120 words, explain database indexing to a product manager. Use the exact terms \"B-tree\" and \"query planner\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "B-tree",
+     "query planner"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a032",
+   "prompt": "In 60 to 120 words, explain password hashing to a curious teenager. Use the exact terms \"salt\" and \"work factor\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "salt",
+     "work factor"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a033",
+   "prompt": "In 60 to 120 words, explain feature flags to a product manager. Use the exact terms \"rollout\" and \"kill switch\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "rollout",
+     "kill switch"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a034",
+   "prompt": "In 60 to 120 words, explain two-factor authentication to a curious teenager. Use the exact terms \"one-time code\" and \"phishing\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "one-time code",
+     "phishing"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a035",
+   "prompt": "In 60 to 120 words, explain containerization to a new engineering hire. Use the exact terms \"image\" and \"isolation\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "image",
+     "isolation"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a036",
+   "prompt": "In 60 to 120 words, explain content delivery networks to a curious teenager. Use the exact terms \"edge server\" and \"cache hit\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "edge server",
+     "cache hit"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a037",
+   "prompt": "In 60 to 120 words, explain unit testing to a product manager. Use the exact terms \"assertion\" and \"test fixture\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "assertion",
+     "test fixture"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a038",
+   "prompt": "In 60 to 120 words, explain containerization to a product manager. Use the exact terms \"image\" and \"isolation\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "image",
+     "isolation"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a039",
+   "prompt": "In 60 to 120 words, explain password hashing to a new engineering hire. Use the exact terms \"salt\" and \"work factor\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "salt",
+     "work factor"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a040",
+   "prompt": "In 60 to 120 words, explain virtual memory to a product manager. Use the exact terms \"page fault\" and \"address space\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "page fault",
+     "address space"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a041",
+   "prompt": "In 60 to 120 words, explain two-factor authentication to a new engineering hire. Use the exact terms \"one-time code\" and \"phishing\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "one-time code",
+     "phishing"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a042",
+   "prompt": "In 60 to 120 words, explain rate limiting to a curious teenager. Use the exact terms \"token bucket\" and \"burst\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "token bucket",
+     "burst"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a043",
+   "prompt": "In 60 to 120 words, explain CPU caches to a curious teenager. Use the exact terms \"cache line\" and \"latency\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "cache line",
+     "latency"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a044",
+   "prompt": "In 60 to 120 words, explain TCP congestion control to a curious teenager. Use the exact terms \"congestion window\" and \"packet loss\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "congestion window",
+     "packet loss"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a045",
+   "prompt": "In 60 to 120 words, explain SQL joins to a new engineering hire. Use the exact terms \"foreign key\" and \"result set\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "foreign key",
+     "result set"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a046",
+   "prompt": "In 60 to 120 words, explain semantic versioning to a product manager. Use the exact terms \"major version\" and \"breaking change\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "major version",
+     "breaking change"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a047",
+   "prompt": "In 60 to 120 words, explain HTTPS certificates to a product manager. Use the exact terms \"certificate authority\" and \"public key\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "certificate authority",
+     "public key"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a048",
+   "prompt": "In 60 to 120 words, explain accessibility to a new engineering hire. Use the exact terms \"screen reader\" and \"contrast ratio\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "screen reader",
+     "contrast ratio"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a049",
+   "prompt": "In 60 to 120 words, explain backups to a new engineering hire. Use the exact terms \"restore test\" and \"retention\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "restore test",
+     "retention"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a050",
+   "prompt": "In 60 to 120 words, explain DNS caching to a curious teenager. Use the exact terms \"TTL\" and \"resolver\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "TTL",
+     "resolver"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a051",
+   "prompt": "In 60 to 120 words, explain Git branching to a curious teenager. Use the exact terms \"merge commit\" and \"rebase\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "merge commit",
+     "rebase"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a052",
+   "prompt": "In 60 to 120 words, explain accessibility to a product manager. Use the exact terms \"screen reader\" and \"contrast ratio\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "screen reader",
+     "contrast ratio"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a053",
+   "prompt": "In 60 to 120 words, explain REST APIs to a product manager. Use the exact terms \"endpoint\" and \"status code\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "endpoint",
+     "status code"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a054",
+   "prompt": "In 60 to 120 words, explain eventual consistency to a new engineering hire. Use the exact terms \"replica\" and \"convergence\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "replica",
+     "convergence"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a055",
+   "prompt": "In 60 to 120 words, explain binary search to a product manager. Use the exact terms \"sorted array\" and \"midpoint\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "sorted array",
+     "midpoint"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a056",
+   "prompt": "In 60 to 120 words, explain REST APIs to a new engineering hire. Use the exact terms \"endpoint\" and \"status code\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "endpoint",
+     "status code"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a057",
+   "prompt": "In 60 to 120 words, explain SQL joins to a curious teenager. Use the exact terms \"foreign key\" and \"result set\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "foreign key",
+     "result set"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a058",
+   "prompt": "In 60 to 120 words, explain idempotency to a product manager. Use the exact terms \"retry\" and \"side effect\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "retry",
+     "side effect"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a059",
+   "prompt": "In 60 to 120 words, explain garbage collection to a product manager. Use the exact terms \"heap\" and \"reachability\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "heap",
+     "reachability"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a060",
+   "prompt": "In 60 to 120 words, explain deadlocks to a product manager. Use the exact terms \"lock ordering\" and \"circular wait\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "lock ordering",
+     "circular wait"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a061",
+   "prompt": "In 60 to 120 words, explain load balancing to a curious teenager. Use the exact terms \"health check\" and \"round robin\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "health check",
+     "round robin"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a062",
+   "prompt": "In 60 to 120 words, explain message queues to a new engineering hire. Use the exact terms \"consumer\" and \"acknowledgement\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "consumer",
+     "acknowledgement"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a063",
+   "prompt": "In 60 to 120 words, explain regular expressions to a product manager. Use the exact terms \"pattern\" and \"capture group\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "pattern",
+     "capture group"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a064",
+   "prompt": "In 60 to 120 words, explain observability to a product manager. Use the exact terms \"trace\" and \"metric\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "trace",
+     "metric"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a065",
+   "prompt": "In 60 to 120 words, explain WebSockets to a new engineering hire. Use the exact terms \"handshake\" and \"full duplex\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "handshake",
+     "full duplex"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a066",
+   "prompt": "In 60 to 120 words, explain CPU caches to a new engineering hire. Use the exact terms \"cache line\" and \"latency\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "cache line",
+     "latency"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a067",
+   "prompt": "In 60 to 120 words, explain backups to a curious teenager. Use the exact terms \"restore test\" and \"retention\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "restore test",
+     "retention"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a068",
+   "prompt": "In 60 to 120 words, explain containerization to a curious teenager. Use the exact terms \"image\" and \"isolation\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "image",
+     "isolation"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a069",
+   "prompt": "In 60 to 120 words, explain deadlocks to a new engineering hire. Use the exact terms \"lock ordering\" and \"circular wait\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "lock ordering",
+     "circular wait"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a070",
+   "prompt": "In 60 to 120 words, explain JSON Web Tokens to a curious teenager. Use the exact terms \"signature\" and \"expiry\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "signature",
+     "expiry"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a071",
+   "prompt": "In 60 to 120 words, explain floating-point numbers to a new engineering hire. Use the exact terms \"precision\" and \"rounding error\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "precision",
+     "rounding error"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a072",
+   "prompt": "In 60 to 120 words, explain REST APIs to a curious teenager. Use the exact terms \"endpoint\" and \"status code\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "endpoint",
+     "status code"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a073",
+   "prompt": "In 60 to 120 words, explain virtual memory to a new engineering hire. Use the exact terms \"page fault\" and \"address space\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "page fault",
+     "address space"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a074",
+   "prompt": "In 60 to 120 words, explain eventual consistency to a product manager. Use the exact terms \"replica\" and \"convergence\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "replica",
+     "convergence"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a075",
+   "prompt": "In 60 to 120 words, explain floating-point numbers to a product manager. Use the exact terms \"precision\" and \"rounding error\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "precision",
+     "rounding error"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a076",
+   "prompt": "In 60 to 120 words, explain database indexing to a new engineering hire. Use the exact terms \"B-tree\" and \"query planner\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "B-tree",
+     "query planner"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a077",
+   "prompt": "In 60 to 120 words, explain unit testing to a new engineering hire. Use the exact terms \"assertion\" and \"test fixture\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "assertion",
+     "test fixture"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a078",
+   "prompt": "In 60 to 120 words, explain unit testing to a curious teenager. Use the exact terms \"assertion\" and \"test fixture\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "assertion",
+     "test fixture"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a079",
+   "prompt": "In 60 to 120 words, explain technical debt to a curious teenager. Use the exact terms \"refactoring\" and \"interest\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "refactoring",
+     "interest"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a080",
+   "prompt": "In 60 to 120 words, explain backups to a product manager. Use the exact terms \"restore test\" and \"retention\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "restore test",
+     "retention"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a081",
+   "prompt": "In 60 to 120 words, explain binary search to a curious teenager. Use the exact terms \"sorted array\" and \"midpoint\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "sorted array",
+     "midpoint"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a082",
+   "prompt": "In 60 to 120 words, explain hash tables to a new engineering hire. Use the exact terms \"collision\" and \"bucket\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "collision",
+     "bucket"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a083",
+   "prompt": "In 60 to 120 words, explain code review to a new engineering hire. Use the exact terms \"diff\" and \"reviewer\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "diff",
+     "reviewer"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a084",
+   "prompt": "In 60 to 120 words, explain blue-green deployment to a new engineering hire. Use the exact terms \"cutover\" and \"rollback\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "cutover",
+     "rollback"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a085",
+   "prompt": "In 60 to 120 words, explain recursion to a curious teenager. Use the exact terms \"base case\" and \"call stack\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "base case",
+     "call stack"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a086",
+   "prompt": "In 60 to 120 words, explain dependency injection to a curious teenager. Use the exact terms \"interface\" and \"constructor\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "interface",
+     "constructor"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a087",
+   "prompt": "In 60 to 120 words, explain vector embeddings to a product manager. Use the exact terms \"cosine similarity\" and \"dimension\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "cosine similarity",
+     "dimension"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a088",
+   "prompt": "In 60 to 120 words, explain technical debt to a product manager. Use the exact terms \"refactoring\" and \"interest\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "refactoring",
+     "interest"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a089",
+   "prompt": "In 60 to 120 words, explain Git branching to a new engineering hire. Use the exact terms \"merge commit\" and \"rebase\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "merge commit",
+     "rebase"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a090",
+   "prompt": "In 60 to 120 words, explain multithreading to a new engineering hire. Use the exact terms \"race condition\" and \"mutex\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "race condition",
+     "mutex"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a091",
+   "prompt": "In 60 to 120 words, explain deadlocks to a curious teenager. Use the exact terms \"lock ordering\" and \"circular wait\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "lock ordering",
+     "circular wait"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a092",
+   "prompt": "In 60 to 120 words, explain vector embeddings to a new engineering hire. Use the exact terms \"cosine similarity\" and \"dimension\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "cosine similarity",
+     "dimension"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a093",
+   "prompt": "In 60 to 120 words, explain DNS caching to a product manager. Use the exact terms \"TTL\" and \"resolver\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "TTL",
+     "resolver"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a094",
+   "prompt": "In 60 to 120 words, explain regular expressions to a new engineering hire. Use the exact terms \"pattern\" and \"capture group\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "pattern",
+     "capture group"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a095",
+   "prompt": "In 60 to 120 words, explain accessibility to a curious teenager. Use the exact terms \"screen reader\" and \"contrast ratio\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "screen reader",
+     "contrast ratio"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a096",
+   "prompt": "In 60 to 120 words, explain caching strategies to a new engineering hire. Use the exact terms \"invalidation\" and \"stale data\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "invalidation",
+     "stale data"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a097",
+   "prompt": "In 60 to 120 words, explain caching strategies to a curious teenager. Use the exact terms \"invalidation\" and \"stale data\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "invalidation",
+     "stale data"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a098",
+   "prompt": "In 60 to 120 words, explain semantic versioning to a new engineering hire. Use the exact terms \"major version\" and \"breaking change\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "major version",
+     "breaking change"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a099",
+   "prompt": "In 60 to 120 words, explain regular expressions to a curious teenager. Use the exact terms \"pattern\" and \"capture group\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "pattern",
+     "capture group"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a100",
+   "prompt": "In 60 to 120 words, explain virtual memory to a curious teenager. Use the exact terms \"page fault\" and \"address space\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "page fault",
+     "address space"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a101",
+   "prompt": "In 60 to 120 words, explain garbage collection to a curious teenager. Use the exact terms \"heap\" and \"reachability\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "heap",
+     "reachability"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a102",
+   "prompt": "In 60 to 120 words, explain pagination to a curious teenager. Use the exact terms \"cursor\" and \"page size\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "cursor",
+     "page size"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a103",
+   "prompt": "In 60 to 120 words, explain observability to a curious teenager. Use the exact terms \"trace\" and \"metric\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "trace",
+     "metric"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a104",
+   "prompt": "In 60 to 120 words, explain pagination to a new engineering hire. Use the exact terms \"cursor\" and \"page size\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "cursor",
+     "page size"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a105",
+   "prompt": "In 60 to 120 words, explain content delivery networks to a new engineering hire. Use the exact terms \"edge server\" and \"cache hit\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "edge server",
+     "cache hit"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a106",
+   "prompt": "In 60 to 120 words, explain compilers to a curious teenager. Use the exact terms \"parser\" and \"syntax tree\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "parser",
+     "syntax tree"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a107",
+   "prompt": "In 60 to 120 words, explain TCP congestion control to a new engineering hire. Use the exact terms \"congestion window\" and \"packet loss\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "congestion window",
+     "packet loss"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a108",
+   "prompt": "In 60 to 120 words, explain JSON Web Tokens to a new engineering hire. Use the exact terms \"signature\" and \"expiry\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "signature",
+     "expiry"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a109",
+   "prompt": "In 60 to 120 words, explain vector embeddings to a curious teenager. Use the exact terms \"cosine similarity\" and \"dimension\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "cosine similarity",
+     "dimension"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a110",
+   "prompt": "In 60 to 120 words, explain HTTPS certificates to a curious teenager. Use the exact terms \"certificate authority\" and \"public key\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "certificate authority",
+     "public key"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a111",
+   "prompt": "In 60 to 120 words, explain feature flags to a curious teenager. Use the exact terms \"rollout\" and \"kill switch\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "rollout",
+     "kill switch"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a112",
+   "prompt": "In 60 to 120 words, explain load balancing to a product manager. Use the exact terms \"health check\" and \"round robin\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "health check",
+     "round robin"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a113",
+   "prompt": "In 60 to 120 words, explain Unicode to a new engineering hire. Use the exact terms \"code point\" and \"UTF-8\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "code point",
+     "UTF-8"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a114",
+   "prompt": "In 60 to 120 words, explain dependency injection to a new engineering hire. Use the exact terms \"interface\" and \"constructor\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "interface",
+     "constructor"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a115",
+   "prompt": "In 60 to 120 words, explain CPU caches to a product manager. Use the exact terms \"cache line\" and \"latency\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "cache line",
+     "latency"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a116",
+   "prompt": "In 60 to 120 words, explain pagination to a product manager. Use the exact terms \"cursor\" and \"page size\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "cursor",
+     "page size"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a117",
+   "prompt": "In 60 to 120 words, explain database indexing to a curious teenager. Use the exact terms \"B-tree\" and \"query planner\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "B-tree",
+     "query planner"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a118",
+   "prompt": "In 60 to 120 words, explain rate limiting to a new engineering hire. Use the exact terms \"token bucket\" and \"burst\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "token bucket",
+     "burst"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a119",
+   "prompt": "In 60 to 120 words, explain TCP congestion control to a product manager. Use the exact terms \"congestion window\" and \"packet loss\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "congestion window",
+     "packet loss"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a120",
+   "prompt": "In 60 to 120 words, explain two-factor authentication to a product manager. Use the exact terms \"one-time code\" and \"phishing\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "one-time code",
+     "phishing"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a121",
+   "prompt": "In 60 to 120 words, explain idempotency to a new engineering hire. Use the exact terms \"retry\" and \"side effect\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "retry",
+     "side effect"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a122",
+   "prompt": "In 60 to 120 words, explain observability to a new engineering hire. Use the exact terms \"trace\" and \"metric\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "trace",
+     "metric"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a123",
+   "prompt": "In 60 to 120 words, explain password hashing to a product manager. Use the exact terms \"salt\" and \"work factor\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "salt",
+     "work factor"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a124",
+   "prompt": "In 60 to 120 words, explain recursion to a product manager. Use the exact terms \"base case\" and \"call stack\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "base case",
+     "call stack"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a125",
+   "prompt": "In 60 to 120 words, explain garbage collection to a new engineering hire. Use the exact terms \"heap\" and \"reachability\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "heap",
+     "reachability"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a126",
+   "prompt": "In 60 to 120 words, explain multithreading to a product manager. Use the exact terms \"race condition\" and \"mutex\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "race condition",
+     "mutex"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a127",
+   "prompt": "In 60 to 120 words, explain compilers to a new engineering hire. Use the exact terms \"parser\" and \"syntax tree\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "parser",
+     "syntax tree"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a128",
+   "prompt": "In 60 to 120 words, explain technical debt to a new engineering hire. Use the exact terms \"refactoring\" and \"interest\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "refactoring",
+     "interest"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  },
+  {
+   "id": "a129",
+   "prompt": "In 60 to 120 words, explain rate limiting to a product manager. Use the exact terms \"token bucket\" and \"burst\". Write plain prose in one or two paragraphs: no lists, no headings.",
+   "check": {
+    "kind": "chat",
+    "terms": [
+     "token bucket",
+     "burst"
+    ],
+    "min": 50,
+    "max": 150
+   }
+  }
+ ]
+}

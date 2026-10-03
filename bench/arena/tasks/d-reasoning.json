@@ -1,0 +1,1571 @@
+{
+ "class": "d",
+ "name": "reasoning",
+ "generator": "arena-gen-1",
+ "seed": "bench-arena/2026-10-02",
+ "max_tokens": 4096,
+ "effort": null,
+ "note": "rubric: ANSWER exact (normalised), CONFIDENCE self-report for Brier; human spot-check sheet emitted by --report",
+ "tasks": [
+  {
+   "id": "d000",
+   "prompt": "A shop sells notebooks at $8.60 each. Ana buys 33 notebooks. Orders of more than 11 notebooks get 10% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $10.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "265.42",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d001",
+   "prompt": "A warehouse starts the day with 130 units of a product. In order, it receives a delivery of 13 units, then gets 1 units returned damaged and discards them, then ships 9 units to customers, then ships 27 units to customers, then gets 23 units returned in perfect condition and puts them back in stock, then gets 30 units returned in perfect condition and puts them back in stock. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "160",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d002",
+   "prompt": "Two fair six-sided dice, one red and one blue, are rolled. Of the 36 equally likely (red, blue) outcomes, how many have a sum of exactly 2?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "1",
+    "type": "num"
+   },
+   "meta": {
+    "family": "dice"
+   }
+  },
+  {
+   "id": "d003",
+   "prompt": "Two fair six-sided dice, one red and one blue, are rolled. Of the 36 equally likely (red, blue) outcomes, how many have a sum of at least 4?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "33",
+    "type": "num"
+   },
+   "meta": {
+    "family": "dice"
+   }
+  },
+  {
+   "id": "d004",
+   "prompt": "A shop sells notebooks at $9.09 each. Ana buys 12 notebooks. Orders of more than 21 notebooks get 10% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $7.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "116.08",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d005",
+   "prompt": "A project starts on 2026-08-09 and runs for 125 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2026-12-11",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d006",
+   "prompt": "A 24-hour clock shows 00:23. What will it show exactly 2661 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "20:44",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d007",
+   "prompt": "Two fair six-sided dice, one red and one blue, are rolled. Of the 36 equally likely (red, blue) outcomes, how many have a sum of at least 7?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "21",
+    "type": "num"
+   },
+   "meta": {
+    "family": "dice"
+   }
+  },
+  {
+   "id": "d008",
+   "prompt": "A shop sells notebooks at $14.07 each. Ana buys 35 notebooks. Orders of more than 12 notebooks get 20% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $6.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "399.96",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d009",
+   "prompt": "A warehouse starts the day with 129 units of a product. In order, it receives a delivery of 11 units, then receives a delivery of 28 units, then receives a delivery of 10 units, then gets 9 units returned in perfect condition and puts them back in stock, then ships 20 units to customers, then gets 15 units returned in perfect condition and puts them back in stock. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "182",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d010",
+   "prompt": "A project starts on 2027-01-19 and runs for 224 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2027-08-30",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d011",
+   "prompt": "Five people have different heights. Eli is taller than Dev. Fay is taller than Ana. Dev is taller than Hal. Hal is taller than Fay. Who is the fourth tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Fay",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d012",
+   "prompt": "A shop sells notebooks at $22.00 each. Ana buys 21 notebooks. Orders of more than 8 notebooks get 15% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $6.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "398.70",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d013",
+   "prompt": "A project starts on 2026-10-25 and runs for 288 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2027-08-08",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d014",
+   "prompt": "A shop sells notebooks at $22.99 each. Ana buys 28 notebooks. Orders of more than 17 notebooks get 20% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $5.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "519.98",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d015",
+   "prompt": "A project starts on 2025-02-06 and runs for 72 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2025-04-18",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d016",
+   "prompt": "A warehouse starts the day with 90 units of a product. In order, it gets 9 units returned in perfect condition and puts them back in stock, then gets 12 units returned in perfect condition and puts them back in stock, then ships 25 units to customers, then receives a delivery of 4 units, then receives a delivery of 7 units. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "97",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d017",
+   "prompt": "Five people have different heights. Eli is taller than Ana. Eli is shorter than Fay. Gus is taller than Cara. Cara is taller than Fay. Who is the fourth tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Eli",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d018",
+   "prompt": "A project starts on 2027-10-22 and runs for 318 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2028-09-03",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d019",
+   "prompt": "A warehouse starts the day with 109 units of a product. In order, it gets 10 units returned in perfect condition and puts them back in stock, then gets 28 units returned damaged and discards them, then receives a delivery of 4 units, then gets 17 units returned damaged and discards them, then ships 24 units to customers, then receives a delivery of 12 units. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "111",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d020",
+   "prompt": "A project starts on 2026-03-10 and runs for 36 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2026-04-14",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d021",
+   "prompt": "A 24-hour clock shows 09:25. What will it show exactly 2060 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "19:45",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d022",
+   "prompt": "A warehouse starts the day with 179 units of a product. In order, it ships 13 units to customers, then gets 14 units returned in perfect condition and puts them back in stock, then receives a delivery of 24 units, then ships 11 units to customers. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "193",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d023",
+   "prompt": "Five people have different heights. Ben is shorter than Gus. Ben is taller than Cara. Eli is taller than Ana. Cara is taller than Eli. Who is the fourth tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Eli",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d024",
+   "prompt": "Five people have different heights. Eli is shorter than Cara. Dev is shorter than Eli. Hal is taller than Cara. Ana is taller than Hal. Who is the second tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Hal",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d025",
+   "prompt": "A shop sells notebooks at $4.02 each. Ana buys 35 notebooks. Orders of more than 20 notebooks get 15% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $9.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "128.60",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d026",
+   "prompt": "A shop sells notebooks at $13.07 each. Ana buys 40 notebooks. Orders of more than 19 notebooks get 5% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $8.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "504.66",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d027",
+   "prompt": "Five people have different heights. Ben is shorter than Ana. Ana is shorter than Fay. Fay is shorter than Hal. Cara is shorter than Ben. Who is the second tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Fay",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d028",
+   "prompt": "A shop sells notebooks at $23.07 each. Ana buys 8 notebooks. Orders of more than 5 notebooks get 15% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $6.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "162.88",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d029",
+   "prompt": "A project starts on 2027-03-23 and runs for 173 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2027-09-11",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d030",
+   "prompt": "A 24-hour clock shows 11:25. What will it show exactly 1214 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "07:39",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d031",
+   "prompt": "Five people have different heights. Gus is shorter than Cara. Ben is taller than Hal. Hal is taller than Cara. Ana is shorter than Gus. Who is the shortest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Ana",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d032",
+   "prompt": "A project starts on 2027-09-15 and runs for 69 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2027-11-22",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d033",
+   "prompt": "A 24-hour clock shows 20:19. What will it show exactly 1791 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "02:10",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d034",
+   "prompt": "Five people have different heights. Gus is taller than Hal. Dev is taller than Ana. Dev is shorter than Ben. Ana is taller than Gus. Who is the shortest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Hal",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d035",
+   "prompt": "Two fair six-sided dice, one red and one blue, are rolled. Of the 36 equally likely (red, blue) outcomes, how many have a sum of exactly 7?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "6",
+    "type": "num"
+   },
+   "meta": {
+    "family": "dice"
+   }
+  },
+  {
+   "id": "d036",
+   "prompt": "Five people have different heights. Dev is shorter than Ana. Hal is taller than Ana. Fay is taller than Ben. Dev is taller than Fay. Who is the tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Hal",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d037",
+   "prompt": "A 24-hour clock shows 07:29. What will it show exactly 2632 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "03:21",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d038",
+   "prompt": "A 24-hour clock shows 11:53. What will it show exactly 686 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "23:19",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d039",
+   "prompt": "A warehouse starts the day with 105 units of a product. In order, it ships 28 units to customers, then ships 8 units to customers, then ships 25 units to customers, then receives a delivery of 6 units, then gets 29 units returned damaged and discards them, then gets 3 units returned in perfect condition and puts them back in stock. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "53",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d040",
+   "prompt": "Two fair six-sided dice, one red and one blue, are rolled. Of the 36 equally likely (red, blue) outcomes, how many have a sum of exactly 3?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2",
+    "type": "num"
+   },
+   "meta": {
+    "family": "dice"
+   }
+  },
+  {
+   "id": "d041",
+   "prompt": "A shop sells notebooks at $21.32 each. Ana buys 15 notebooks. Orders of more than 25 notebooks get 20% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $12.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "331.80",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d042",
+   "prompt": "A project starts on 2025-06-02 and runs for 150 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2025-10-29",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d043",
+   "prompt": "A 24-hour clock shows 06:44. What will it show exactly 1570 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "08:54",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d044",
+   "prompt": "A project starts on 2026-12-04 and runs for 61 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2027-02-02",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d045",
+   "prompt": "A warehouse starts the day with 81 units of a product. In order, it ships 20 units to customers, then receives a delivery of 13 units, then ships 26 units to customers, then gets 24 units returned in perfect condition and puts them back in stock. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "72",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d046",
+   "prompt": "A shop sells notebooks at $12.36 each. Ana buys 17 notebooks. Orders of more than 12 notebooks get 25% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $3.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "160.59",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d047",
+   "prompt": "A project starts on 2025-07-19 and runs for 192 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2026-01-26",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d048",
+   "prompt": "A warehouse starts the day with 31 units of a product. In order, it gets 3 units returned in perfect condition and puts them back in stock, then gets 8 units returned in perfect condition and puts them back in stock, then gets 26 units returned in perfect condition and puts them back in stock, then ships 15 units to customers, then gets 1 units returned in perfect condition and puts them back in stock. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "54",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d049",
+   "prompt": "A 24-hour clock shows 00:22. What will it show exactly 2085 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "11:07",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d050",
+   "prompt": "Five people have different heights. Eli is shorter than Dev. Fay is shorter than Ana. Ben is shorter than Fay. Ana is shorter than Eli. Who is the third tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Ana",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d051",
+   "prompt": "A shop sells notebooks at $16.74 each. Ana buys 36 notebooks. Orders of more than 13 notebooks get 5% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $4.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "576.51",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d052",
+   "prompt": "A shop sells notebooks at $18.08 each. Ana buys 5 notebooks. Orders of more than 9 notebooks get 20% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $12.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "102.40",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d053",
+   "prompt": "A 24-hour clock shows 08:16. What will it show exactly 2044 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "18:20",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d054",
+   "prompt": "Five people have different heights. Cara is taller than Gus. Fay is shorter than Ana. Ana is shorter than Gus. Dev is shorter than Fay. Who is the tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Cara",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d055",
+   "prompt": "A project starts on 2027-05-05 and runs for 24 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2027-05-28",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d056",
+   "prompt": "Five people have different heights. Fay is taller than Dev. Dev is taller than Gus. Hal is taller than Fay. Ana is shorter than Gus. Who is the third tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Dev",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d057",
+   "prompt": "A 24-hour clock shows 12:45. What will it show exactly 2421 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "05:06",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d058",
+   "prompt": "A warehouse starts the day with 57 units of a product. In order, it gets 9 units returned damaged and discards them, then gets 17 units returned in perfect condition and puts them back in stock, then gets 26 units returned in perfect condition and puts them back in stock, then gets 30 units returned in perfect condition and puts them back in stock, then gets 30 units returned damaged and discards them, then gets 15 units returned in perfect condition and puts them back in stock. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "145",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d059",
+   "prompt": "Two fair six-sided dice, one red and one blue, are rolled. Of the 36 equally likely (red, blue) outcomes, how many have a product of exactly 18?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2",
+    "type": "num"
+   },
+   "meta": {
+    "family": "dice"
+   }
+  },
+  {
+   "id": "d060",
+   "prompt": "A warehouse starts the day with 187 units of a product. In order, it gets 22 units returned in perfect condition and puts them back in stock, then gets 19 units returned in perfect condition and puts them back in stock, then gets 16 units returned damaged and discards them, then gets 9 units returned in perfect condition and puts them back in stock. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "237",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d061",
+   "prompt": "A warehouse starts the day with 126 units of a product. In order, it gets 8 units returned damaged and discards them, then gets 15 units returned damaged and discards them, then gets 11 units returned in perfect condition and puts them back in stock, then gets 28 units returned in perfect condition and puts them back in stock. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "165",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d062",
+   "prompt": "A project starts on 2027-06-23 and runs for 170 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2027-12-09",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d063",
+   "prompt": "Two fair six-sided dice, one red and one blue, are rolled. Of the 36 equally likely (red, blue) outcomes, how many have a sum of exactly 11?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2",
+    "type": "num"
+   },
+   "meta": {
+    "family": "dice"
+   }
+  },
+  {
+   "id": "d064",
+   "prompt": "A 24-hour clock shows 20:29. What will it show exactly 803 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "09:52",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d065",
+   "prompt": "A 24-hour clock shows 03:20. What will it show exactly 1311 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "01:11",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d066",
+   "prompt": "A project starts on 2026-05-12 and runs for 380 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2027-05-26",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d067",
+   "prompt": "A 24-hour clock shows 02:41. What will it show exactly 1633 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "05:54",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d068",
+   "prompt": "A 24-hour clock shows 06:52. What will it show exactly 543 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "15:55",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d069",
+   "prompt": "Two fair six-sided dice, one red and one blue, are rolled. Of the 36 equally likely (red, blue) outcomes, how many have a sum of exactly 8?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "5",
+    "type": "num"
+   },
+   "meta": {
+    "family": "dice"
+   }
+  },
+  {
+   "id": "d070",
+   "prompt": "A 24-hour clock shows 19:02. What will it show exactly 1471 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "19:33",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d071",
+   "prompt": "A warehouse starts the day with 51 units of a product. In order, it receives a delivery of 9 units, then gets 17 units returned damaged and discards them, then gets 23 units returned in perfect condition and puts them back in stock, then receives a delivery of 1 units, then gets 4 units returned damaged and discards them. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "84",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d072",
+   "prompt": "A warehouse starts the day with 180 units of a product. In order, it ships 11 units to customers, then gets 10 units returned damaged and discards them, then gets 5 units returned in perfect condition and puts them back in stock, then gets 15 units returned in perfect condition and puts them back in stock, then gets 26 units returned damaged and discards them, then ships 25 units to customers. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "164",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d073",
+   "prompt": "Two fair six-sided dice, one red and one blue, are rolled. Of the 36 equally likely (red, blue) outcomes, how many have a sum of exactly 10?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "3",
+    "type": "num"
+   },
+   "meta": {
+    "family": "dice"
+   }
+  },
+  {
+   "id": "d074",
+   "prompt": "Two fair six-sided dice, one red and one blue, are rolled. Of the 36 equally likely (red, blue) outcomes, how many have a product of exactly 36?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "1",
+    "type": "num"
+   },
+   "meta": {
+    "family": "dice"
+   }
+  },
+  {
+   "id": "d075",
+   "prompt": "Five people have different heights. Fay is shorter than Gus. Dev is shorter than Eli. Dev is taller than Ana. Eli is shorter than Fay. Who is the shortest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Ana",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d076",
+   "prompt": "A 24-hour clock shows 22:48. What will it show exactly 2531 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "16:59",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d077",
+   "prompt": "A shop sells notebooks at $19.23 each. Ana buys 19 notebooks. Orders of more than 9 notebooks get 5% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $12.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "359.10",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d078",
+   "prompt": "A 24-hour clock shows 04:43. What will it show exactly 2322 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "19:25",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d079",
+   "prompt": "Five people have different heights. Gus is taller than Cara. Dev is shorter than Fay. Dev is taller than Ben. Gus is shorter than Ben. Who is the second tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Dev",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d080",
+   "prompt": "A shop sells notebooks at $12.74 each. Ana buys 31 notebooks. Orders of more than 11 notebooks get 20% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $11.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "326.95",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d081",
+   "prompt": "Two fair six-sided dice, one red and one blue, are rolled. Of the 36 equally likely (red, blue) outcomes, how many have a product of exactly 4?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "3",
+    "type": "num"
+   },
+   "meta": {
+    "family": "dice"
+   }
+  },
+  {
+   "id": "d082",
+   "prompt": "A 24-hour clock shows 08:15. What will it show exactly 482 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "16:17",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d083",
+   "prompt": "Five people have different heights. Fay is shorter than Dev. Fay is taller than Gus. Eli is taller than Dev. Eli is shorter than Hal. Who is the third tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Dev",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d084",
+   "prompt": "Five people have different heights. Eli is taller than Ana. Ana is taller than Fay. Cara is shorter than Hal. Fay is taller than Hal. Who is the tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Eli",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d085",
+   "prompt": "A project starts on 2025-12-22 and runs for 65 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2026-02-24",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d086",
+   "prompt": "A warehouse starts the day with 73 units of a product. In order, it gets 7 units returned damaged and discards them, then receives a delivery of 21 units, then gets 18 units returned in perfect condition and puts them back in stock, then ships 26 units to customers, then gets 12 units returned damaged and discards them, then receives a delivery of 9 units. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "95",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d087",
+   "prompt": "Five people have different heights. Ben is taller than Cara. Ana is taller than Eli. Ben is shorter than Dev. Dev is shorter than Eli. Who is the fourth tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Ben",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d088",
+   "prompt": "Two fair six-sided dice, one red and one blue, are rolled. Of the 36 equally likely (red, blue) outcomes, how many have a product of exactly 24?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2",
+    "type": "num"
+   },
+   "meta": {
+    "family": "dice"
+   }
+  },
+  {
+   "id": "d089",
+   "prompt": "A warehouse starts the day with 198 units of a product. In order, it gets 28 units returned in perfect condition and puts them back in stock, then gets 24 units returned damaged and discards them, then receives a delivery of 18 units, then gets 19 units returned in perfect condition and puts them back in stock. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "263",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d090",
+   "prompt": "A shop sells notebooks at $23.35 each. Ana buys 29 notebooks. Orders of more than 9 notebooks get 5% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $4.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "647.29",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d091",
+   "prompt": "A shop sells notebooks at $13.83 each. Ana buys 40 notebooks. Orders of more than 10 notebooks get 20% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $10.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "452.56",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d092",
+   "prompt": "A project starts on 2026-06-25 and runs for 35 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2026-07-29",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d093",
+   "prompt": "A shop sells notebooks at $3.16 each. Ana buys 33 notebooks. Orders of more than 15 notebooks get 5% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $10.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "109.07",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d094",
+   "prompt": "A warehouse starts the day with 179 units of a product. In order, it gets 1 units returned in perfect condition and puts them back in stock, then receives a delivery of 27 units, then ships 27 units to customers, then ships 8 units to customers, then ships 10 units to customers, then ships 21 units to customers. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "141",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d095",
+   "prompt": "A 24-hour clock shows 07:33. What will it show exactly 274 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "12:07",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d096",
+   "prompt": "A project starts on 2027-08-05 and runs for 231 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2028-03-22",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d097",
+   "prompt": "A 24-hour clock shows 09:44. What will it show exactly 2529 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "03:53",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d098",
+   "prompt": "A shop sells notebooks at $12.38 each. Ana buys 31 notebooks. Orders of more than 5 notebooks get 25% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $9.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "296.84",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d099",
+   "prompt": "A warehouse starts the day with 30 units of a product. In order, it receives a delivery of 19 units, then ships 19 units to customers, then receives a delivery of 28 units, then ships 3 units to customers, then ships 14 units to customers. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "41",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d100",
+   "prompt": "Five people have different heights. Ben is taller than Hal. Cara is taller than Dev. Ben is shorter than Eli. Dev is taller than Eli. Who is the shortest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Hal",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d101",
+   "prompt": "Five people have different heights. Hal is shorter than Dev. Ben is shorter than Eli. Ben is taller than Dev. Fay is taller than Eli. Who is the second tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Eli",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d102",
+   "prompt": "A shop sells notebooks at $16.70 each. Ana buys 10 notebooks. Orders of more than 21 notebooks get 5% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $11.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "178.00",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d103",
+   "prompt": "A 24-hour clock shows 12:23. What will it show exactly 550 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "21:33",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d104",
+   "prompt": "Two fair six-sided dice, one red and one blue, are rolled. Of the 36 equally likely (red, blue) outcomes, how many have a sum of at least 8?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "15",
+    "type": "num"
+   },
+   "meta": {
+    "family": "dice"
+   }
+  },
+  {
+   "id": "d105",
+   "prompt": "A shop sells notebooks at $18.78 each. Ana buys 27 notebooks. Orders of more than 8 notebooks get 10% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $5.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "461.35",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d106",
+   "prompt": "A shop sells notebooks at $2.00 each. Ana buys 4 notebooks. Orders of more than 10 notebooks get 5% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $11.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "19.00",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d107",
+   "prompt": "A shop sells notebooks at $21.13 each. Ana buys 26 notebooks. Orders of more than 13 notebooks get 5% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $9.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "530.91",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d108",
+   "prompt": "A warehouse starts the day with 185 units of a product. In order, it receives a delivery of 10 units, then receives a delivery of 19 units, then receives a delivery of 1 units, then gets 22 units returned in perfect condition and puts them back in stock. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "237",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d109",
+   "prompt": "Five people have different heights. Gus is taller than Dev. Ana is taller than Fay. Ana is shorter than Cara. Fay is taller than Gus. Who is the third tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Fay",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d110",
+   "prompt": "A warehouse starts the day with 106 units of a product. In order, it gets 5 units returned in perfect condition and puts them back in stock, then gets 19 units returned in perfect condition and puts them back in stock, then gets 19 units returned damaged and discards them, then receives a delivery of 9 units. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "139",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d111",
+   "prompt": "A project starts on 2025-10-05 and runs for 232 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2026-05-24",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d112",
+   "prompt": "A project starts on 2025-10-15 and runs for 43 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2025-11-26",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d113",
+   "prompt": "A warehouse starts the day with 93 units of a product. In order, it ships 27 units to customers, then gets 10 units returned damaged and discards them, then receives a delivery of 24 units, then gets 1 units returned damaged and discards them. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "90",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d114",
+   "prompt": "A 24-hour clock shows 20:28. What will it show exactly 1492 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "21:20",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d115",
+   "prompt": "A project starts on 2027-08-24 and runs for 58 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2027-10-20",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d116",
+   "prompt": "A warehouse starts the day with 192 units of a product. In order, it gets 15 units returned in perfect condition and puts them back in stock, then gets 1 units returned damaged and discards them, then ships 21 units to customers, then ships 12 units to customers, then gets 5 units returned damaged and discards them. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "174",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d117",
+   "prompt": "A shop sells notebooks at $6.78 each. Ana buys 3 notebooks. Orders of more than 19 notebooks get 5% off the notebook subtotal (rounded to the nearest cent, half-cents round up). A flat $6.00 shipping fee is then added. How much does Ana pay in total, in dollars?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "26.34",
+    "type": "num"
+   },
+   "meta": {
+    "family": "discount"
+   }
+  },
+  {
+   "id": "d118",
+   "prompt": "A project starts on 2026-05-01 and runs for 192 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2026-11-08",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d119",
+   "prompt": "Two fair six-sided dice, one red and one blue, are rolled. Of the 36 equally likely (red, blue) outcomes, how many have a sum of at least 11?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "3",
+    "type": "num"
+   },
+   "meta": {
+    "family": "dice"
+   }
+  },
+  {
+   "id": "d120",
+   "prompt": "A project starts on 2025-06-12 and runs for 48 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2025-07-29",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d121",
+   "prompt": "Five people have different heights. Cara is shorter than Fay. Ben is shorter than Dev. Gus is taller than Fay. Dev is shorter than Cara. Who is the second tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Fay",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d122",
+   "prompt": "Two fair six-sided dice, one red and one blue, are rolled. Of the 36 equally likely (red, blue) outcomes, how many have a sum of exactly 9?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "4",
+    "type": "num"
+   },
+   "meta": {
+    "family": "dice"
+   }
+  },
+  {
+   "id": "d123",
+   "prompt": "Five people have different heights. Hal is taller than Ben. Eli is shorter than Fay. Hal is shorter than Ana. Fay is shorter than Ben. Who is the shortest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Eli",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d124",
+   "prompt": "Five people have different heights. Eli is shorter than Gus. Cara is shorter than Eli. Fay is shorter than Cara. Gus is shorter than Dev. Who is the fourth tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Cara",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d125",
+   "prompt": "A warehouse starts the day with 82 units of a product. In order, it receives a delivery of 3 units, then ships 5 units to customers, then gets 8 units returned in perfect condition and puts them back in stock, then ships 17 units to customers, then gets 3 units returned in perfect condition and puts them back in stock. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "74",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  },
+  {
+   "id": "d126",
+   "prompt": "A 24-hour clock shows 00:40. What will it show exactly 821 minutes later? Answer as HH:MM.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "14:21",
+    "type": "time"
+   },
+   "meta": {
+    "family": "clock"
+   }
+  },
+  {
+   "id": "d127",
+   "prompt": "A project starts on 2025-06-27 and runs for 32 consecutive calendar days, counting the start date as day 1. What is the date of its last day? Give it as YYYY-MM-DD.\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "2025-07-28",
+    "type": "date"
+   },
+   "meta": {
+    "family": "date"
+   }
+  },
+  {
+   "id": "d128",
+   "prompt": "Five people have different heights. Gus is taller than Ana. Ben is shorter than Ana. Fay is taller than Eli. Gus is shorter than Eli. Who is the tallest?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "Fay",
+    "type": "name"
+   },
+   "meta": {
+    "family": "ordering"
+   }
+  },
+  {
+   "id": "d129",
+   "prompt": "A warehouse starts the day with 46 units of a product. In order, it receives a delivery of 11 units, then receives a delivery of 13 units, then gets 30 units returned damaged and discards them, then ships 23 units to customers, then gets 20 units returned in perfect condition and puts them back in stock. How many units are in stock at the end of the day?\n\nThink it through, then end your reply with exactly two lines:\nANSWER: <answer>\nCONFIDENCE: <integer 0-100>",
+   "check": {
+    "kind": "answer",
+    "expect": "67",
+    "type": "num"
+   },
+   "meta": {
+    "family": "inventory"
+   }
+  }
+ ]
+}

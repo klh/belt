@@ -1,0 +1,44 @@
+{
+ "generator": "arena-gen-1",
+ "seed": "bench-arena/2026-10-02",
+ "sealed_at": "2026-10-02T21:08:09.270Z",
+ "rule": "never edit; --n k takes the first k tasks",
+ "files": {
+  "a-short-chat.json": {
+   "class": "a",
+   "n": 130,
+   "bytes": 46769,
+   "sha256": "ba3f660271b133af74e10630814f48ec2e07ae335b81c7124bab11f57c6edb14"
+  },
+  "b-code-gen.json": {
+   "class": "b",
+   "n": 130,
+   "bytes": 247718,
+   "sha256": "242b91d76b739cdf46c22b257dc2f94178898a7fab729d4a725d1877742907c7"
+  },
+  "c-extract.json": {
+   "class": "c",
+   "n": 130,
+   "bytes": 120184,
+   "sha256": "657defc0406f98b4f8b18f319e43ee068b2592222d831a3ca1bb8f1882cd867a"
+  },
+  "d-reasoning.json": {
+   "class": "d",
+   "n": 130,
+   "bytes": 63042,
+   "sha256": "fe58dbd753da2f9925a7f077492855add582170582cc630c5f6e539b75344b30"
+  },
+  "e-decision.json": {
+   "class": "e",
+   "n": 130,
+   "bytes": 29387,
+   "sha256": "3be78f864e3996f4559d38a1a61134873196f33a71d9cd5b1045d4501144f00f"
+  },
+  "f-long-context.json": {
+   "class": "f",
+   "n": 36,
+   "bytes": 1144260,
+   "sha256": "257573296a3d4d8d4aadf16e07ce04b72c811f3628997d5590326360459e861e"
+  }
+ }
+}
