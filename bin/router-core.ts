@@ -602,9 +602,12 @@ export function anthropicSseFromOpenAi(
 	return new ReadableStream({
 		start(c) {
 			c.enqueue(enc.encode(anthropicHead(meta)));
-		},
-		async pull(c) {
-			try {
+			// PUSH-based: pump inside start() — Bun 1.4.x serve does not drive
+			// pull()-based ReadableStream responses (verified 2026-10-03: pull()
+			// never fires after start(); push-style pumping streams fine).
+			void (async () => {
+				try {
+					for (;;) {
 				const { value, done: eof } = await reader.read();
 				if (eof) {
 					const out = handleLine(buf) + anthropicTail(finish, outTokens);
@@ -618,7 +621,8 @@ export function anthropicSseFromOpenAi(
 				buf = lines.pop() ?? "";
 				const out = lines.map(handleLine).join("");
 				if (out) c.enqueue(enc.encode(out));
-			} catch (e) {
+					}
+				} catch (e) {
 				const msg = e instanceof Error ? e.message : String(e);
 				c.enqueue(
 					enc.encode(
@@ -634,6 +638,7 @@ export function anthropicSseFromOpenAi(
 				c.close();
 				done(msg);
 			}
+			})();
 		},
 		cancel(reason) {
 			done("client cancelled");
