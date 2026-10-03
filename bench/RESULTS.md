@@ -5,6 +5,21 @@ Moved per owner law (2026-10-02): curated tables live in
 [bench-questions.md](../../bench-questions.md). **Do not store bench data
 here.** The 2026-09-23 fleet snapshot is preserved below for provenance.
 
+## Dated run log (pointers only — tables live in benchmarks.md)
+
+- `2026-10-02T21-31-09` — bench-arena n=12, 7 legs × 6 classes, load1 13–41;
+  speed strong / quality insufficient → [REPORT-n12.md](../REPORT-n12.md).
+- `2026-10-02T22-09-09` — bench-arena n=33, same legs, load1 27–84; speed
+  strong / quality weak → [REPORT-n33.md](../REPORT-n33.md).
+- post-W270-fix rerun — in flight at W274 compile time; REPORT-postw270.md
+  not yet copied in (gap, see benchmarks.md).
+- `2026-10-03T07:31Z` W274 AS-IS live probes (55 requests, single-stream,
+  load1 6.7–7.5, AC): `:4000/registry.json` 404 (W271 not live); 1-token
+  `local-extract` direct `:8902` p50 91 ms vs `:4100` p50 100 ms (n=10 each,
+  1.10×); W270 `resolveTarget()` alias sent to `:8902` → 10/10 404
+  `model_not_found`; Kev `:8912` 200 <1 ms; embeddings `:8907` down. →
+  [benchmarks.md](../benchmarks.md#stack-vs-pure-api--bench-arena-findings-w274-all-setups-as-is).
+
 ---
 
 ## Historical snapshot (2026-09-23 fleet runs)
