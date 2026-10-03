@@ -127,6 +127,32 @@ function saveState(s: StateFile): void {
 	writeFileSync(STATE, JSON.stringify(s, null, 2));
 }
 
+// ---- tried memo (bench/tried.json): mechanical memory of every A/B verdict ----
+
+export interface TriedRow {
+	id: string;
+	verdict: Verdict;
+	date: string;
+	slot?: number;
+	note?: string;
+}
+const TRIED = `${BIN}/../bench/tried.json`;
+
+export function priorTried(rows: TriedRow[], id: string): TriedRow | undefined {
+	return rows.find((r) => r.id === id);
+}
+
+function loadTried(): TriedRow[] {
+	if (!existsSync(TRIED)) return [];
+	return JSON.parse(readFileSync(TRIED, "utf8")) as TriedRow[];
+}
+
+function appendTried(row: TriedRow): void {
+	const rows = loadTried();
+	rows.push(row);
+	writeFileSync(TRIED, `${JSON.stringify(rows, null, "\t")}\n`);
+}
+
 // A/B benches are nonce-cold: identical temp-0 prompts hit rapid-mlx's
 // response cache and return absurd tok/s (239k tok/s observed 2026-10-03).
 // Same 4 fleet prompts as bench-suite, each leg nonce-stamped so no response
@@ -177,7 +203,13 @@ function cmdStatus(gbPairs: string[]): void {
 		if (!expectedBytes) throw new Error(`--gb needs id=gb pairs, got: ${pair}`);
 		const bytes = cacheBytes(m);
 		const prev = state[id];
+		const tried = priorTried(loadTried(), id);
 		let line = `${id}: ${(bytes / 1e9).toFixed(2)}/${gbStr}GB `;
+		if (tried) {
+			line += `[TRIED ${tried.verdict} ${tried.date}] `;
+			if (tried.verdict === "win")
+				line = `⚠ ${line} — this IS a slot incumbent `;
+		}
 		if (bytes >= expectedBytes * 0.95) {
 			line += "COMPLETE";
 		} else if (
@@ -252,6 +284,7 @@ interface AbArgs {
 	incumbentPort: number;
 	incumbentModel: string;
 	margin: number;
+	force: boolean;
 	keep: boolean;
 }
 
@@ -260,6 +293,16 @@ async function cmdAb(a: AbArgs): Promise<void> {
 	const cand = model(a.candidate);
 	const inc = model(a.incumbentModel);
 	const selfAb = cand.id === inc.id;
+	const triedRow = priorTried(loadTried(), a.candidate);
+	if (triedRow && !a.force) {
+		console.error(
+			`already tried: ${triedRow.verdict} on ${triedRow.date} — ${triedRow.note ?? "no note"}`,
+		);
+		console.error(
+			"refusing to re-bench a known verdict; use --force to override",
+		);
+		process.exit(1);
+	}
 	const bytes = cacheBytes(cand);
 	if (a.candidateGb && bytes < a.candidateGb * 1e9 * 0.95) {
 		console.error(
@@ -310,6 +353,15 @@ async function cmdAb(a: AbArgs): Promise<void> {
 			console.log("self-A/B: deletion guard held — nothing removed");
 		} else {
 			console.log("--keep set — weights left in place");
+		}
+		if (!selfAb) {
+			appendTried({
+				id: cand.id,
+				verdict: v,
+				date: new Date().toISOString().slice(0, 10),
+				slot: a.incumbentPort,
+				note: `${candMed.toFixed(1)} vs ${incMed.toFixed(1)} tok/s nonce-cold`,
+			});
 		}
 		benchOut = JSON.stringify({
 			ts: new Date().toISOString(),
@@ -397,6 +449,7 @@ if (import.meta.main) {
 			incumbentModel: incModel,
 			margin: Number(get("--margin") ?? 0.05),
 			keep: args.includes("--keep"),
+			force: args.includes("--force"),
 		});
 	} else {
 		console.error("usage: fleet-refresh.ts <status|pull|ab> …");

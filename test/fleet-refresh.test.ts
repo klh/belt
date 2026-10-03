@@ -4,7 +4,22 @@ import {
 	parseMedian,
 	parseLoadavg,
 	isStalled,
+	priorTried,
+	type TriedRow,
 } from "../bin/fleet-refresh.ts";
+
+describe("priorTried", () => {
+	const rows: TriedRow[] = [
+		{ id: "a/model", verdict: "lose", date: "2026-10-03", note: "slow" },
+		{ id: "b/model", verdict: "win", date: "2026-10-03", slot: 8903 },
+	];
+	test("finds prior verdict by exact id", () => {
+		expect(priorTried(rows, "a/model")?.verdict).toBe("lose");
+	});
+	test("undefined for untried id", () => {
+		expect(priorTried(rows, "c/model")).toBeUndefined();
+	});
+});
 
 describe("verdictOf", () => {
 	test("win above margin", () => {

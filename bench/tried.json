@@ -1,0 +1,79 @@
+[
+	{
+		"id": "mlx-community/Qwen3.8-27B",
+		"verdict": "lose",
+		"date": "2026-09-23",
+		"slot": 8903,
+		"note": "28.3 vs 138.5 tok/s at equal probe quality — dense loses to MoE"
+	},
+	{
+		"id": "zai/GLM-5.x-local",
+		"verdict": "lose",
+		"date": "2026-09-27",
+		"note": "204-418GB at 4-bit, no fit in 128GB — remote-only"
+	},
+	{
+		"id": "mlx-community/Xing4.0-29B-A4B",
+		"verdict": "lose",
+		"date": "2026-09-27",
+		"note": "MLA+MTP unproven in MLX then; the OptiQ port IS the sanctioned revisit — bench it as a NEW id"
+	},
+	{
+		"id": "mlx-community/Fastino-Nemotron-3.5-Lightning-Finance",
+		"verdict": "lose",
+		"date": "2026-09-27",
+		"note": "English-only, no Danish context"
+	},
+	{
+		"id": "mlx-community/Intern-Decision-4B",
+		"verdict": "lose",
+		"date": "2026-09-27",
+		"note": "12/15 vs 13/15 fork replay, CUDA-only serving — revisit only if an MLX port appears"
+	},
+	{
+		"id": "kev-9B",
+		"verdict": "lose",
+		"date": "2026-09",
+		"slot": 8912,
+		"note": "OOM-killed by macOS in a RAM spike"
+	},
+	{
+		"id": "laya-mlx-421m",
+		"verdict": "lose",
+		"date": "2026-09",
+		"note": "40% misroute rate beats any speed gain"
+	},
+	{
+		"id": "laya-multilingual-322m",
+		"verdict": "lose",
+		"date": "2026-09",
+		"note": "same misroute"
+	},
+	{
+		"id": "kev-4b-fit",
+		"verdict": "lose",
+		"date": "2026-10-02",
+		"note": "4/12 agreement, 3.6x latency, 1.6x tokens vs :8902 chat-JSON (W225)"
+	},
+	{
+		"id": "mlx-community/Qwen3.5-9B-OptiQ-4bit",
+		"verdict": "lose",
+		"date": "2026-10-03",
+		"slot": 8906,
+		"note": "68.5 vs 87.0 tok/s same-day (W228) — weights deleted"
+	},
+	{
+		"id": "mlx-community/Qwen3.5-35B-A3B-OptiQ-4bit",
+		"verdict": "win",
+		"date": "2026-10-03",
+		"slot": 8903,
+		"note": "107.2 vs 86.0 tok/s — NOW the :8903 incumbent; do not re-challenge it on :8903"
+	},
+	{
+		"id": "mlx-community/Qwen3-Reranker-0.6B-4bit",
+		"verdict": "tie",
+		"date": "2026-10-03",
+		"slot": 8913,
+		"note": "rank-only: acc@0.5 4/10 card pairs, rank 3/3, p50 22ms — passage reranker, never a card gate"
+	}
+]
