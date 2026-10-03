@@ -8,10 +8,21 @@
 //   bun swarm.ts status      — show running specialists
 //   bun swarm.ts download    — download all specialist models
 //   bun swarm.ts restart     — stop + start
+//   bun swarm.ts supervise   — long-running self-heal loop (launchd KeepAlive):
+//                              respawns the :4000 shim + resident specialists
+//                              with backoff + circuit breaker (supervisor.ts)
 
 import { spawn, execSync } from "node:child_process";
 import { SPECIALISTS, DOWNLOAD_MODELS, residentSet } from "./registry.ts";
 import { spawnArgs, mlxLogPath } from "./spawner.ts";
+import {
+	fleetTargets,
+	otherSupervisorAlive,
+	readStatus,
+	STATUS_FILE,
+	Supervisor,
+	TRANSITION_LOG,
+} from "./supervisor.ts";
 
 const HOME = process.env.HOME;
 // download-only — server argv lives in spawner.ts (spawnArgs), shared with the
@@ -115,8 +126,34 @@ async function cmdStart(): Promise<void> {
 	process.exit(0);
 }
 
+async function cmdSupervise(): Promise<void> {
+	const other = otherSupervisorAlive();
+	if (other) {
+		console.log(`supervisor already running (pid ${other}) — exiting`);
+		return;
+	}
+	const sup = new Supervisor(fleetTargets(), {
+		statusFile: STATUS_FILE,
+		logFile: TRANSITION_LOG,
+	});
+	// Children are services, not session state: leave them running on
+	// SIGTERM so a supervisor restart adopts them (probe-up) instead of
+	// reloading 40GB of weights.
+	for (const sig of ["SIGTERM", "SIGINT"] as const)
+		process.on(sig, () => sup.stop());
+	console.log(`🩺 supervising → ${STATUS_FILE}`);
+	await sup.run();
+}
+
 async function cmdStop(): Promise<void> {
 	console.log("🛑 Stopping swarm…");
+	// Stop the supervisor first or it would respawn what we kill.
+	const sup = readStatus()?.supervisorPid;
+	if (sup && sup !== process.pid) {
+		try {
+			process.kill(sup, "SIGTERM");
+		} catch {}
+	}
 	killPort(4000);
 	for (const s of SPECIALISTS) killPort(s.port);
 	console.log("  All stopped.");
@@ -185,8 +222,13 @@ switch (cmd) {
 	case "download":
 		await cmdDownload();
 		break;
+	case "supervise":
+		await cmdSupervise();
+		break;
 	default:
-		console.log(`Usage: bun swarm.ts {start|stop|status|restart|download}\n`);
+		console.log(
+			`Usage: bun swarm.ts {start|stop|status|restart|download|supervise}\n`,
+		);
 		console.log(`Specialists (from registry.ts):`);
 		for (const s of SPECIALISTS) {
 			console.log(`  :${s.port}  ${s.label}  (${s.ram_gb}GB, ${s.tier})`);

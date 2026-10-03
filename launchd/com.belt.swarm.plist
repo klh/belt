@@ -7,7 +7,7 @@
     <key>ProgramArguments</key>
     <array>
         <string>/opt/homebrew/bin/bun</string>
-        <string>__HOME__/.claude/local-llm/swarm.ts</string><string>start</string>
+        <string>__HOME__/.claude/local-llm/swarm.ts</string><string>supervise</string>
     </array>
     <key>KeepAlive</key>
     <true/>
@@ -24,6 +24,9 @@
         <key>PATH</key>
         <string>__HOME__/.local/bin:__HOME__/.local/share/uv/tools/mlx-lm/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
     </dict>
-    <!-- Swarm: resident specialists (see bin/registry.ts, ~41GB) + router. -->
+    <!-- Swarm: resident specialists (see bin/registry.ts, ~41GB) + router.
+         `supervise` is long-running: it respawns a dead :4000 shim or
+         resident specialist (backoff + circuit breaker, bin/supervisor.ts);
+         KeepAlive restarts the supervisor itself, which adopts live ports. -->
 </dict>
 </plist>

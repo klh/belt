@@ -5,6 +5,11 @@
 //   bun watchdog.ts report '{"sid":"a1","task":"refactor x","milestone":"edit-loop","files":["/a.ts"]}'
 //   bun watchdog.ts status
 //   bun watchdog.ts daemon       (long-running; launchd KeepAlive)
+//   bun watchdog.ts liveness [--json]  fleet port liveness (W272): fresh probe
+//                                      of :4000, :890x, :8912, :4100 merged with
+//                                      the supervisor's restart counts. Report
+//                                      only — `swarm.ts supervise` is the single
+//                                      restarter (two restarters = fork-bomb).
 //
 // Policy:
 //   - overdue  = no heartbeat for 5min → flagged
@@ -19,6 +24,7 @@ import {
 	mkdirSync,
 	appendFileSync,
 } from "node:fs";
+import { livenessReport, renderLiveness } from "./liveness.ts";
 
 const CACHE = `${process.env.HOME}/.cache/claude-governor`;
 const HB_FILE = `${CACHE}/heartbeats.json`;
@@ -68,12 +74,12 @@ function revokeLeases(sid: string, reason: string): number {
 		writeFileSync(LOCKS_FILE, JSON.stringify(locks, null, 2));
 		appendFileSync(
 			REVOKE_LOG,
-			JSON.stringify({
+			`${JSON.stringify({
 				ts: new Date().toISOString(),
 				sid,
 				reason,
 				leases_revoked: n,
-			}) + "\n",
+			})}\n`,
 		);
 	}
 	return n;
@@ -156,6 +162,14 @@ if (cmd === "status") {
 		);
 	}
 	process.exit(0);
+}
+
+if (cmd === "liveness") {
+	const report = await livenessReport();
+	console.log(
+		arg === "--json" ? JSON.stringify(report, null, 2) : renderLiveness(report),
+	);
+	process.exit(report.alerts.length > 0 ? 2 : 0);
 }
 
 // ─── daemon (launchd KeepAlive) ───
