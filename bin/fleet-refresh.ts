@@ -193,11 +193,13 @@ function cmdPull(id: string): void {
 	const m = model(id);
 	const log = `/tmp/rmq-pull-${m.name}.log`;
 	const fd = openSync(log, "w");
-	const proc = Bun.spawn(["rapid-mlx", "pull", id], {
-		stdout: fd,
-		stderr: fd,
-	});
-	console.log(`pull ${id} → pid ${proc.pid}, log ${log}`);
+	// hf download RESUMES partial blobs across restarts; rapid-mlx pull does
+	// not (a dead pull loses all partial bytes — lost 13GB of the 35B twice
+	// on 2026-10-03). rapid-mlx serve reads the same HF cache either way.
+	const hasHf = Bun.spawnSync(["which", "hf"]).exitCode === 0;
+	const argv = hasHf ? ["hf", "download", id] : ["rapid-mlx", "pull", id];
+	const proc = Bun.spawn(argv, { stdout: fd, stderr: fd });
+	console.log(`pull ${id} → pid ${proc.pid} (${argv[0]}), log ${log}`);
 }
 
 async function freePort(preferred: number): Promise<number> {
