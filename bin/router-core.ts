@@ -133,6 +133,7 @@ export interface AnthropicBody {
 	system?: unknown;
 	messages?: Array<{ role: unknown; content: unknown }>;
 	_force_dead_port?: number;
+	_knowledge?: unknown;
 }
 
 export const blockText = (content: unknown): string =>
@@ -608,36 +609,36 @@ export function anthropicSseFromOpenAi(
 			void (async () => {
 				try {
 					for (;;) {
-				const { value, done: eof } = await reader.read();
-				if (eof) {
-					const out = handleLine(buf) + anthropicTail(finish, outTokens);
-					c.enqueue(enc.encode(out));
-					c.close();
-					done();
-					return;
-				}
-				buf += dec.decode(value, { stream: true });
-				const lines = buf.split("\n");
-				buf = lines.pop() ?? "";
-				const out = lines.map(handleLine).join("");
-				if (out) c.enqueue(enc.encode(out));
+						const { value, done: eof } = await reader.read();
+						if (eof) {
+							const out = handleLine(buf) + anthropicTail(finish, outTokens);
+							c.enqueue(enc.encode(out));
+							c.close();
+							done();
+							return;
+						}
+						buf += dec.decode(value, { stream: true });
+						const lines = buf.split("\n");
+						buf = lines.pop() ?? "";
+						const out = lines.map(handleLine).join("");
+						if (out) c.enqueue(enc.encode(out));
 					}
 				} catch (e) {
-				const msg = e instanceof Error ? e.message : String(e);
-				c.enqueue(
-					enc.encode(
-						sseEvent("error", {
-							type: "error",
-							error: {
-								type: "api_error",
-								message: `router: upstream stream broke (${msg})`,
-							},
-						}),
-					),
-				);
-				c.close();
-				done(msg);
-			}
+					const msg = e instanceof Error ? e.message : String(e);
+					c.enqueue(
+						enc.encode(
+							sseEvent("error", {
+								type: "error",
+								error: {
+									type: "api_error",
+									message: `router: upstream stream broke (${msg})`,
+								},
+							}),
+						),
+					);
+					c.close();
+					done(msg);
+				}
 			})();
 		},
 		cancel(reason) {

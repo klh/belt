@@ -32,6 +32,7 @@ import {
 } from "./router-core.ts";
 import { registryResponse } from "./registry-emit.ts";
 import { ensureUp } from "./spawner.ts";
+import { injectKnowledge, logServe } from "./knowledge-inject.ts";
 
 const admission = createAdmission();
 
@@ -517,6 +518,21 @@ Bun.serve({
 			const temperature = body.temperature ?? 0.7;
 			const messages = toOpenAiMessages(body);
 
+			// W255 knowledge injection — top-k active hub facts as ONE tail
+			// message; the prefix above stays byte-identical so provider and
+			// mlx prefix caches keep hitting. Opt-in per request
+			// (_knowledge: true in the body); BELT_INJECT=on is the fleet-wide
+			// default, =off the kill switch.
+			const injection = injectKnowledge({
+				text,
+				enabled:
+					process.env.BELT_INJECT !== "off" &&
+					(body._knowledge === true || process.env.BELT_INJECT === "on"),
+			});
+			if (injection !== null) {
+				messages.push(injection.tail);
+			}
+
 			let response = "";
 			let finish: string | undefined;
 			let usedPort: number = route.port;
@@ -532,6 +548,15 @@ Bun.serve({
 				port: usedPort,
 				model: usedModel,
 				note: note.join("; "),
+				knowledge:
+					injection === null
+						? undefined
+						: {
+								served: injection.served.map((s) => ({
+									topic: s.topic,
+									score: Number(s.score.toFixed(4)),
+								})),
+							},
 				prefs: {
 					cost_speed: prefs.cost_speed ?? "balanced",
 					allow_cloud: prefs.allow_cloud === true,
@@ -683,6 +708,26 @@ Bun.serve({
 				} catch {
 					note.push("cloud escalation failed");
 				}
+			}
+
+			// W255 serve transparency — which facts went into which request;
+			// before the outcome bail so failed serves are on record too.
+			if (injection !== null) {
+				const logged = logServe(process.env, {
+					prompt: text.slice(0, 80),
+					tier: score.tier,
+					port: usedPort,
+					model: usedModel,
+					candidates: injection.candidates,
+					served: injection.served.map((s) => ({
+						id: s.id,
+						topic: s.topic,
+						score: Number(s.score.toFixed(4)),
+					})),
+				});
+				note.push(
+					`knowledge: ${String(injection.served.length)} fact(s) served${logged ? "" : " (serve-log write FAILED)"}`,
+				);
 			}
 
 			if (!response) {
