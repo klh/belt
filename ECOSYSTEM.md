@@ -10,7 +10,12 @@
 **speedy / suspenders / buckle / belt / klh-local are one system.** Five
 repos because each layer has its own release cadence and its own license
 (suspenders/belt are source-available BSL, buckle/local are MIT), not
-because they're unrelated.
+because they're unrelated. Each of the three service repos (suspenders,
+belt, buckle) also has a private, enterprise-only `*-remote` sibling
+(`suspenders-remote`, `belt-remote`, `buckle-remote`) — an overlay, not a
+fork, adding the hub/multi-user profile on top of the public base. See
+[Hub + Spoke federation](#hub--spoke-federation--a-start-topology-not-a-fixed-one-optional)
+below.
 
 ## The five repos
 
@@ -70,6 +75,16 @@ flowchart TB
         zai["z.ai / anthropic / openai\nupstreams.yaml rows, env-gated keys"]
     end
 
+    subgraph overlay["*-remote overlays (private, enterprise/hub)"]
+        srem["suspenders-remote\nhub admin plane, multi-user tokens"]
+        brem["belt-remote\nfederation.peers, multi-hub routing"]
+        burem["buckle-remote\nprovider-key vault, peer-hub federation"]
+    end
+
+    subgraph parenthub["Parent hub (optional, this hub's own hub)"]
+        parent["another buckle hub\nsub-hub of sub-hub — dynamic, not hardcoded"]
+    end
+
     surfaces -->|hook gates, dialect adapters| plane
     install -.->|chains, one-time| plane
     install -.-> gw
@@ -87,6 +102,10 @@ flowchart TB
     ladder --> zai
     ladder --> nas
     hub -. "policy/entitlements push" .-> spoke
+    overlay -. "overlay, not fork\npublic install + profile on top" .-> plane
+    overlay -. overlay .-> gw
+    overlay -. overlay .-> fleet
+    hub -. "this hub is itself a spoke\nof its own parent (optional)" .-> parent
 
     plane -. "WoL + probe" .-> nas
 ```
@@ -142,7 +161,7 @@ hosts/IPs/MACs/keys stay local). Zod-validated, endpoint-level shape:
 - A malformed config fails loud (logs `z.prettifyError`, routes return
   empty) instead of silently mis-routing.
 
-## Hub + Spoke federation (optional)
+## Hub + Spoke federation — a start topology, not a fixed one (optional)
 
 A **buckle** instance can run as a federation **hub**: `/federation/enroll`
 mints a spoke a token from an admin-issued code; `/federation/policy` serves
@@ -153,6 +172,35 @@ interval, caches last-known under `~/.claude/local-llm/`, and degrades
 gracefully (hub unreachable = keep last-known, never block local routing).
 speedy's `install.sh` asks once ("Do you want to buckle up and connect to a
 belt hub?") and never re-prompts — standalone is the default.
+
+**This is a starting topology, not the only shape.** A hub can itself be a
+spoke of another hub — hubs have sub-hubs, dynamic and fault-tolerant, never
+a single hardcoded relationship. belt-remote's `config/hub-profile.yaml`
+carries a `federation.peers` list (empty by default, filled at runtime) —
+the seam multi-hub routing hangs off.
+
+### The `*-remote` overlay repos (private, enterprise/hub layer)
+
+`klh/suspenders-remote`, `klh/belt-remote`, `klh/buckle-remote` are private
+overlays over their public counterparts — **inheritance is one-directional**
+(private depends on public via `package.json`; public repos never reference
+anything `*-remote`). Overlay, not fork: a hub deploy = public base install
+
+- the matching `*-remote` profile on top (config over code). They add:
+
+* **suspenders-remote**: hub-profile defaults (auth ON, multi-user tokens,
+  no local-MLX assumptions), the hub admin plane (token issuance/
+  revocation per user+machine, provider-key management, federation status).
+* **belt-remote**: multi-machine MLX fleet profile — registry federation
+  with other hubs, hub-auth on every wire, multi-hub routing policy.
+* **buckle-remote**: the hub gateway posture — multi-user auth tokens,
+  provider-key vaulting behind admin control, federation to peer hubs,
+  per-repo lane policies (must/prefer/hub/residency) enforced at the
+  gateway.
+
+Real hosts/keys for any of this live in `~/.config/klh/stack.yaml` (mode
+600, OIDC/Entra tenant config included) — committed files carry
+placeholders only (`hub.example`, `$ENV_NAME` refs).
 
 ## Discovery: `/llms.txt`
 
