@@ -94,10 +94,23 @@ function loadavg(): number {
 }
 
 function cacheBytes(m: Model): number {
-	const r = Bun.spawnSync(["du", "-sk", cacheDir(m)]);
-	return r.exitCode === 0
-		? Number(r.stdout.toString().split("\t")[0]) * 1024
-		: 0;
+	// hf 2.x layout: snapshot → blob symlink → real shard. Plain du sees 416K
+	// (symlink inodes); du -L double-counts. Sum RESOLVED sizes of snapshot
+	// entries, deduped by target. BSD stat (macOS fleet).
+	const snap = `${cacheDir(m)}/snapshots`;
+	const find = Bun.spawnSync(["find", snap, "-type", "f", "-o", "-type", "l"]);
+	const seen = new Set<string>();
+	let bytes = 0;
+	for (const e of find.stdout.toString().split("\n")) {
+		if (!e) continue;
+		const rl = Bun.spawnSync(["readlink", "-f", e]);
+		const key = rl.exitCode === 0 ? rl.stdout.toString().trim() : e;
+		if (!key || seen.has(key)) continue;
+		seen.add(key);
+		const st = Bun.spawnSync(["stat", "-f", "%z", key]);
+		if (st.exitCode === 0) bytes += Number(st.stdout.toString().trim()) || 0;
+	}
+	return bytes;
 }
 
 interface StateRow {
