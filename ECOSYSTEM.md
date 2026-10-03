@@ -19,13 +19,13 @@ below.
 
 ## The five repos
 
-| Repo           | Role                                                                                                                                                    | Runtime location (after install)    | Key ports                                                                                                                   |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **speedy**     | Top-level installer/config layer — chains the other four in, installs skills, hooks, launchd agents.                                                    | the git checkout you installed from | —                                                                                                                           |
-| **suspenders** | Control plane: governor.db work graph (SQLite/WAL), coord bus, fleet board, hook gates, fleet-loop (dispatch + merge ladder).                           | `~/.claude/hooks/suspenders`        | `:7799` board/console                                                                                                       |
-| **buckle**     | LLM gateway: dual-dialect (OpenAI + Anthropic) pass-through, provider-as-data upstream pool, ladder routing, usage ledger, hub/spoke federation server. | `~/.claude/buckle`                  | `:4100` serving (today: litellm, cutover target: buckle itself) · `:4101` buckle shadow (pre-cutover)                       |
-| **belt**       | The local LLM fleet: MLX specialists on localhost, keyword router, benchmark rig.                                                                       | `~/.claude/local-llm`               | `:8901` code · `:8902` extract · `:8903` reason · `:8906` danish/general · `:8912` kev · `:8913` rerank · `:7791` dashboard |
-| **klh/local**  | LAN fabric: user-level Caddy serving `*.local` names over mDNS, zero sudo.                                                                              | `~/.local/bin/klh-local`            | `:80`/`:443` Caddy · `:7792` bar (registry dashboard)                                                                       |
+| Repo           | Role                                                                                                                                                                                                               | Runtime location (after install)    | Key ports                                                                                                                   |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **speedy**     | Top-level installer/config layer — chains the other four in, installs skills, hooks, launchd agents.                                                                                                               | the git checkout you installed from | —                                                                                                                           |
+| **suspenders** | Control plane: governor.db work graph (SQLite/WAL), coord bus, fleet board, hook gates, fleet-loop (dispatch + merge ladder).                                                                                      | `~/.claude/hooks/suspenders`        | `:7799` board/console                                                                                                       |
+| **buckle**     | LLM gateway: OpenAI + Anthropic client dialects in, LiteLLM-powered internally (70-100+ upstream providers via `upstreams.yaml` provider-as-data rows), ladder routing, usage ledger, hub/spoke federation server. | `~/.claude/buckle`                  | `:4100` serving (today: litellm, cutover target: buckle itself) · `:4101` buckle shadow (pre-cutover)                       |
+| **belt**       | The local LLM fleet: MLX specialists on localhost, keyword router, benchmark rig.                                                                                                                                  | `~/.claude/local-llm`               | `:8901` code · `:8902` extract · `:8903` reason · `:8906` danish/general · `:8912` kev · `:8913` rerank · `:7791` dashboard |
+| **klh/local**  | LAN fabric: user-level Caddy serving `*.local` names over mDNS, zero sudo.                                                                                                                                         | `~/.local/bin/klh-local`            | `:80`/`:443` Caddy · `:7792` bar (registry dashboard)                                                                       |
 
 ## System map
 
@@ -52,7 +52,7 @@ flowchart TB
     end
 
     subgraph gw["buckle — gateway"]
-        shim["dual-dialect router\n/v1/chat/completions + /v1/messages"]
+        shim["dialect router (OpenAI + Anthropic in)\nLiteLLM internally -> 70-100+ providers"]
         ladder["ladder routing\nrouting-policy.yaml, cooldown, retry"]
         hub["federation server\n/federation/enroll, /federation/policy\n(hub role: optional)"]
     end
@@ -121,9 +121,15 @@ flowchart TB
    Danish/multilingual → `:8906`, rerank → `:8913`.
 3. Requests belt can't serve locally (>32k context, frontier-quality
    production work, or local fleet down) fall through to **buckle** — the
-   dual-dialect gateway that picks a ladder rung (`routing-policy.yaml`):
-   another local machine (via `remotes.json`), or a cloud upstream
-   (`upstreams.yaml`, env-gated API keys, never committed).
+   gateway that picks a ladder rung (`routing-policy.yaml`): another local
+   machine (via `remotes.json`), or a cloud upstream (`upstreams.yaml`,
+   env-gated API keys, never committed). Buckle accepts both OpenAI
+   (`/v1/chat/completions`) and Anthropic (`/v1/messages`) wire dialects
+   from clients, but internally it runs **LiteLLM** (owner decision
+   W219.1 — proxy every capability LiteLLM provides natively rather than
+   reimplement providers) to reach 70-100+ upstream provider backends;
+   `upstreams.yaml`'s provider-as-data rows are what LiteLLM's own
+   `openai_like/providers.json` catalog models.
 4. **suspenders** sits alongside this path as the control plane, not in it —
    it governs work (the graph), coordinates sessions (coord bus), and shows
    the whole fleet's state (board), but doesn't route inference traffic
