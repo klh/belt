@@ -203,7 +203,7 @@ rank by p_yes, never threshold. Protocol lesson: bare card labels
 
 | Candidate                   |   GB | Challenging              | Status (2026-10-03)                                                   |
 | --------------------------- | ---: | ------------------------ | --------------------------------------------------------------------- |
-| Qwen3.5-9B-OptiQ-4bit       |  7.1 | 8906 incumbent (5GB)     | **downloaded (8.1GB) — A/B ready**                                    |
+| Qwen3.5-9B-OptiQ-4bit       |  7.1 | 8906 incumbent (5GB)     | **REJECTED 2026-10-03: 68.5 vs 87.0 tok/s (+3GB) — weights deleted**  |
 | Qwen3.5-35B-A3B-OptiQ-4bit  | 22.2 | 8903 incumbent (20GB)    | downloading (0.4/22.2GB)                                              |
 | Qwopus3.6-27B-Coder-oQ4-mtp | 17.0 | 8901 incumbent (18GB)    | downloading (0.3/17GB)                                                |
 | Fara1.5-27B-OptiQ-4bit      |    — | new candidate            | downloading (0.4GB)                                                   |
@@ -215,11 +215,12 @@ any model bump (managed-router lesson: the fleet changes underneath you).
 
 ## Rejection log
 
-| Date       | Model                                  | Verdict                                                                            |
-| ---------- | -------------------------------------- | ---------------------------------------------------------------------------------- |
-| 2026-09-23 | Qwen3.8-27B (dense)                    | 28.3 vs 138.5 tok/s at equal probe quality — the :8903 slot stays Qwen3.5-35B-A3B  |
-| 2026-09-27 | GLM-5.x locally                        | 204–418GB at 4-bit; no fit in 128GB — remote-only                                  |
-| 2026-09-27 | Xing4.0-29B-A4B                        | MLA+MTP unproven in MLX, no expected edge over Qwen3.5-35B-A3B                     |
-| 2026-09-27 | Fastino-Nemotron-3.5-Lightning-Finance | English-only; no Danish context — general local model + own docs wins              |
-| 2026-09-27 | Intern-Decision-4B                     | 12/15 vs 13/15 fork replay, CUDA-only serving; revisit only if an MLX port appears |
-| 2026-10-02 | kev-4B as belt fit-classifier          | 4/12 agreement, 3.6× latency, 1.6× tokens vs :8902 chat-JSON (W225)                |
+| Date       | Model                                  | Verdict                                                                                        |
+| ---------- | -------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| 2026-09-23 | Qwen3.8-27B (dense)                    | 28.3 vs 138.5 tok/s at equal probe quality — the :8903 slot stays Qwen3.5-35B-A3B              |
+| 2026-09-27 | GLM-5.x locally                        | 204–418GB at 4-bit; no fit in 128GB — remote-only                                              |
+| 2026-09-27 | Xing4.0-29B-A4B                        | MLA+MTP unproven in MLX, no expected edge over Qwen3.5-35B-A3B                                 |
+| 2026-09-27 | Fastino-Nemotron-3.5-Lightning-Finance | English-only; no Danish context — general local model + own docs wins                          |
+| 2026-09-27 | Intern-Decision-4B                     | 12/15 vs 13/15 fork replay, CUDA-only serving; revisit only if an MLX port appears             |
+| 2026-10-02 | kev-4B as belt fit-classifier          | 4/12 agreement, 3.6× latency, 1.6× tokens vs :8902 chat-JSON (W225)                            |
+| 2026-10-03 | Qwen3.5-9B-OptiQ-4bit                  | 68.5 vs 87.0 tok/s re-benched same-day (load1 ~9.7) — :8906 stays 9B-MLX-4bit, weights deleted |
