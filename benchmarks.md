@@ -213,6 +213,12 @@ Protocol: one-by-one A/B vs the incumbent; winner keeps the slot and this
 table, loser weights get DELETED from the HF cache; rerun the full suite on
 any model bump (managed-router lesson: the fleet changes underneath you).
 
+Mechanized (W295): `bun bin/fleet-refresh.ts status --gb <id>=<gb>,…` ·
+`pull <id>` · `ab --candidate <id> --incumbent-port <p> --incumbent-model
+<id>` — nonce-cold legs (response-cache-proof), same-day incumbent re-bench,
+loser weights deleted automatically (self-A/B deletion guard, `--keep`
+override), verdict + medians + loadavg logged to benchmarks.jsonl.
+
 ## Rejection log
 
 | Date       | Model                                  | Verdict                                                                                        |
