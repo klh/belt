@@ -368,6 +368,7 @@ const sseHeaders = (routing: Record<string, unknown>) => ({
 
 Bun.serve({
 	port: ROUTER_PORT,
+	hostname: "127.0.0.1", // W204/H1: loopback-only — never a raw LAN bind; external access only via an authenticated Caddy hop
 	idleTimeout: 0, // streams may idle through a long prefill
 	async fetch(req) {
 		const url = new URL(req.url);
