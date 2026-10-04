@@ -3,24 +3,43 @@
 # the announcer advertises _klh-llm._tcp over host networking so belt's
 # dynamic discovery finds it. DNS name nas.threads.dk resolves first; the
 # static ip_fallback covers resolver hiccups; WoL covers hibernation.
+#
+# Supply pins (W200): both images pinned by digest, the announcer's zeroconf
+# pinned by version. The announcer runs unprivileged (uid 65534) — mDNS
+# binds 5353, a privileged port, hence cap NET_BIND_SERVICE; pip installs
+# --user into HOME=/tmp since site-packages is root-owned.
+#
+# LAN bind decision (W200): ollama publishes on the NAS LAN IP, not 0.0.0.0.
+# Discovery (mDNS) and every belt consumer live on the LAN, so binding there
+# loses nothing and closes 11434 on every other host interface (docker
+# bridges, VPN tunnels). NAS_LAN_IP is required — compose fails loudly if
+# .env is missing (copy env.example); the IP is static per the ip_fallback
+# doctrine in bin/remotes.ts.
 services:
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.35.0@sha256:2a6e883b917fc543389599dae79918f5cac9e1438890506982f44aa4f5625d01
     container_name: nas-llm
     ports:
-      - "11434:11434"
+      - "${NAS_LAN_IP:?set NAS_LAN_IP in .env — copy env.example}:11434:11434"
     volumes:
       - /volume1/docker/nas-llm:/root/.ollama
     restart: unless-stopped
 
   announcer:
-    image: python:3.12-alpine
+    image: python:3.12-alpine@sha256:0687a6bc9716edc2a6ee0fbfb0f87e7ee358b262b67c9215de91bc9b2d38ba71
     container_name: nas-llm-announce
     network_mode: host
     restart: unless-stopped
+    user: "65534:65534"
+    environment:
+      HOME: /tmp
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
     entrypoint:
       - /bin/sh
       - -c
-      - pip install --no-cache-dir zeroconf >/dev/null 2>&1 && python /announce.py
+      - pip install --no-cache-dir --user "zeroconf==0.151.5" >/dev/null 2>&1 && python /announce.py
     volumes:
       - ./announce.py:/announce.py:ro
