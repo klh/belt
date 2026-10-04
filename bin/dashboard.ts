@@ -5,7 +5,10 @@
 // (vanilla JS, auto-refresh 3s); GET /api/status is the JSON behind it. On
 // boot the dashboard advertises itself on the LAN via dns-sd as belt.local.
 // Page styling follows the threads.dk instrument spec: warm near-black
-// ground, mono throughout, one rust accent, rows not cards.
+// ground, mono throughout, one accent, rows not cards. The colours, type
+// scale, dark/light theme and the klh·fleet strip come from the shared klh
+// theme vendored as ./klh-theme.ts (byte-identical to klh/suspenders
+// hooks/lib/theme.ts), so the page still works offline.
 //
 // Usage:
 //   bun dashboard.ts                  — serve on :7791 (env BELT_PORT overrides)
@@ -36,6 +39,15 @@ import {
 	rateLimiter,
 	type RouteMethods,
 } from "./http-citizenship.ts";
+import {
+	FLEET_NAV_CSS,
+	FLEET_NAV_JS,
+	fleetNav,
+	settingsBlock,
+	THEME_HEAD,
+	THEME_SETTINGS_CSS,
+	THEME_SETTINGS_JS,
+} from "./klh-theme.ts";
 
 const HOME = process.env.HOME;
 const LOG_DIR = `${HOME}/.claude-insights`;
@@ -247,28 +259,28 @@ const remotesSnapshot = (): Promise<RemotesSnapshot> => {
 };
 
 // ─── page — embedded, no frameworks, no external assets (works offline) ───
+// Tokens, the theme gear and the klh·fleet strip come from ./klh-theme.ts (see
+// the file header); the page never hard-codes a colour.
 const PAGE = `<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>belt — local LLM fleet</title>
+${THEME_HEAD}
 <style>
-:root { color-scheme: dark; --ground:#191614; --panel:#201d1a; --text:#e8e2d9; --mut:#8a857e;
-  --rust:#e05a2b; --ok:#4a7c4e; --hair:rgba(232,226,217,.12); --track:rgba(255,255,255,.08);
-  --rust-mark:#e05a2b; }
 * { box-sizing: border-box; }
-body { background:var(--ground); color:var(--text); font:12.5px/1.5 ui-monospace,Menlo,Consolas,monospace; margin:0; padding:18px 22px 26px; }
+body { background:var(--klh-bg); color:var(--klh-ink); font:var(--klh-text-md)/1.5 var(--klh-font-mono); margin:0; padding:var(--klh-space-5) var(--klh-space-6) var(--klh-space-7); }
 header { display:flex; align-items:baseline; gap:10px; margin-bottom:6px; }
-header .mark { font-weight:700; font-size:13px; }
-header .sub { color:var(--mut); font-size:11px; }
-header .right { margin-left:auto; display:flex; align-items:center; gap:8px; font-size:11px; color:var(--mut); font-variant-numeric:tabular-nums; }
-.dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--rust); }
+header .mark { font-weight:700; font-size:var(--klh-text-lg); }
+header .sub { color:var(--klh-dim); font-size:var(--klh-text-sm); }
+header .right { margin-left:auto; display:flex; align-items:center; gap:8px; font-size:var(--klh-text-sm); color:var(--klh-dim); font-variant-numeric:tabular-nums; }
+.dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--klh-accent); }
 .blink { animation:blip 1s steps(1,end) infinite; }
 @keyframes blip { 0%{opacity:1} 50%{opacity:.15} 100%{opacity:1} }
-h2 { font-size:10px; font-weight:400; text-transform:uppercase; letter-spacing:.14em; color:var(--mut); margin:20px 0 2px; }
+h2 { font-size:var(--klh-text-xs); font-weight:400; text-transform:uppercase; letter-spacing:.14em; color:var(--klh-dim); margin:20px 0 2px; }
 table { width:100%; border-collapse:collapse; }
-th { text-align:left; font-weight:400; font-size:10px; text-transform:uppercase; letter-spacing:.14em; color:var(--mut); padding:8px 8px 6px 0; border-bottom:1px solid var(--hair); }
-.mut { color:var(--mut); }
-.u { color:var(--mut); }
-.ok { color:var(--ok); }
+th { text-align:left; font-weight:400; font-size:var(--klh-text-xs); text-transform:uppercase; letter-spacing:.14em; color:var(--klh-dim); padding:8px 8px 6px 0; border-bottom:1px solid var(--klh-edge); }
+.mut { color:var(--klh-dim); }
+.u { color:var(--klh-dim); }
+.ok { color:var(--klh-ok-ink); }
 /* unified fleet table — one <details> per row; a shared grid keeps the
    collapsed columns aligned (location | endpoint | state | protocol |
    model), expanded panels wrap instead of widening. The disclosure marker
@@ -284,85 +296,52 @@ th { text-align:left; font-weight:400; font-size:10px; text-transform:uppercase;
   .fhead, .frow summary { grid-template-columns:minmax(90px,.9fr) minmax(120px,1.1fr) minmax(140px,1.2fr) 110px minmax(130px,1.6fr) 88px 70px 88px minmax(160px,1.6fr); }
   .fhead > .w, .frow summary > .w { display:block; }
 }
-.fhead { font-size:10px; text-transform:uppercase; letter-spacing:.14em; color:var(--mut); border-bottom:1px solid var(--hair); padding-bottom:6px; }
-.frow { border-bottom:1px solid var(--hair); }
+.fhead { font-size:var(--klh-text-xs); text-transform:uppercase; letter-spacing:.14em; color:var(--klh-dim); border-bottom:1px solid var(--klh-edge); padding-bottom:6px; }
+.frow { border-bottom:1px solid var(--klh-edge); }
 .frow summary { cursor:pointer; list-style:none; position:relative; }
 .frow summary::-webkit-details-marker { display:none; }
-.frow summary::before { content:"▸"; position:absolute; left:2px; top:9px; color:var(--mut); font-size:10px; }
+.frow summary::before { content:"▸"; position:absolute; left:2px; top:9px; color:var(--klh-dim); font-size:var(--klh-text-xs); }
 .frow[open] summary::before { content:"▾"; }
 .frow .cmodel { word-break:break-word; }
-.frow .cgood { font-size:11px; color:var(--mut); line-height:1.4; word-break:break-word; max-width:26ch; }
+.frow .cgood { font-size:var(--klh-text-sm); color:var(--klh-dim); line-height:1.4; word-break:break-word; max-width:26ch; }
 .frow .cstate { word-break:break-word; }
 .fhead > span, .frow summary > span { min-width:0; overflow-wrap:anywhere; }
-.load { display:inline-block; border:1px solid var(--hair); border-radius:2px; padding:0 5px; font-size:10px; color:var(--mut); font-style:normal; font-variant-numeric:tabular-nums; margin-left:4px; }
+.load { display:inline-block; border:1px solid var(--klh-edge); border-radius:var(--klh-radius); padding:0 5px; font-size:var(--klh-text-xs); color:var(--klh-dim); font-style:normal; font-variant-numeric:tabular-nums; margin-left:4px; }
 .panel { padding:2px 0 12px; display:grid; gap:6px; max-width:100%; }
-.panel p { margin:0; font-size:11.5px; max-width:100%; overflow-wrap:anywhere; }
+.panel p { margin:0; font-size:var(--klh-text-sm); max-width:100%; overflow-wrap:anywhere; }
 .scroll { overflow-x:auto; }
-.bar { height:3px; background:var(--track); border-radius:2px; overflow:hidden; }
-.bar i { display:block; height:100%; width:0; background:#6f6a63; }
-.bar i.hot { background:var(--rust); }
+.bar { height:3px; background:var(--klh-edge-faint); border-radius:var(--klh-radius); overflow:hidden; }
+.bar i { display:block; height:100%; width:0; background:var(--klh-chart-axis); }
+.bar i.hot { background:var(--klh-accent); }
 .memrow { display:flex; align-items:baseline; gap:10px; margin:6px 0 14px; }
-.memrow .n { margin-left:auto; color:var(--mut); font-variant-numeric:tabular-nums; }
-.mrow { display:grid; grid-template-columns:1fr 64px; gap:10px; align-items:baseline; max-width:560px; margin:8px 0 4px; font-size:11px; }
-.mrow .n { text-align:right; color:var(--mut); font-variant-numeric:tabular-nums; }
-.chip { display:inline-block; border:1px solid var(--hair); border-radius:2px; padding:2px 8px; font-size:11px; color:var(--mut); margin:6px 6px 0 0; background:transparent; }
+.memrow .n { margin-left:auto; color:var(--klh-dim); font-variant-numeric:tabular-nums; }
+.mrow { display:grid; grid-template-columns:1fr 64px; gap:10px; align-items:baseline; max-width:560px; margin:8px 0 4px; font-size:var(--klh-text-sm); }
+.mrow .n { text-align:right; color:var(--klh-dim); font-variant-numeric:tabular-nums; }
+.chip { display:inline-block; border:1px solid var(--klh-edge); border-radius:var(--klh-radius); padding:2px 8px; font-size:var(--klh-text-sm); color:var(--klh-dim); margin:6px 6px 0 0; background:transparent; }
 .rhead { display:flex; align-items:center; margin:6px 0 0; }
 .rhead button { margin-left:auto; }
-button { border:1px solid var(--hair); border-radius:2px; background:transparent; color:var(--mut); font:inherit; font-size:11px; padding:2px 10px; cursor:pointer; letter-spacing:.04em; }
-button:hover { color:var(--text); border-color:var(--rust); }
-.badge { display:inline-block; border:1px solid var(--hair); border-radius:2px; padding:0 6px; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--mut); margin-right:2px; }
-.badge.immich { color:var(--rust); border-color:rgba(224,90,43,.5); }
-.fast { color:var(--ok); }
-#remoteslog { font-size:11px; line-height:1.75; color:var(--mut); white-space:pre-wrap; word-break:break-word; margin:4px 0 0; }
-#log { font-size:11px; line-height:1.75; color:var(--mut); white-space:pre-wrap; word-break:break-word; margin:4px 0 0; }
-#prefsline { margin-top:12px; font-size:11px; color:var(--mut); }
-footer { border-top:1px solid var(--hair); margin-top:22px; padding-top:12px; display:flex; align-items:center; font-size:11px; color:var(--mut); }
-footer .right { margin-left:auto; font-size:10px; letter-spacing:.14em; text-transform:uppercase; }
-threads-mark { vertical-align:middle; margin:0 3px 0 0; }
-.empty { color:var(--mut); margin:8px 0 0; }
+button { border:1px solid var(--klh-edge); border-radius:var(--klh-radius); background:transparent; color:var(--klh-dim); font:inherit; font-size:var(--klh-text-sm); padding:2px 10px; cursor:pointer; letter-spacing:.04em; }
+button:hover { color:var(--klh-ink); border-color:var(--klh-accent); }
+.badge { display:inline-block; border:1px solid var(--klh-edge); border-radius:var(--klh-radius); padding:0 6px; font-size:var(--klh-text-xs); letter-spacing:.08em; text-transform:uppercase; color:var(--klh-dim); margin-right:2px; }
+.badge.immich { color:var(--klh-accent); border-color:var(--klh-accent); }
+.fast { color:var(--klh-ok-ink); }
+#remoteslog { font-size:var(--klh-text-sm); line-height:1.75; color:var(--klh-dim); white-space:pre-wrap; word-break:break-word; margin:4px 0 0; }
+#log { font-size:var(--klh-text-sm); line-height:1.75; color:var(--klh-dim); white-space:pre-wrap; word-break:break-word; margin:4px 0 0; }
+#prefsline { margin-top:12px; font-size:var(--klh-text-sm); color:var(--klh-dim); }
+footer { border-top:1px solid var(--klh-edge); margin-top:22px; padding-top:12px; display:flex; align-items:center; font-size:var(--klh-text-sm); color:var(--klh-dim); }
+footer .right { margin-left:auto; font-size:var(--klh-text-xs); letter-spacing:.14em; text-transform:uppercase; }
+/* the Threads brand mark reads --rust/--hair/--paper; feed it brand red + theme edges */
+threads-mark { vertical-align:middle; margin:0 3px 0 0; --rust:var(--klh-danger); --hair:var(--klh-edge); --paper:var(--klh-surface); }
+.empty { color:var(--klh-dim); margin:8px 0 0; }
+${FLEET_NAV_CSS}
+${THEME_SETTINGS_CSS}
 </style></head>
 <body>
-<style>
-#klh-topbar{display:flex;gap:1.1em;align-items:center;padding:.4em 1em;border-bottom:1px solid #232326;background:rgba(10,10,12,.6);font:500 12px/1.4 -apple-system,sans-serif;letter-spacing:.02em}
-#klh-topbar .tb-brand{color:#6b6b70;text-transform:uppercase;font-size:10px;letter-spacing:.12em}
-#klh-topbar a{color:#8ab4ff;text-decoration:none}
-#klh-topbar a.down{opacity:.35}
-</style>
-<div id="klh-topbar">
-  <span class="tb-brand">klh fleet</span>
-  <a class="tb-link" data-probe="https://belt.local" data-repo="https://github.com/klh/belt" href="https://belt.local">belt</a>
-  <a class="tb-link" data-probe="https://suspenders.local" data-repo="https://github.com/klh/suspenders" href="https://suspenders.local">suspenders</a>
-  <a class="tb-link" data-probe="https://bar.local" data-repo="https://klh/local" href="https://bar.local">local</a>
-</div>
-<script>
-(function () {
-  var probe = function () {
-    var links = document.querySelectorAll("#klh-topbar .tb-link");
-    for (var i = 0; i < links.length; i++) {
-      (function (a) {
-        var url = a.getAttribute("data-probe");
-        fetch(url + "/ping", { mode: "no-cors", cache: "no-store" })
-          .then(function () {
-            a.classList.remove("direct");
-            a.classList.add("direct");
-            a.classList.remove("down");
-            a.href = url;
-          })
-          .catch(function () {
-            a.classList.remove("direct");
-            a.classList.add("down");
-            a.href = a.getAttribute("data-repo");
-          });
-      })(links[i]);
-    }
-  };
-  probe();
-  setInterval(probe, 5000);
-})();
-</script>
+${fleetNav("belt")}
 
 <header><span class="mark">belt</span><span class="sub">local LLM fleet</span>
-  <span class="right"><i class="dot blink" id="live"></i><span id="clockbox">—</span></span></header>
+  <div class="right"><i class="dot blink" id="live"></i><span id="clockbox">—</span>${settingsBlock()}</div></header>
+<script>${FLEET_NAV_JS}${THEME_SETTINGS_JS}</script>
 <h2>Fleet</h2>
 <div class="scroll">
 <div class="fhead"><span>location</span><span>endpoint</span><span>state</span><span>protocol</span><span>model</span><span class="w">engine</span><span class="w">ram</span><span class="w">latency</span><span class="w">good at</span></div>
