@@ -20,6 +20,7 @@ import { LITELLM_PORT } from "./litellm-target.ts";
 import { spawnArgs, mlxLogPath } from "./spawner.ts";
 import {
 	fleetTargets,
+	httpProbe,
 	otherSupervisorAlive,
 	readStatus,
 	STATUS_FILE,
@@ -36,18 +37,9 @@ const LOG_DIR = `${HOME}/.claude-insights`;
 const ROUTER = `${HOME}/.claude/local-llm/router-shim.ts`;
 
 // ─── helpers ───
-const isUp = async (port: number): Promise<boolean> => {
-	try {
-		// Any HTTP response = listening. The router (:4000) answers 404 on
-		// /v1/models by design — it only implements Anthropic /v1/messages.
-		await fetch(`http://localhost:${port}/v1/models`, {
-			signal: AbortSignal.timeout(1000),
-		});
-		return true;
-	} catch {
-		return false;
-	}
-};
+// W5: delegates to supervisor.ts's hardened probe — see dashboard.ts's note.
+const isUp = (port: number): Promise<boolean> =>
+	httpProbe(port, "/v1/models", "127.0.0.1", 2000);
 
 const getModel = async (port: number): Promise<string> => {
 	try {
