@@ -5,6 +5,7 @@
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { residentSet } from "./registry.ts";
+import { httpProbe } from "./supervisor.ts";
 
 const HOME = process.env.HOME!;
 const CACHE = `${HOME}/.cache/claude-governor`;
@@ -24,16 +25,12 @@ type Heartbeats = Record<
 	}
 >;
 
-const isUp = async (port: number): Promise<boolean> => {
-	try {
-		const r = await fetch(`http://localhost:${port}/v1/models`, {
-			signal: AbortSignal.timeout(800),
-		});
-		return r.ok;
-	} catch {
-		return false;
-	}
-};
+// W5: delegates to supervisor.ts's hardened probe (TCP pre-check, 2000ms) —
+// `r.ok` previously misreported the router (:4000, 404-by-design on
+// /v1/models) as down whenever its /health/liveliness fallback above failed,
+// and the bare 800ms timeout was prone to false negatives under load.
+const isUp = (port: number): Promise<boolean> =>
+	httpProbe(port, "/v1/models", "127.0.0.1", 2000);
 
 const health = async (
 	port: number,

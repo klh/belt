@@ -27,7 +27,7 @@ import {
 	type RouteLogEntry,
 } from "./remotes.ts";
 import { metricsFor, metricsSnapshot } from "./metrics.ts";
-import { readStatus } from "./supervisor.ts";
+import { httpProbe, readStatus } from "./supervisor.ts";
 import { bearerToken, handleRoute } from "./route-policy.ts";
 import {
 	citizenshipGate,
@@ -55,19 +55,14 @@ const readPrefs = (): Record<string, unknown> => {
 	}
 };
 
-// ─── liveness — same probes as swarm.ts / coordinator.ts ───
-const isUp = async (port: number): Promise<boolean> => {
-	try {
-		// Any HTTP response = listening. The router (:4000) answers 404 on
-		// /v1/models by design — it only implements Anthropic /v1/messages.
-		await fetch(`http://localhost:${port}/v1/models`, {
-			signal: AbortSignal.timeout(1000),
-		});
-		return true;
-	} catch {
-		return false;
-	}
-};
+// ─── liveness — delegates to supervisor.ts's hardened probe (W5): any HTTP
+// response = listening (the router at :4000 answers 404 on /v1/models by
+// design — it only implements Anthropic /v1/messages), 2000ms timeout. A
+// bare fetch() with a 1000ms timeout flipped the whole fleet to "offline" in
+// the UI under ordinary inference load; supervisor.ts's probe is what
+// watchdog.ts/liveness.ts already trust for restart decisions.
+const isUp = (port: number): Promise<boolean> =>
+	httpProbe(port, "/v1/models", "127.0.0.1", 2000);
 
 const getModel = async (port: number): Promise<string> => {
 	try {
