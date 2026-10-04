@@ -130,6 +130,13 @@ optionally, `klh-local` (klh/local) fronts that with Caddy at
 For always-on, `./install.sh --with-launchd` loads it as the
 `com.belt.dashboard` KeepAlive agent (logs: `~/.claude-insights/belt-dashboard.log`).
 
+The page wears the shared klh theme so it reads as one product with
+suspenders.local and bar.local: dark/light tokens, the settings gear (theme:
+system/dark/light), and the `klh·fleet` strip linking belt · suspenders ·
+local. `bin/klh-theme.ts` is a byte-identical copy of klh/suspenders
+`hooks/lib/theme.ts`; never edit it by hand: re-vendor it and bump the pin
+in `test/klh-theme.test.ts`.
+
 ## Routing
 
 Deterministic, keyword-based, 0 ms — no LLM overhead for routing decisions.
