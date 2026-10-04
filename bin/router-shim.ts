@@ -212,7 +212,9 @@ async function viaCloud(
 		},
 		signal: AbortSignal.timeout(120_000),
 		body: JSON.stringify({
-			model: `${model}[1m]`,
+			// litellm group names — the [1m] 1M-context ids exist in no litellm
+			// model_list; lanes 400'd on unrecognized_model through this path
+			model,
 			max_tokens: budget.maxTokens,
 			...(body.system === undefined ? {} : { system: body.system }),
 			messages: body.messages,
