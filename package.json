@@ -1,6 +1,6 @@
 {
 	"name": "belt",
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"description": "Local LLM fleet — MLX specialists, anthropic-wire router, benchmark rig",
 	"type": "module",
 	"license": "BUSL-1.1",
