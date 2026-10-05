@@ -701,3 +701,15 @@ if (process.env.BELT_MDNS !== "off") {
 console.log(
 	`belt dashboard → http://127.0.0.1:${PORT} · LAN: http://belt.local:${PORT}`,
 );
+
+// health law: the served process regenerates status.json from its own event
+// loop; the hub health sidecar judges by file age. Hub-only (HEARTBEAT_FILE,
+// helper rides the suspenders volume) — silent outside the hub.
+{
+	const hb = process.env.HEARTBEAT_FILE;
+	if (hb) {
+		void import("/src/suspenders/deploy/healthcheck/heartbeat.ts")
+			.then((m) => m.startHeartbeat(hb))
+			.catch(() => {});
+	}
+}
