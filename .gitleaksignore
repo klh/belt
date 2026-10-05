@@ -1,3 +1,1 @@
-// gitleaks: generic-api-key entropy false positive — KEY_ALPHA is the base32
-// alphabet for sealed-task ids (not a credential). Fingerprint per gitleaks 8.x.
-f8b9e2e28002f9984dab57a1bbd9abb6ac963d50:bench/arena/gen.ts:generic-api-key:936
+47a877c873a602111bfb1b24dd33d3d88a432436:bench/arena/gen.ts:generic-api-key:936
